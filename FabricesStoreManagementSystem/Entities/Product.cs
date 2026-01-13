@@ -11,4 +11,11 @@ public class Product
     public string? Material { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public Inventory? Inventory { get; set; }
+    public ICollection<PurchaseItem> PurchaseItems { get; set; } =
+        new List<PurchaseItem>();
+    public ICollection<SaleItem> SaleItems { get; set; } =
+        new List<SaleItem>();
+    public ICollection<StockTransaction> StockTransactions { get; set; } =
+        new List<StockTransaction>();
 }
