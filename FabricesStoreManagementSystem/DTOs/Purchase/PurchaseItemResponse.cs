@@ -1,9 +1,8 @@
 ﻿namespace FabricesStoreManagementSystem.DTOs.Purchase;
 
-public record PurchaseItemsResponse(
+public record PurchaseItemResponse(
     Guid Id,
     Guid ProductID,
-    string ProductURL,
     float Quantity,
     decimal UnitCost,
     decimal Total

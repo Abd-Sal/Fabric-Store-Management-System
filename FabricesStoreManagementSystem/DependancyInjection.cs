@@ -1,7 +1,4 @@
-﻿using FabricesStoreManagementSystem.Data;
-using System.Net.NetworkInformation;
-
-namespace FabricesStoreManagementSystem;
+﻿namespace FabricesStoreManagementSystem;
 
 public static class DependancyInjection
 {
@@ -12,7 +9,9 @@ public static class DependancyInjection
 
         services
             .AddEfCoreConfig(configuration)
-            .AddSwaggerConfig();
+            .AddSwaggerConfig()
+            .AddOptionsServices()
+            .AddServices();
 
         return services;
     }
@@ -30,6 +29,27 @@ public static class DependancyInjection
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
 
+        return services;
+    }
+
+    private static IServiceCollection AddOptionsServices(this IServiceCollection services)
+    {
+        services.AddOptions<AuthOptions>()
+            .BindConfiguration(AuthOptions.sectionName)
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
+        return services;
+    }
+    
+    private static IServiceCollection AddServices(this IServiceCollection services)
+    {
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<ICustomerService, CustomerService>();
+        services.AddScoped<ISupplierService, SupplierService>();
+        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IPurchaseService, PurchaseService>();
+        services.AddScoped<ISaleService, SaleService>();
         return services;
     }
 }
