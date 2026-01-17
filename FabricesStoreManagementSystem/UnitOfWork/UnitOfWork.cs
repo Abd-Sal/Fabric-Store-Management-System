@@ -10,11 +10,11 @@ public class UnitOfWork : IUnitOfWork
     {
         _appDbContext = appDbContext;
         AuthService = new AuthService(authOptions);
-        CustomerService = new CustomerService();
-        SupplierService = new SupplierService();
-        ProductService = new ProductService();
-        PurchaseService = new PurchaseService();
-        SaleService = new SaleService();
+        CustomerService = new CustomerService(appDbContext);
+        SupplierService = new SupplierService(appDbContext);
+        ProductService = new ProductService(appDbContext);
+        PurchaseService = new PurchaseService(appDbContext);
+        SaleService = new SaleService(appDbContext);
     }
 
     public IAuthService AuthService { get; }

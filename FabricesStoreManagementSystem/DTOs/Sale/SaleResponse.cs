@@ -10,6 +10,6 @@ public record SaleResponse(
     decimal NetAmount,
     decimal PaidAmount,
     PayStatuses Status,
-    DateTime CreatedAT,
+    DateTime CreatedAt,
     List<SaleItemResponse>? SaleItems
 );

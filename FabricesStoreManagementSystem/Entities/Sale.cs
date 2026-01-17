@@ -12,7 +12,6 @@ public class Sale
     public decimal PaidAmount { get; set; }
     public PayStatuses Status { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public Guid CreatedBy { get; set; }
 
     public Customer Customer { get; set; } = null!;
     public ICollection<SaleItem> SaleItems { get; set; } =

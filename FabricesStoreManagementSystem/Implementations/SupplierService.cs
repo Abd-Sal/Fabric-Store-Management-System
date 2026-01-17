@@ -86,9 +86,7 @@ public class SupplierService(AppDbContext appDbContext) : ISupplierService
     public async Task<Result> UpdateSupplier
         (Guid id, SupplierRequest request, CancellationToken cancellationToken = default)
     {
-        if (!(await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)) ||
-            (await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x => x.Id == id && !x.IsActive, cancellationToken))
-        )
+        if (!(await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x => x.Id == id && x.IsActive, cancellationToken)))
             return Result.Failure(SupplierErrors.NotFound);
 
         if (request.Email is not null &&

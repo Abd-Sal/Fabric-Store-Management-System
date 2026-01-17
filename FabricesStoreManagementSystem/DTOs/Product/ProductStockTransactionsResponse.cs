@@ -2,5 +2,7 @@
 
 public record ProductStockTransactionsResponse(
     ProductResponse Product,
-    List<StockTransactionResponse> StockTransactions
+    float CurrentQuantity,
+    DateTime? LastUpdateAt,
+    List<StockTransactionResponse>? StockTransactions
 );

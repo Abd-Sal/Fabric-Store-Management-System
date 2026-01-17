@@ -22,9 +22,11 @@ public class StockTransactionConfigurations : IEntityTypeConfiguration<StockTran
         builder.Property(x => x.ReferenceType)
             .HasConversion(
                 v => v.ToString(),
-                v => (ReferenceTypes)Enum.Parse(typeof(ReferenceTypes), v)
+                v => v != null ? (ReferenceTypes)Enum.Parse(typeof(ReferenceTypes), v)
+                        : null
             )
-            .HasMaxLength(25);
+            .HasMaxLength(25)
+            .IsRequired(false);
 
         builder.HasIndex(x => x.ProductID);
         builder.HasIndex(x => x.ReferenceID);

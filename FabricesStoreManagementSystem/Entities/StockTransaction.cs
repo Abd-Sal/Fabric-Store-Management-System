@@ -10,7 +10,6 @@ public class StockTransaction
     public ReferenceTypes? ReferenceType { get; set; }
     public string? Note { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public Guid CreatedBy { get; set; }
 
     public Product Product { get; set; } = null!;
 }

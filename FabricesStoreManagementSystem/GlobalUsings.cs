@@ -4,6 +4,7 @@ global using Microsoft.Extensions.Options;
 
 global using System.ComponentModel.DataAnnotations.Schema;
 global using System.ComponentModel.DataAnnotations;
+global using System.Text.Json.Serialization;
 
 global using FabricesStoreManagementSystem.Enums;
 global using FabricesStoreManagementSystem.Entities;
@@ -21,3 +22,7 @@ global using FabricesStoreManagementSystem.Implementations;
 global using FabricesStoreManagementSystem.HelpTools;
 global using FabricesStoreManagementSystem.Errors;
 global using FabricesStoreManagementSystem.Mapping;
+global using FabricesStoreManagementSystem.Data.Configurations;
+
+global using FluentValidation;
+global using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;

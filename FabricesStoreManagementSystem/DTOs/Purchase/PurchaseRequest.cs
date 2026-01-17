@@ -2,6 +2,6 @@
 
 public record PurchaseRequest(
     Guid SupplierID,
-    decimal? PaidAmount,
+    decimal PaidAmount,
     List<PurchaseItemRequest> PurchaseItems
 );

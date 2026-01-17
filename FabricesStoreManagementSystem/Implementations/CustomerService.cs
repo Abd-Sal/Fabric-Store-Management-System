@@ -55,9 +55,7 @@ public class CustomerService(AppDbContext appDbContext) : ICustomerService
     public async Task<Result> UpdateCustomer
         (Guid id, CustomerRequest request, CancellationToken cancellationToken = default)
     {
-        if (!(await _appDbContext.Customers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)) ||
-            (await _appDbContext.Customers.AsNoTracking().AnyAsync(x => x.Id == id && !x.IsActive, cancellationToken))
-        )
+        if (!(await _appDbContext.Customers.AsNoTracking().AnyAsync(x => x.Id == id && x.IsActive, cancellationToken)))
             return Result.Failure<List<SaleResponse>>(CustomerErrors.NotFound);
 
         if (request.Email is not null &&

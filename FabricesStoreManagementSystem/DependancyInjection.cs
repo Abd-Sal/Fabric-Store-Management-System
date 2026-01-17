@@ -4,7 +4,11 @@ public static class DependancyInjection
 {
     public static IServiceCollection InjectOurServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddControllers();
+        services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+            });
         services.AddOpenApi();
 
         services
@@ -38,7 +42,14 @@ public static class DependancyInjection
             .BindConfiguration(AuthOptions.sectionName)
             .ValidateDataAnnotations()
             .ValidateOnStart();
-
+        
+        return services;
+    }
+    
+    private static IServiceCollection AddFluentValidation(this IServiceCollection services)
+    {
+        services.AddFluentValidation();
+        services.AddFluentValidationAutoValidation();
         return services;
     }
     

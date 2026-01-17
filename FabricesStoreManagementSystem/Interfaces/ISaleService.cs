@@ -3,6 +3,8 @@
 public interface ISaleService
 {
     Task<Result<SaleResponse>> CreateSale(SaleRequest request, CancellationToken cancellationToken = default);
+    Task<Result> UpdateSalePaidAmount(Guid id, SaleUpdatePaidRequest request, CancellationToken cancellationToken = default);
+    Task<Result> RemoveSale(Guid id, CancellationToken cancellationToken = default);
     Task<Result<List<SaleResponse>>> GetSales(CancellationToken cancellationToken = default);
     Task<Result<SaleResponse>> GetSale(Guid id, CancellationToken cancellationToken = default);
     Task<Result<SaleResponse>> GetSaleByInvoiceNumber(string invoiceNumber, CancellationToken cancellationToken = default);
