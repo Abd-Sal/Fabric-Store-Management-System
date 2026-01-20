@@ -30,19 +30,27 @@ public class SupplierService(AppDbContext appDbContext) : ISupplierService
         return Result.Success(supplier.ToSupplierResponse());
     }
 
-    public async Task<Result<List<PurchaseResponse>>> GetPurchaseBySupplier
-        (Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchaseBySupplier
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
-            return Result.Failure<List<PurchaseResponse>>(SupplierErrors.NotFound);
+            return Result.Failure<PaginatedList<PurchaseResponse>>(SupplierErrors.NotFound);
 
-        var result =await  _appDbContext.Purchases.AsNoTracking()
-            .Where(x => x.Id == id)
-            .OrderByDescending(x => x.CreatedAt)
-            .Select(x => x.ToPurchaseResponse())
-            .ToListAsync(cancellationToken);
+        var query = _appDbContext.Purchases.AsNoTracking()
+            .Where(x => x.SupplierID == id);
 
-        return Result.Success(result);
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(PurchaseSorts.PurchaseResponseSort(sortRequest));
+        else
+            query = query.OrderBy(PurchaseSorts.PurchaseResponseSort(sortRequest));
+
+        var result = query
+            .Select(x => x.ToPurchaseResponse());
+
+        var response = await PaginatedList<PurchaseResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 
     public async Task<Result<SupplierResponse>> GetSupplier
@@ -55,17 +63,25 @@ public class SupplierService(AppDbContext appDbContext) : ISupplierService
         return Result.Success(supplier.ToSupplierResponse());
     }
 
-    public async Task<Result<List<SupplierResponse>>> GetSuppliers
-        (bool includeOnlyActive = true, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<SupplierResponse>>> GetSuppliers
+        (PaginationRequest paginationRequest, SortRequest sortRequest, bool includeOnlyActive = true, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Suppliers.AsNoTracking();
         if (includeOnlyActive)
             query = query.Where(x => x.IsActive);
-        query = query.OrderByDescending(x => x.CreatedAt);
-        var result = await query
-            .Select(x => x.ToSupplierResponse())
-            .ToListAsync(cancellationToken);
-        return Result.Success(result);
+
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(SupplierSorts.SupplierResponseSort(sortRequest));
+        else
+            query = query.OrderBy(SupplierSorts.SupplierResponseSort(sortRequest));
+
+        var result = query
+            .Select(x => x.ToSupplierResponse());
+
+        var response = await PaginatedList<SupplierResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 
     public async Task<Result> ToggleSupplierStatus

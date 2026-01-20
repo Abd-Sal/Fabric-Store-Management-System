@@ -35,126 +35,176 @@ public class ProductService(AppDbContext appDbContext) : IProductService
     {
         var product = await _appDbContext.Products.AsNoTracking()
             .Include(x => x.Inventory)
+            .Include(x => x.PurchaseItems)
             .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (product is null)
             return Result.Failure<ProductWithInventoryResponse>(ProductErrors.NotFound);
 
-        return Result.Success(product.ToProductWithInventoryResponse());
-    }
-
-    public async Task<Result<List<ProductResponse>>> GetProducts
-        (CancellationToken cancellationToken = default)
-    {
-        var result = await _appDbContext.Products
-            .AsNoTracking()
+        var maxProductPurchase =
+            await _appDbContext.Purchases.AsNoTracking()
+            .Include(x => x.PurchaseItems)
+            .Where(x => x.PurchaseItems.Any(p => p.ProductID == id))
             .OrderByDescending(x => x.CreatedAt)
-            .Select(x => x.ToProductResponse())
-            .ToListAsync(cancellationToken);
-        return Result.Success(result);
+            .SelectMany(x => x.PurchaseItems)
+            .Where(x => x.ProductID == id)
+            .OrderByDescending(x => x.UnitCost)
+            .FirstOrDefaultAsync();
+
+        if(maxProductPurchase is null)
+            return Result.Failure<ProductWithInventoryResponse>(ProductErrors.NotFound);
+
+        return Result.Success(product.ToProductWithInventoryResponse(maxProductPurchase.UnitCost));
     }
 
-    public async Task<Result<ProductStockTransactionsResponse>> GetProductStockTransactions
-        (Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<ProductResponse>>> GetProducts
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, CancellationToken cancellationToken = default)
     {
-        var product = await _appDbContext.Products.AsNoTracking()
-            .Include(x => x.Inventory)
-            .Include(x => x.StockTransactions)
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (product is null)
-            return Result.Failure<ProductStockTransactionsResponse>(ProductErrors.NotFound);
-        return Result.Success(product.ToProductStockTransactionsResponse());
+        var query = _appDbContext.Products.AsNoTracking();
+
+        if (dateRangeRequest is not null)
+            query = query
+                .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
+                            DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
+
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(ProductSorts.ProductResponseSort(sortRequest));
+        else
+            query = query.OrderBy(ProductSorts.ProductResponseSort(sortRequest));
+
+        var result = query
+            .Select(x => x.ToProductResponse());
+
+        var response = await PaginatedList<ProductResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 
-    public async Task<Result<List<SaleResponse>>> GetSalesByProduct
-        (Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<StockTransactionResponse>>> GetProductStockTransactions
+        (Guid id, PaginationRequest paginationRequest, CancellationToken cancellationToken = default)
     {
-        var product = await _appDbContext.Products.AsNoTracking()
+        if (!(await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
+            return Result.Failure<PaginatedList<StockTransactionResponse>>(ProductErrors.NotFound);
+
+        var query = _appDbContext.StockTransactions.AsNoTracking()
+            .Where(x => x.ProductID == id)
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => x.ToStockTransactionResponse());
+
+        var response = await PaginatedList<StockTransactionResponse>.CreateAsync
+            (query, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
+    }
+
+    public async Task<Result<PaginatedList<SaleResponse>>> GetSalesByProduct
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, CancellationToken cancellationToken = default)
+    {
+        if (!(await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
+            return Result.Failure<PaginatedList<SaleResponse>>(ProductErrors.NotFound);
+
+        var query = _appDbContext.Products.AsNoTracking()
             .Include(x => x.SaleItems)
             .ThenInclude(x => x.Sale)
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+            .SelectMany(x => x.SaleItems)
+            .Select(x => x.Sale);
 
-        if (product is null)
-            return Result.Failure<List<SaleResponse>>(ProductErrors.NotFound);
+        if (dateRangeRequest is not null)
+            query = query
+                .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
+                            DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
 
-        if (!product.SaleItems.Any())
-            return Result.Success(new List<SaleResponse>());
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(SaleSorts.SaleResponseSort(sortRequest));
+        else
+            query = query.OrderBy(SaleSorts.SaleResponseSort(sortRequest));
 
-        var sales = product.SaleItems
-            .Select(x => x.Sale.ToSaleResponseWithNoItems())
-            .OrderByDescending(x => x.CreatedAt)
-            .ToList();
+        var result = query
+            .Select(x => x.ToSaleResponseWithNoItems());
 
-        return Result.Success(sales);
+        var response = await PaginatedList<SaleResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 
-    public async Task<Result<List<PurchaseResponse>>> GetPurchasesByProduct
-        (Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchasesByProduct
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, CancellationToken cancellationToken = default)
     {
-        var product = await _appDbContext.Products.AsNoTracking()
+        if (!(await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
+            return Result.Failure<PaginatedList<PurchaseResponse>>(ProductErrors.NotFound);
+
+        var query = _appDbContext.Products.AsNoTracking()
             .Include(x => x.PurchaseItems)
             .ThenInclude(x => x.Purchase)
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+            .SelectMany(x => x.PurchaseItems)
+            .Select(x => x.Purchase);
 
-        if (product is null)
-            return Result.Failure<List<PurchaseResponse>>(ProductErrors.NotFound);
+        if(dateRangeRequest is not null)
+            query = query
+                .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
+                            DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
 
-        if (!product.PurchaseItems.Any())
-            return Result.Success(new List<PurchaseResponse>());
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(PurchaseSorts.PurchaseResponseSort(sortRequest));
+        else
+            query = query.OrderBy(PurchaseSorts.PurchaseResponseSort(sortRequest));
 
-        var purchases = product.PurchaseItems
-            .Select(x => x.Purchase.ToPurchaseResponseWithoutItems())
-            .OrderByDescending(x => x.CreatedAt)
-            .ToList();
+        var result = query
+            .Select(x => x.ToPurchaseResponseWithoutItems());
 
-        return Result.Success(purchases);
+        var response = await PaginatedList<PurchaseResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 
-    public async Task<Result<List<PurchaseResponse>>> GetPurchasesByProductAndDateRange
-        (Guid id, DateRangeRequest dateRangeRequest, CancellationToken cancellationToken = default)
+    public async Task<Result> CutSampleForCatalog
+        (CutCatalogRequest request, CancellationToken cancellationToken = default)
     {
-        var product = await _appDbContext.Products.AsNoTracking()
-            .Include(x => x.PurchaseItems)
-            .ThenInclude(x => x.Purchase)
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        if (request.Product.Count != request.Product.DistinctBy(x => x.Id).Count())
+            return Result.Failure(ProductErrors.DuplicatedInInvoice);
 
-        if (product is null)
-            return Result.Failure<List<PurchaseResponse>>(ProductErrors.NotFound);
+        var checkIDs = await _appDbContext.Products.AsNoTracking()
+            .AnyAsync(x => request.Product.Select(i => i.Id).Contains(x.Id));
 
-        if (!product.PurchaseItems.Any())
-            return Result.Success(new List<PurchaseResponse>());
+        if (!checkIDs)
+            return Result.Failure(ProductErrors.NotFoundID);
 
-        var purchases = product.PurchaseItems
-            .Select(x => x.Purchase.ToPurchaseResponseWithoutItems())
-            .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From && 
-                    DateOnly.Parse(x.CreatedAt.ToString())<= dateRangeRequest.To)
-            .OrderByDescending(x => x.CreatedAt)
-            .ToList();
+        var cutProcesses = request.Product.Select(x => CutProduct(x, cancellationToken));
+        var resultCutting = Task.WhenAll(cutProcesses).Result;
+        foreach (var res in resultCutting)
+            if (res.IsFailure)
+                return Result.Failure(res.Error);
 
-        return Result.Success(purchases);
+        return Result.Success();
     }
 
-    public async Task<Result<List<SaleResponse>>> GetSalesByProductAndDateRange
-        (Guid id, DateRangeRequest dateRangeRequest, CancellationToken cancellationToken = default)
+    private async Task<Result> CutProduct
+        (ProductCatalogRequest product, CancellationToken cancellationToken = default)
     {
-        var product = await _appDbContext.Products.AsNoTracking()
-            .Include(x => x.SaleItems)
-            .ThenInclude(x => x.Sale)
-            .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var productInventory = await _appDbContext.Inventory.FindAsync(product.Id, cancellationToken);
+        if (productInventory is null)
+            return Result.Failure(ProductErrors.NoQuantity);
 
-        if (product is null)
-            return Result.Failure<List<SaleResponse>>(ProductErrors.NotFound);
+        if (productInventory.CurrentQuantity < product.Quantity)
+            return Result.Failure(ProductErrors.NoEnoughQuantity);
 
-        if (!product.SaleItems.Any())
-            return Result.Success(new List<SaleResponse>());
+        productInventory.CurrentQuantity -= product.Quantity;
+        productInventory.LastUpdateAt = DateTime.UtcNow;
 
-        var sales = product.SaleItems
-            .Select(x => x.Sale.ToSaleResponseWithNoItems())
-            .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
-                    DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To)
-            .OrderByDescending(x => x.CreatedAt)
-            .ToList();
+        var stockTransaction = new StockTransaction
+        {
+            ProductID = product.Id,
+            Note = "قص من اجل الكاتالوغ",
+            QuantityChange = -1f * product.Quantity,
+            TransactionType = StockTransactionType.Sample            
+        };
 
-        return Result.Success(sales);
+        await _appDbContext.StockTransactions.AddAsync(stockTransaction, cancellationToken);
+        _appDbContext.Inventory.Update(productInventory);
+        return Result.Success();
     }
+
 }

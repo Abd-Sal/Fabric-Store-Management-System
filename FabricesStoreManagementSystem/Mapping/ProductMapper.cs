@@ -9,19 +9,12 @@ public static class ProductMapper
                 product.Material, product.CreatedAt
             );
 
-    public static ProductWithInventoryResponse ToProductWithInventoryResponse(this Product product)
+    public static ProductWithInventoryResponse ToProductWithInventoryResponse(this Product product, decimal price)
         => new ProductWithInventoryResponse(
                 product.ToProductResponse(),
                 product.Inventory?.CurrentQuantity ?? 0,
+                price,
                 product.Inventory?.LastUpdateAt
-            );
-
-    public static ProductStockTransactionsResponse ToProductStockTransactionsResponse(this Product product)
-        => new ProductStockTransactionsResponse(
-                product.ToProductResponse(),
-                product.Inventory?.CurrentQuantity ?? 0,
-                product.Inventory?.LastUpdateAt,
-                product.StockTransactions.Select(x => x.ToStockTransactionResponse()).ToList()
             );
 
     public static StockTransactionResponse ToStockTransactionResponse(this StockTransaction stockTransaction)

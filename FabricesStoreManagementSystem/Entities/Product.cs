@@ -19,3 +19,4 @@ public class Product
     public ICollection<StockTransaction> StockTransactions { get; set; } =
         new List<StockTransaction>();
 }
+

@@ -39,17 +39,25 @@ public class CustomerService(AppDbContext appDbContext) : ICustomerService
         return Result.Success(customer.ToCustomerResponse());
     }
 
-    public async Task<Result<List<CustomerResponse>>> GetCustomers
-        (bool includeOnlyActive = true, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<CustomerResponse>>> GetCustomers
+        (PaginationRequest paginationRequest, SortRequest sortRequest, bool includeOnlyActive = true, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Customers.AsNoTracking();
         if (includeOnlyActive)
             query = query.Where(x => x.IsActive);
-        query = query.OrderByDescending(x => x.CreatedAt);
+
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(CustomerSorts.CustomerResponseSort(sortRequest));
+        else
+            query = query.OrderBy(CustomerSorts.CustomerResponseSort(sortRequest));
+
         var result = query
-                .Select(x => x.ToCustomerResponse())
-                .ToListAsync(cancellationToken);
-        return Result.Success(await result);
+            .Select(x => x.ToCustomerResponse());
+
+        var response = await PaginatedList<CustomerResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 
     public async Task<Result> UpdateCustomer
@@ -83,18 +91,27 @@ public class CustomerService(AppDbContext appDbContext) : ICustomerService
         return Result.Success();
     }
 
-    public async Task<Result<List<SaleResponse>>> GetSaleByCustomer
-        (Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<SaleResponse>>> GetSaleByCustomer
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Customers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
-            return Result.Failure<List<SaleResponse>>(CustomerErrors.NotFound);
+            return Result.Failure<PaginatedList<SaleResponse>>(CustomerErrors.NotFound);
 
-        var result = await _appDbContext.Sales.AsNoTracking()
-            .Where(x => x.CustomerID == id)
-            .Select(x => x.ToSaleResponseWithNoItems())
-            .ToListAsync(cancellationToken);
+        var query = _appDbContext.Sales.AsNoTracking()
+            .Where(x => x.CustomerID == id);
 
-        return Result.Success(result);
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(SaleSorts.SaleResponseSort(sortRequest));
+        else
+            query = query.OrderBy(SaleSorts.SaleResponseSort(sortRequest));
+
+        var result = query
+            .Select(x => x.ToSaleResponseWithNoItems());
+
+        var response = await PaginatedList<SaleResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 
     public async Task<Result> ToggleCustomerStatus

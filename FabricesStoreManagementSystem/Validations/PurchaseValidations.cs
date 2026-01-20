@@ -11,6 +11,11 @@ public class PurchaseValidations : AbstractValidator<PurchaseRequest>
             .NotEmpty()
             .GreaterThanOrEqualTo(0);
 
+        RuleFor(x => x.PurchaseItems)
+            .NotEmpty()
+            .Must(x => x.Count == x.DistinctBy(x => x.ProductID).Count())
+            .WithMessage("there is duplicated product id");
+
         RuleForEach(x => x.PurchaseItems)
             .NotEmpty()
             .SetValidator(new PurchaseItemValidations());

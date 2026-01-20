@@ -33,6 +33,6 @@ public class UnitOfWork : IUnitOfWork
     public int SaveChanges()
         => _appDbContext.SaveChanges();
 
-    public async Task<int> SaveChangesAsync()
-        => await _appDbContext.SaveChangesAsync();
+    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+        => await _appDbContext.SaveChangesAsync(cancellationToken);
 }

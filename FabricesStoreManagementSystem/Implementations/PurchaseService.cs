@@ -7,6 +7,9 @@ public class PurchaseService(AppDbContext appDbContext) : IPurchaseService
     public async Task<Result<PurchaseResponse>> CreatePurchase
         (PurchaseRequest request, CancellationToken cancellationToken = default)
     {
+        if (request.PurchaseItems.Count() != request.PurchaseItems.DistinctBy(x => x.ProductID).Count())
+            return Result.Failure<PurchaseResponse>(ProductErrors.DuplicatedInInvoice);
+
         if (!(await _appDbContext.Suppliers.AsNoTracking()
             .AnyAsync(x => x.Id == request.SupplierID && x.IsActive, cancellationToken)))
             return Result.Failure<PurchaseResponse>(SupplierErrors.NotFound);
@@ -108,15 +111,23 @@ public class PurchaseService(AppDbContext appDbContext) : IPurchaseService
         return Result.Success(purchaseItem);
     }
 
-    public async Task<Result<List<PurchaseResponse>>> GetPurchases
-        (CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchases
+        (PaginationRequest paginationRequest, SortRequest sortRequest, CancellationToken cancellationToken = default)
     {
-        var purchases = await _appDbContext.Purchases.AsNoTracking()
-            .Select(x => x.ToPurchaseResponseWithoutItems())
-            .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync(cancellationToken);
+        var query = _appDbContext.Purchases.AsNoTracking();
 
-        return Result.Success(purchases);
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(PurchaseSorts.PurchaseResponseSort(sortRequest));
+        else
+            query = query.OrderBy(PurchaseSorts.PurchaseResponseSort(sortRequest));
+
+        var result = query
+            .Select(x => x.ToPurchaseResponseWithoutItems());
+
+        var response = await PaginatedList<PurchaseResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 
     public async Task<Result<PurchaseResponse>> GetPurchase
@@ -145,15 +156,24 @@ public class PurchaseService(AppDbContext appDbContext) : IPurchaseService
         return Result.Success(purchase.ToPurchaseResponse());
     }
 
-    public async Task<Result<List<PurchaseResponse>>> GetPurchaseByRangeDate
-        (DateRangeRequest dateRange, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchaseByRangeDate
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRange, CancellationToken cancellationToken = default)
     {
-        var purchases = await _appDbContext.Purchases.AsNoTracking()
+        var query = _appDbContext.Purchases.AsNoTracking()
             .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRange.From &&
-                        DateOnly.Parse(x.CreatedAt.ToString()) <= dateRange.To)
-            .Select(x => x.ToPurchaseResponseWithoutItems())
-            .ToListAsync(cancellationToken);
+                        DateOnly.Parse(x.CreatedAt.ToString()) <= dateRange.To);
 
-        return Result.Success(purchases);
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(PurchaseSorts.PurchaseResponseSort(sortRequest));
+        else
+            query = query.OrderBy(PurchaseSorts.PurchaseResponseSort(sortRequest));
+
+        var result = query
+            .Select(x => x.ToPurchaseResponseWithoutItems());
+
+        var response = await PaginatedList<PurchaseResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 }

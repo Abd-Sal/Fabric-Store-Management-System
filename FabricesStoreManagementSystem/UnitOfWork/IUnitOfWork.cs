@@ -10,5 +10,5 @@ public interface IUnitOfWork
     public ISaleService SaleService { get; }
 
     public int SaveChanges();
-    public Task<int> SaveChangesAsync();
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

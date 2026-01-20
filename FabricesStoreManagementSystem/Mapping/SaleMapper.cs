@@ -4,8 +4,8 @@ public static class SaleMapper
 {
     public static SaleResponse ToSaleResponseWithNoItems(this Sale sale)
         => new SaleResponse(
-                sale.Id, sale.InvoiceNumber, sale.CustomerID,
-                sale.ProductsCount, sale.TotalAmount, sale.Discount,
+                sale.Id, sale.InvoiceNumber, sale.ProductsCount,
+                sale.TotalAmount, sale.Discount,
                 sale.NetAmount, sale.PaidAmount, sale.Status,
                 sale.CreatedAt, null
             );
@@ -15,8 +15,8 @@ public static class SaleMapper
 
     public static SaleResponse ToSaleResponse(this Sale sale)
         => new SaleResponse(
-                sale.Id, sale.InvoiceNumber, sale.CustomerID,
-                sale.ProductsCount, sale.TotalAmount, sale.Discount,
+                sale.Id, sale.InvoiceNumber, sale.ProductsCount,
+                sale.TotalAmount, sale.Discount,
                 sale.NetAmount, sale.PaidAmount, sale.Status,
                 sale.CreatedAt, sale.SaleItems.TotSaleItemsResponse().ToList()
             );

@@ -7,6 +7,16 @@ public class ProductErrors
             "product not found",
             StatusCodes.Status404NotFound);
 
+    public static Error NotFoundID =
+        new("Product.NotFoundID",
+            $"one or more product id not found",
+            StatusCodes.Status404NotFound);
+
+    public static Error DuplicatedInInvoice =
+        new("Product.DuplicatedInInvoice",
+            "there is product duplicated in invoice",
+            StatusCodes.Status409Conflict);
+
     public static Error NoQuantity =
         new("Product.NoQuantity",
             "there is not quantity of this product",

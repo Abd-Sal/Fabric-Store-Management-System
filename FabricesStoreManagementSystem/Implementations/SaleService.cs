@@ -7,10 +7,13 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
     public async Task<Result<SaleResponse>> CreateSale
         (SaleRequest request, CancellationToken cancellationToken = default)
     {
+        if (request.SaleItems.Count != request.SaleItems.DistinctBy(x => x.ProductID).Count())
+            return Result.Failure<SaleResponse>(ProductErrors.DuplicatedInInvoice);
+
         if (!(await _appDbContext.Customers.AsNoTracking()
             .AnyAsync(x => x.Id == request.CustomerID && x.IsActive, cancellationToken)))
             return Result.Failure<SaleResponse>(CustomerErrors.NotFound);
-
+            
         var sale = new Sale
         {
             InvoiceNumber = HelperTools.GenerateInvoiceNumber(),
@@ -107,7 +110,7 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
         {
             Note = "Do sale process and decrease quantity by admin",
             ProductID = saleItem.ProductID,
-            QuantityChange = -1 * saleItem.Quantity,
+            QuantityChange = -1f * saleItem.Quantity,
             ReferenceID = saleItem.SaleID,
             ReferenceType = ReferenceTypes.Sale,
             TransactionType = StockTransactionType.Sale
@@ -218,15 +221,23 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
         return Result.Success();
     }
 
-    public async Task<Result<List<SaleResponse>>> GetSales
-        (CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<SaleResponse>>> GetSales
+        (PaginationRequest paginationRequest, SortRequest sortRequest, CancellationToken cancellationToken = default)
     {
-        var sales = _appDbContext.Sales.AsNoTracking()
-            .Select(x => x.ToSaleResponseWithNoItems())
-            .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync(cancellationToken);
+        var query = _appDbContext.Sales.AsNoTracking();
 
-        return Result.Success(await sales);
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(SaleSorts.SaleResponseSort(sortRequest));
+        else
+            query = query.OrderBy(SaleSorts.SaleResponseSort(sortRequest));
+
+        var result = query
+            .Select(x => x.ToSaleResponseWithNoItems());
+
+        var response = await PaginatedList<SaleResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 
     public async Task<Result<SaleResponse>> GetSale
@@ -255,15 +266,24 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
         return Result.Success(sale.ToSaleResponse());
     }
 
-    public async Task<Result<List<SaleResponse>>> GetSaleByRangeDate
-        (DateRangeRequest dateRange, CancellationToken cancellationToken = default)
+    public async Task<Result<PaginatedList<SaleResponse>>> GetSaleByRangeDate
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRange, CancellationToken cancellationToken = default)
     {
-        var sales = await _appDbContext.Sales.AsNoTracking()
+        var query = _appDbContext.Sales.AsNoTracking()
             .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRange.From &&
-                        DateOnly.Parse(x.CreatedAt.ToString()) <= dateRange.To)
-            .Select(x => x.ToSaleResponseWithNoItems())
-            .ToListAsync(cancellationToken);
+                        DateOnly.Parse(x.CreatedAt.ToString()) <= dateRange.To);
 
-        return Result.Success(sales);
+        if (sortRequest.SortDir?.ToLower() == "asc")
+            query = query.OrderByDescending(SaleSorts.SaleResponseSort(sortRequest));
+        else
+            query = query.OrderBy(SaleSorts.SaleResponseSort(sortRequest));
+
+        var result = query
+            .Select(x => x.ToSaleResponseWithNoItems());
+
+        var response = await PaginatedList<SaleResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 }

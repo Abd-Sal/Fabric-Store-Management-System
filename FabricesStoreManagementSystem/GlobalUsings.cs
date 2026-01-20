@@ -1,11 +1,14 @@
 ﻿global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using Microsoft.Extensions.Options;
+global using Microsoft.AspNetCore.Mvc;
 
 global using System.ComponentModel.DataAnnotations.Schema;
 global using System.ComponentModel.DataAnnotations;
 global using System.Text.Json.Serialization;
+global using System.Linq.Expressions;
 
+global using FabricesStoreManagementSystem.SortingConfig;
 global using FabricesStoreManagementSystem.Enums;
 global using FabricesStoreManagementSystem.Entities;
 global using FabricesStoreManagementSystem.Abstraction;
@@ -23,6 +26,8 @@ global using FabricesStoreManagementSystem.HelpTools;
 global using FabricesStoreManagementSystem.Errors;
 global using FabricesStoreManagementSystem.Mapping;
 global using FabricesStoreManagementSystem.Data.Configurations;
+global using FabricesStoreManagementSystem.UnitOfWork;
+global using FabricesStoreManagementSystem.ResultsExtension;
 
 global using FluentValidation;
 global using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
