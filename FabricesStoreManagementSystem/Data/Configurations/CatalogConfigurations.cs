@@ -20,7 +20,7 @@ public class CatalogConfigurations : IEntityTypeConfiguration<Catalog>
 
         builder.Property(x => x.Description)
             .HasColumnType("nvarchar")
-            .HasMaxLength(CatalogConfigurationDescriptionMaxLenght)
+            .HasMaxLength(DescriptionMaxLenght)
             .IsRequired(false);
 
         builder.HasIndex(x => x.CatalogCode);
