@@ -6,6 +6,11 @@ public class PurchaseErrors
         new("Purchase.NoSuccessfulPurchaseItems",
             "no any purchase items processed saccessfully",
             StatusCodes.Status400BadRequest);
+    
+    public static Error UnableToReturnPurchase =
+        new("Purchase.UnableToReturnPurchase",
+            "unable to return purchase cause there is one or more sales of this ",
+            StatusCodes.Status400BadRequest);
 
     public static Error NotFound =
         new("Purchase.NotFound",

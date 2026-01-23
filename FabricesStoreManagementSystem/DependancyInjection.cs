@@ -1,4 +1,6 @@
-﻿namespace FabricesStoreManagementSystem;
+﻿using Serilog;
+
+namespace FabricesStoreManagementSystem;
 
 public static class DependancyInjection
 {
@@ -55,7 +57,6 @@ public static class DependancyInjection
     
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
-        services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<ISupplierService, SupplierService>();
         services.AddScoped<IProductService, ProductService>();

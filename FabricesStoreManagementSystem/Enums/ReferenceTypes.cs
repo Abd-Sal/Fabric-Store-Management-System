@@ -3,5 +3,6 @@
 public enum ReferenceTypes
 {
     Sale,
-    Purchase
+    Purchase,
+    Sample
 }

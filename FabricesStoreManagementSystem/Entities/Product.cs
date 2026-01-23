@@ -18,5 +18,7 @@ public class Product
         new List<SaleItem>();
     public ICollection<StockTransaction> StockTransactions { get; set; } =
         new List<StockTransaction>();
+    public ICollection<CatalogProduct> CatalogsProducts { get; set; } =
+        new List<CatalogProduct>();
 }
 

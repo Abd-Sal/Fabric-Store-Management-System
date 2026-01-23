@@ -2,7 +2,7 @@
 
 public interface IUnitOfWork
 {
-    public IAuthService AuthService { get; }
+    public ICatalogService CatalogService { get; }
     public ICustomerService CustomerService { get; }
     public ISupplierService SupplierService{ get; }
     public IProductService ProductService { get; }

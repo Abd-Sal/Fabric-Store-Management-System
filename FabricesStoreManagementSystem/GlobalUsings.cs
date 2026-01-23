@@ -7,7 +7,12 @@ global using System.ComponentModel.DataAnnotations.Schema;
 global using System.ComponentModel.DataAnnotations;
 global using System.Text.Json.Serialization;
 global using System.Linq.Expressions;
+global using System.Reflection;
+global using System.Globalization;
+global using System.Text.RegularExpressions;
 
+global using FabricesStoreManagementSystem.DTOs.Catalog;
+global using FabricesStoreManagementSystem.DTOs.Common;
 global using FabricesStoreManagementSystem.SortingConfig;
 global using FabricesStoreManagementSystem.Enums;
 global using FabricesStoreManagementSystem.Entities;
@@ -28,6 +33,8 @@ global using FabricesStoreManagementSystem.Mapping;
 global using FabricesStoreManagementSystem.Data.Configurations;
 global using FabricesStoreManagementSystem.UnitOfWork;
 global using FabricesStoreManagementSystem.ResultsExtension;
+global using FabricesStoreManagementSystem.CustomMiddlewares;
 
+global using Serilog;
 global using FluentValidation;
 global using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;

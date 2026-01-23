@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace FabricesStoreManagementSystem.Data;
+﻿namespace FabricesStoreManagementSystem.Data;
 
 public class AppDbContext : DbContext
 {
@@ -8,6 +6,9 @@ public class AppDbContext : DbContext
             : base(options)
     {
     }
+    public DbSet<Catalog> Catalogs{ get; set; }
+    public DbSet<CatalogProduct> CatalogsProducts{ get; set; }
+    public DbSet<CatalogAssign> CatalogsAssigns{ get; set; }
     public DbSet<Customer> Customers{ get; set; }
     public DbSet<Supplier> Suppliers{ get; set; }
     public DbSet<Product> Products{ get; set; }

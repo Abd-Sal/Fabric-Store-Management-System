@@ -7,4 +7,6 @@ public class Customer : Person
 
     public ICollection<Sale> Sales { get; set; } = 
         new List<Sale>();
+    public ICollection<CatalogAssign> CatalogsAssigns { get; set; } = 
+        new List<CatalogAssign>();
 }

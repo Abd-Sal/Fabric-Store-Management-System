@@ -1,0 +1,13 @@
+﻿namespace FabricesStoreManagementSystem.Interfaces;
+
+public interface ICatalogService
+{
+    Task<Result<CatalogResponse>> CreateCatalog(CatalogRequest request, CancellationToken cancellationToken = default);
+    Task<Result<CatalogResponse>> CreateCatalog(CatalogFromSupplierRequest request, CancellationToken cancellationToken = default);
+    Task<Result> RemoveCatalog(Guid id, CancellationToken cancellationToken = default);
+    Task<Result<AssignCatalogResponse>> AssignCatalog(AssignCatalogRequest request, CancellationToken cancellationToken = default);
+    Task<Result<AssignCatalogResponse>> ReturnCatalog(Guid assignID, CancellationToken cancellationToken = default);
+    Task<Result> DestructionCatalog(Guid id, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedList<CatalogResponse>>> GetCatalogs(PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, CancellationToken cancellationToken = default);
+    Task<Result<CatalogResponse>> GetCatalog(Guid id, CancellationToken cancellationToken = default);
+}

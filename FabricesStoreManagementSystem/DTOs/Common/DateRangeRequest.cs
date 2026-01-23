@@ -1,4 +1,4 @@
-﻿namespace FabricesStoreManagementSystem.DTOs;
+﻿namespace FabricesStoreManagementSystem.DTOs.Common;
 
 public record DateRangeRequest(
     DateOnly From,

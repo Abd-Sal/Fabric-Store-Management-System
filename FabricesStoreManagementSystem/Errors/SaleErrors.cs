@@ -12,9 +12,9 @@ public class SaleErrors
             "not found the sale",
             StatusCodes.Status404NotFound);
 
-    public static Error PaidMoreThanTotal =
+    public static Error PaidMoreThanNetTotal =
         new("Sale.PaidMoreThanTotal",
-            "customer pay more than total amount",
+            "customer pay more than net amount",
             StatusCodes.Status400BadRequest);
 
     public static Error AlreadyPaid =

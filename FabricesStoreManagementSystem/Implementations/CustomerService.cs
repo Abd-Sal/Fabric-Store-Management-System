@@ -91,7 +91,7 @@ public class CustomerService(AppDbContext appDbContext) : ICustomerService
         return Result.Success();
     }
 
-    public async Task<Result<PaginatedList<SaleResponse>>> GetSaleByCustomer
+    public async Task<Result<PaginatedList<SaleResponse>>> GetSalesByCustomer
         (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Customers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
@@ -115,15 +115,18 @@ public class CustomerService(AppDbContext appDbContext) : ICustomerService
     }
 
     public async Task<Result> ToggleCustomerStatus
-        (Guid id, CancellationToken cancellationToken = default)
+        (Guid id, bool? state, CancellationToken cancellationToken = default)
     {
         if (await _appDbContext.Customers.FindAsync(id, cancellationToken) is not { } customer)
             return Result.Failure<List<SaleResponse>>(CustomerErrors.NotFound);
 
+        if (state.HasValue && customer.IsActive == state)
+            return Result.Success();
+
         await _appDbContext.Customers.Where(x => x.Id == customer.Id)
             .ExecuteUpdateAsync(setters =>
                 setters
-                    .SetProperty(x => x.IsActive, !customer.IsActive),
+                    .SetProperty(x => x.IsActive, state.HasValue ? state : !customer.IsActive),
                     cancellationToken
             );
 

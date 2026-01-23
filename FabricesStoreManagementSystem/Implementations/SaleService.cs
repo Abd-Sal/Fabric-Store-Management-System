@@ -30,13 +30,13 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
         var resultSaleItems = processSaleItems.Value;
 
         sale.ProductsCount = resultSaleItems.Count;
-        sale.NetAmount = resultSaleItems.Sum(x => x.Total);
+        sale.TotalAmount = resultSaleItems.Sum(x => x.Total);
 
-        var totalAmount = resultSaleItems.Sum(x => x.Total) - request.Discount;
-        sale.TotalAmount = totalAmount;
+        var netAmount = sale.TotalAmount - request.Discount;
+        sale.NetAmount = netAmount;
 
-        if (totalAmount > 0)
-            sale.TotalAmount = 0;
+        if (netAmount < 0)
+            sale.NetAmount = 0;
 
         sale.PaidAmount = request.PaidAmount;
 
@@ -48,14 +48,14 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
             Amount = sale.PaidAmount
         };
 
-        if (sale.PaidAmount > sale.TotalAmount)
-            return Result.Failure<SaleResponse>(SaleErrors.PaidMoreThanTotal);
-        else if (sale.PaidAmount == sale.TotalAmount)
+        if (sale.PaidAmount > sale.NetAmount)
+            return Result.Failure<SaleResponse>(SaleErrors.PaidMoreThanNetTotal);
+        else if (sale.PaidAmount == sale.NetAmount)
         {
             sale.Status = PayStatuses.Paid;
             await _appDbContext.Payments.AddAsync(payment, cancellationToken);
         }
-        else if (sale.PaidAmount < sale.TotalAmount)
+        else if (sale.PaidAmount < sale.NetAmount)
         {
             sale.Status = PayStatuses.NotCompleted;
             await _appDbContext.Payments.AddAsync(payment, cancellationToken);
@@ -76,7 +76,7 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
             .Select(x => new SaleItem
             {
                 ProductID = x.ProductID,
-                Quantity = x.Qunatity,
+                Quantity = x.Quantity,
                 UnitPrice = x.UnitPrice,
                 SaleID = saleID,
             })
@@ -136,8 +136,8 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
 
         var paid = request.PaidAmount + sale.PaidAmount;
         var status = sale.Status;
-        if (paid > sale.TotalAmount)
-            return Result.Failure(SaleErrors.PaidMoreThanTotal);
+        if (paid > sale.NetAmount)
+            return Result.Failure(SaleErrors.PaidMoreThanNetTotal);
 
         var payment = new Payment
         {
@@ -146,12 +146,12 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
             PayMethod = PaymentMethod.Cash,
             Amount = sale.PaidAmount
         };
-        if (paid == sale.TotalAmount)
+        if (paid == sale.NetAmount)
         {
             status = PayStatuses.Paid;
             await _appDbContext.Payments.AddAsync(payment, cancellationToken);
         }
-        else if (sale.PaidAmount < sale.TotalAmount)
+        else if (sale.PaidAmount < sale.NetAmount)
         {
             status = PayStatuses.NotCompleted;
             await _appDbContext.Payments.AddAsync(payment, cancellationToken);
@@ -222,9 +222,14 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
     }
 
     public async Task<Result<PaginatedList<SaleResponse>>> GetSales
-        (PaginationRequest paginationRequest, SortRequest sortRequest, CancellationToken cancellationToken = default)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Sales.AsNoTracking();
+
+        if(dateRangeRequest is not null)
+            query = query
+                .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
+                            DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
 
         if (sortRequest.SortDir?.ToLower() == "asc")
             query = query.OrderByDescending(SaleSorts.SaleResponseSort(sortRequest));
@@ -264,26 +269,5 @@ public class SaleService(AppDbContext appDbContext) : ISaleService
             return Result.Failure<SaleResponse>(SaleErrors.NotFound);
 
         return Result.Success(sale.ToSaleResponse());
-    }
-
-    public async Task<Result<PaginatedList<SaleResponse>>> GetSaleByRangeDate
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRange, CancellationToken cancellationToken = default)
-    {
-        var query = _appDbContext.Sales.AsNoTracking()
-            .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRange.From &&
-                        DateOnly.Parse(x.CreatedAt.ToString()) <= dateRange.To);
-
-        if (sortRequest.SortDir?.ToLower() == "asc")
-            query = query.OrderByDescending(SaleSorts.SaleResponseSort(sortRequest));
-        else
-            query = query.OrderBy(SaleSorts.SaleResponseSort(sortRequest));
-
-        var result = query
-            .Select(x => x.ToSaleResponseWithNoItems());
-
-        var response = await PaginatedList<SaleResponse>.CreateAsync
-            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
-
-        return Result.Success(response);
     }
 }

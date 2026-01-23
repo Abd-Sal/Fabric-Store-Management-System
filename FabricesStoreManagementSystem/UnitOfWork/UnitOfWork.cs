@@ -9,15 +9,15 @@ public class UnitOfWork : IUnitOfWork
     )
     {
         _appDbContext = appDbContext;
-        AuthService = new AuthService(authOptions);
         CustomerService = new CustomerService(appDbContext);
         SupplierService = new SupplierService(appDbContext);
         ProductService = new ProductService(appDbContext);
-        PurchaseService = new PurchaseService(appDbContext);
+        PurchaseService = new PurchaseService(appDbContext, ProductService);
         SaleService = new SaleService(appDbContext);
+        CatalogService = new CatalogService(appDbContext);
     }
 
-    public IAuthService AuthService { get; }
+    public ICatalogService CatalogService{ get; }
 
     public ICustomerService CustomerService { get; }
 

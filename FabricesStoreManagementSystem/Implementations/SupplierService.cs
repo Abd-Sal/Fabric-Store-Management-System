@@ -30,7 +30,7 @@ public class SupplierService(AppDbContext appDbContext) : ISupplierService
         return Result.Success(supplier.ToSupplierResponse());
     }
 
-    public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchaseBySupplier
+    public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchasesBySupplier
         (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
@@ -85,15 +85,18 @@ public class SupplierService(AppDbContext appDbContext) : ISupplierService
     }
 
     public async Task<Result> ToggleSupplierStatus
-        (Guid id, CancellationToken cancellationToken = default)
+        (Guid id, bool? state, CancellationToken cancellationToken = default)
     {
         if (await _appDbContext.Suppliers.FindAsync(id, cancellationToken) is not { } supplier)
             return Result.Failure(SupplierErrors.NotFound);
 
+        if(state.HasValue && supplier.IsActive == state)
+            return Result.Success();
+
         await _appDbContext.Suppliers.Where(x => x.Id == id)
             .ExecuteUpdateAsync(setters =>
                 setters
-                    .SetProperty(x => x.IsActive, !supplier.IsActive),
+                    .SetProperty(x => x.IsActive, state.HasValue ? state : !supplier.IsActive),
                 cancellationToken
             );
         return Result.Success();

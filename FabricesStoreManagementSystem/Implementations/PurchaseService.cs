@@ -1,8 +1,9 @@
 ﻿namespace FabricesStoreManagementSystem.Implementations;
 
-public class PurchaseService(AppDbContext appDbContext) : IPurchaseService
+public class PurchaseService(AppDbContext appDbContext, IProductService productService) : IPurchaseService
 {
     private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly IProductService _productService = productService;
 
     public async Task<Result<PurchaseResponse>> CreatePurchase
         (PurchaseRequest request, CancellationToken cancellationToken = default)
@@ -112,9 +113,14 @@ public class PurchaseService(AppDbContext appDbContext) : IPurchaseService
     }
 
     public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchases
-        (PaginationRequest paginationRequest, SortRequest sortRequest, CancellationToken cancellationToken = default)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Purchases.AsNoTracking();
+
+        if(dateRangeRequest is not null)
+            query = query
+                    .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
+                                DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
 
         if (sortRequest.SortDir?.ToLower() == "asc")
             query = query.OrderByDescending(PurchaseSorts.PurchaseResponseSort(sortRequest));
@@ -156,24 +162,114 @@ public class PurchaseService(AppDbContext appDbContext) : IPurchaseService
         return Result.Success(purchase.ToPurchaseResponse());
     }
 
-    public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchaseByRangeDate
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRange, CancellationToken cancellationToken = default)
+    public async Task<Result> RemovePurchase
+        (Guid id, CancellationToken cancellationToken = default)
     {
-        var query = _appDbContext.Purchases.AsNoTracking()
-            .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRange.From &&
-                        DateOnly.Parse(x.CreatedAt.ToString()) <= dateRange.To);
+        var purchase = await _appDbContext.Purchases
+            .Include(x => x.PurchaseItems)
+            .SingleOrDefaultAsync(x => x.Id == id);
 
-        if (sortRequest.SortDir?.ToLower() == "asc")
-            query = query.OrderByDescending(PurchaseSorts.PurchaseResponseSort(sortRequest));
+        if (purchase is null)
+            return Result.Failure(PurchaseErrors.NotFound);
+
+        var getSaleProcesses = purchase.PurchaseItems
+            .Select(x => _productService
+                            .GetSalesByProduct(x.ProductID,
+                                                new PaginationRequest(1, 1),
+                                                new SortRequest(null, null),
+                                                new DateRangeRequest(DateOnly.FromDateTime(purchase.CreatedAt), DateOnly.FromDateTime(DateTime.UtcNow)),
+                                                cancellationToken));
+
+        var salesResultProcess = await Task.WhenAll(getSaleProcesses);
+        foreach (var item in salesResultProcess)
+            return Result.Failure(item.Error);
+
+        var check = salesResultProcess.Select(x => x.Value.TotalItems).Max();
+        if (check > 0)
+            return Result.Failure(PurchaseErrors.UnableToReturnPurchase);
+
+        var returnProductQuantities = purchase.PurchaseItems
+            .Select(x => returnQuantity(id, x.ProductID, x.Quantity, cancellationToken));
+
+        var endedReturnQuantities = await Task.WhenAll(returnProductQuantities);
+        foreach (var ended in endedReturnQuantities)
+            return Result.Failure(ended.Error);
+
+        await _appDbContext.Payments.Where(x => x.ReferenceID == id)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        await _appDbContext.PurchaseItems.Where(x => x.PurchaseID == id)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        await _appDbContext.Purchases.Where(x => x.Id == id)
+            .ExecuteDeleteAsync(cancellationToken);
+
+        return Result.Success();
+    }
+
+    private async Task<Result> returnQuantity
+        (Guid purchaseID, Guid productID, float returnedQuantity, CancellationToken cancellationToken = default)
+    {
+        var productInventory = await _appDbContext.Inventory
+            .SingleOrDefaultAsync(x => x.ProductID == productID);
+
+        if (productInventory is null)
+            return Result.Failure(GeneralErrors.UnexpectedError);
+
+        productInventory.CurrentQuantity += returnedQuantity;
+        productInventory.LastUpdateAt = DateTime.UtcNow;
+
+        _appDbContext.StockTransactions.RemoveRange(
+            await _appDbContext.StockTransactions
+                .Where(x => x.ReferenceID == purchaseID && x.ProductID == productID)
+                .ToListAsync(cancellationToken)
+        );
+
+        _appDbContext.Inventory.Update(productInventory);
+        return Result.Success();
+    }
+
+    public async Task<Result> UpdatePurchasePaidAmount
+        (Guid id, PurchaseUpdatePaidRequest request, CancellationToken cancellationToken = default)
+    {
+        if (await _appDbContext.Purchases.FindAsync(id, cancellationToken) is not { } purchase)
+            return Result.Failure(PurchaseErrors.NotFound);
+
+        if (purchase.Status == PayStatuses.Paid)
+            return Result.Failure(PurchaseErrors.AlreadyPaid);
+
+        var paid = request.PaidAmount + purchase.PaidAmount;
+        var status = purchase.Status;
+        if (paid > purchase.TotalAmount)
+            return Result.Failure(PurchaseErrors.PaidMoreThanTotal);
+
+        var payment = new Payment
+        {
+            ReferenceID = purchase.Id,
+            ReferenceType = ReferenceTypes.Purchase,
+            PayMethod = PaymentMethod.Cash,
+            Amount = purchase.PaidAmount
+        };
+        if (paid == purchase.TotalAmount)
+        {
+            status = PayStatuses.Paid;
+            await _appDbContext.Payments.AddAsync(payment, cancellationToken);
+        }
+        else if (purchase.PaidAmount < purchase.TotalAmount)
+        {
+            status = PayStatuses.NotCompleted;
+            await _appDbContext.Payments.AddAsync(payment, cancellationToken);
+        }
         else
-            query = query.OrderBy(PurchaseSorts.PurchaseResponseSort(sortRequest));
+            status = PayStatuses.NotPaid;
 
-        var result = query
-            .Select(x => x.ToPurchaseResponseWithoutItems());
-
-        var response = await PaginatedList<PurchaseResponse>.CreateAsync
-            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
-
-        return Result.Success(response);
+        await _appDbContext.Purchases.Where(x => x.Id == id)
+            .ExecuteUpdateAsync(setters =>
+                setters
+                    .SetProperty(x => x.PaidAmount, paid)
+                    .SetProperty(x => x.Status, status),
+                cancellationToken
+            );
+        return Result.Success();
     }
 }
