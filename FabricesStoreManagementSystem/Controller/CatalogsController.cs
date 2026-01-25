@@ -2,20 +2,26 @@
 
 [Route("api/catalogs")]
 [ApiController]
-public class CatalogsController(IUnitOfWork unitOfWork) : ControllerBase
+public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly ILogger<CatalogService> _logger = logger;
 
     [HttpGet("")]
     public async Task<IActionResult> GetCatalogs
     ([FromQuery] PaginationRequest paginationRequest,
     [FromQuery] SortRequest sortRequest,
     [FromQuery] DateRangeRequest? dateRangeRequest,
+    [FromQuery] SearchRequest? searchRequest,
     CancellationToken cancellationToken = default)
     {
-        var result = await _unitOfWork.CatalogService.GetCatalogs(paginationRequest, sortRequest, dateRangeRequest, cancellationToken);
+        _logger.LogError("get catalogs");
+        var result = await _unitOfWork.CatalogService.GetCatalogs(paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
 
@@ -24,9 +30,13 @@ public class CatalogsController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromRoute] Guid id,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogError("get catalog({id})", id);
         var result = await _unitOfWork.CatalogService.GetCatalog(id, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
 
@@ -35,9 +45,13 @@ public class CatalogsController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromBody] CatalogRequest catalogRequest,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogError("create catalog by stock");
         var result = await _unitOfWork.CatalogService.CreateCatalog(catalogRequest, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return CreatedAtAction(nameof(GetCatalog), new {id = result.Value.Id}, result.Value);
     }
@@ -47,9 +61,13 @@ public class CatalogsController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromBody] CatalogFromSupplierRequest catalogFromSupplierRequest,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogError("create catalog by supplier");
         var result = await _unitOfWork.CatalogService.CreateCatalog(catalogFromSupplierRequest, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return CreatedAtAction(nameof(GetCatalog), new {id = result.Value.Id}, result.Value);
     }
@@ -59,9 +77,13 @@ public class CatalogsController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromBody] AssignCatalogRequest assignCatalogRequest,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogError("assign catalog({id})", assignCatalogRequest.CatalogID);
         var result = await _unitOfWork.CatalogService.AssignCatalog(assignCatalogRequest, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Ok(result.Value);
     }
@@ -71,9 +93,13 @@ public class CatalogsController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromBody] Guid id,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogError("return catalog({id})", id);
         var result = await _unitOfWork.CatalogService.ReturnCatalog(id, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return Ok(result.Value);
     }
@@ -83,9 +109,13 @@ public class CatalogsController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromBody] Guid id,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogError("remove catalog({id})", id);
         var result = await _unitOfWork.CatalogService.RemoveCatalog(id, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
@@ -95,10 +125,25 @@ public class CatalogsController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromBody] Guid id,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogError("destroy catalog({id})", id);
         var result = await _unitOfWork.CatalogService.DestructionCatalog(id, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return NoContent();
+    }
+
+    [HttpOptions("")]
+    public async Task<IActionResult> Details()
+    {
+        var result = new
+        {
+            SearchDetails = CatalogSearchs.CatalogSortColumns(),
+            SortDetails = CatalogSorts.CatalogSortColumns(),
+        };
+        return Ok(result);
     }
 }

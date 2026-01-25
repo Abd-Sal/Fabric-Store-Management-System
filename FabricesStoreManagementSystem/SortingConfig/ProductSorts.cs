@@ -14,4 +14,9 @@ public class ProductSorts
             _ => product => product.CreatedAt
         };
 
+    public static SortColumnsResponse ProductSortColumns()
+        => new SortColumnsResponse(
+                ["name", "color", "code", "productcode", "createdat", "id"],
+                "createdat"
+            );
 }

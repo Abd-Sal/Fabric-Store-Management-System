@@ -1,12 +1,14 @@
 ﻿namespace FabricesStoreManagementSystem.Implementations;
 
-public class ProductService(AppDbContext appDbContext) : IProductService
+public class ProductService(AppDbContext appDbContext, ILogger<ProductService> logger) : IProductService
 {
     private readonly AppDbContext _appDbContext = appDbContext;
+    private readonly ILogger<ProductService> _logger = logger;
 
     public async Task<Result<ProductResponse>> CreateProduct
         (ProductRequest request, CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("check for product code and color duplication");
         if (!(await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Code == request.Code && x.Color == request.Color, cancellationToken)))
             return Result.Failure<ProductResponse>(ProductErrors.CodeWithColorConflict);
         var product = new Product
@@ -19,6 +21,7 @@ public class ProductService(AppDbContext appDbContext) : IProductService
         };
 
         await _appDbContext.Products.AddAsync(product, cancellationToken);
+        _logger.LogInformation("product was added with id({id})", product.Id);
         return Result.Success(product.ToProductResponse());
     }
 
@@ -58,7 +61,7 @@ public class ProductService(AppDbContext appDbContext) : IProductService
     }
 
     public async Task<Result<PaginatedList<ProductResponse>>> GetProducts
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, CancellationToken cancellationToken = default)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Products.AsNoTracking();
 
@@ -67,10 +70,14 @@ public class ProductService(AppDbContext appDbContext) : IProductService
                 .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
                             DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
 
-        if (sortRequest.SortDir?.ToLower() == "asc")
-            query = query.OrderByDescending(ProductSorts.ProductResponseSort(sortRequest));
-        else
+        if (searchRequest is not null)
+            query = query
+                .Where(x => ProductSearchs.ProductResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
+
+        if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(ProductSorts.ProductResponseSort(sortRequest));
+        else
+            query = query.OrderByDescending(ProductSorts.ProductResponseSort(sortRequest));
 
         var result = query
             .Select(x => x.ToProductResponse());
@@ -99,7 +106,7 @@ public class ProductService(AppDbContext appDbContext) : IProductService
     }
 
     public async Task<Result<PaginatedList<SaleResponse>>> GetSalesByProduct
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, CancellationToken cancellationToken = default)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
             return Result.Failure<PaginatedList<SaleResponse>>(ProductErrors.NotFound);
@@ -115,10 +122,14 @@ public class ProductService(AppDbContext appDbContext) : IProductService
                 .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
                             DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
 
-        if (sortRequest.SortDir?.ToLower() == "asc")
-            query = query.OrderByDescending(SaleSorts.SaleResponseSort(sortRequest));
-        else
+        if (searchRequest is not null)
+            query = query
+                .Where(x => SaleSearchs.SaleResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search.ToLower()));
+
+        if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(SaleSorts.SaleResponseSort(sortRequest));
+        else
+            query = query.OrderByDescending(SaleSorts.SaleResponseSort(sortRequest));
 
         var result = query
             .Select(x => x.ToSaleResponseWithNoItems());
@@ -130,7 +141,7 @@ public class ProductService(AppDbContext appDbContext) : IProductService
     }
 
     public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchasesByProduct
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, CancellationToken cancellationToken = default)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
             return Result.Failure<PaginatedList<PurchaseResponse>>(ProductErrors.NotFound);
@@ -141,15 +152,19 @@ public class ProductService(AppDbContext appDbContext) : IProductService
             .SelectMany(x => x.PurchaseItems)
             .Select(x => x.Purchase);
 
-        if(dateRangeRequest is not null)
+        if (dateRangeRequest is not null)
             query = query
                 .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
                             DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
 
-        if (sortRequest.SortDir?.ToLower() == "asc")
-            query = query.OrderByDescending(PurchaseSorts.PurchaseResponseSort(sortRequest));
-        else
+        if (searchRequest is not null)
+            query = query
+                .Where(x => PurchaseSearchs.PurchaseResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
+
+        if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(PurchaseSorts.PurchaseResponseSort(sortRequest));
+        else
+            query = query.OrderByDescending(PurchaseSorts.PurchaseResponseSort(sortRequest));
 
         var result = query
             .Select(x => x.ToPurchaseResponseWithoutItems());

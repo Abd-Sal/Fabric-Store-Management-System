@@ -11,6 +11,8 @@ global using System.Reflection;
 global using System.Globalization;
 global using System.Text.RegularExpressions;
 
+global using FabricesStoreManagementSystem.SearchConfig;
+global using FabricesStoreManagmentSystem.Implementations;
 global using FabricesStoreManagementSystem.DTOs.Catalog;
 global using FabricesStoreManagementSystem.DTOs.Common;
 global using FabricesStoreManagementSystem.SortingConfig;

@@ -10,6 +10,12 @@ public class CatalogSorts
             "code" => catalog => catalog.CatalogCode,
             "createdat" => catalog => catalog.CreatedAt,
             "id" => catalog => catalog.Id,
-            _ => sale => sale.Id
+            _ => sale => sale.CreatedAt
         };
+
+    public static SortColumnsResponse CatalogSortColumns()
+        => new SortColumnsResponse(
+                ["status", "productscount", "code", "createdat", "id"],
+                "createdat"
+            );
 }

@@ -2,18 +2,23 @@
 
 [Route("api/products")]
 [ApiController]
-public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
+public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly ILogger<ProductService> _logger = logger;
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetProduct
         ([FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogError("get product({id})", id);
         var result = await _unitOfWork.ProductService.GetProduct(id, cancellationToken);
-        if(result.IsFailure)
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
 
@@ -22,11 +27,16 @@ public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
         ([FromQuery]PaginationRequest paginationRequest,
         [FromQuery]SortRequest sortRequest,
         [FromQuery]DateRangeRequest? dateRangeRequest,
+        [FromQuery]SearchRequest? searchRequest,
         CancellationToken cancellationToken = default)
     {
-        var result = await _unitOfWork.ProductService.GetProducts(paginationRequest, sortRequest, dateRangeRequest, cancellationToken);
-        if(result.IsFailure)
+        _logger.LogError("get products");
+        var result = await _unitOfWork.ProductService.GetProducts(paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
 
@@ -35,9 +45,13 @@ public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
         ([FromBody]ProductRequest productRequest,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogError("create product");
         var result = await _unitOfWork.ProductService.CreateProduct(productRequest, cancellationToken);
-        if(result.IsFailure)
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return CreatedAtAction(nameof(GetProducts), new {id = result.Value.Id}, result.Value);
     }
@@ -47,9 +61,13 @@ public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
         ([FromRoute]Guid id,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogError("get product({id}) inventory", id);
         var result = await _unitOfWork.ProductService.GetProductInventory(id, cancellationToken);
-        if(result.IsFailure)
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
 
@@ -59,9 +77,13 @@ public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
         [FromQuery]PaginationRequest paginationRequest,
         CancellationToken cancellationToken = default)
     {
+        _logger.LogError("get product({id}) stock transactions", id);
         var result = await _unitOfWork.ProductService.GetProductStockTransactions(id, paginationRequest, cancellationToken);
-        if(result.IsFailure)
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
 
@@ -71,11 +93,16 @@ public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
         [FromQuery]PaginationRequest paginationRequest,
         [FromQuery]SortRequest sortRequest,
         [FromQuery]DateRangeRequest? dateRangeRequest,
+        [FromQuery]SearchRequest? searchRequest,
         CancellationToken cancellationToken = default)
     {
-        var result = await _unitOfWork.ProductService.GetSalesByProduct(id, paginationRequest, sortRequest, dateRangeRequest, cancellationToken);
-        if(result.IsFailure)
+        _logger.LogError("get sales by product({id}) ", id);
+        var result = await _unitOfWork.ProductService.GetSalesByProduct(id, paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
 
@@ -85,11 +112,27 @@ public class ProductsController(IUnitOfWork unitOfWork) : ControllerBase
         [FromQuery]PaginationRequest paginationRequest,
         [FromQuery]SortRequest sortRequest,
         [FromQuery]DateRangeRequest? dateRangeRequest,
+        [FromQuery]SearchRequest? searchRequest,
         CancellationToken cancellationToken = default)
     {
-        var result = await _unitOfWork.ProductService.GetPurchasesByProduct(id, paginationRequest, sortRequest, dateRangeRequest, cancellationToken);
-        if(result.IsFailure)
+        _logger.LogError("get purchase by product({id}) ", id);
+        var result = await _unitOfWork.ProductService.GetPurchasesByProduct(id, paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
+    }
+
+    [HttpOptions("")]
+    public async Task<IActionResult> Details()
+    {
+        var result = new
+        {
+            SearchDetails = ProductSearchs.ProductSortColumns(),
+            SortDetails = ProductSorts.ProductSortColumns(),
+        };
+        return Ok(result);
     }
 }

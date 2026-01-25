@@ -2,18 +2,23 @@
 
 [Route("api/sales")]
 [ApiController]
-public class SalesController(IUnitOfWork unitOfWork) : ControllerBase
+public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
+    private readonly ILogger<SaleService> _logger = logger;
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetSale
     ([FromRoute]Guid id,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("get sale({id})", id);
         var result = await _unitOfWork.SaleService.GetSale(id, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
 
@@ -22,11 +27,16 @@ public class SalesController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromQuery] PaginationRequest paginationRequest,
     [FromQuery] SortRequest sortRequest,
     [FromQuery] DateRangeRequest? dateRangeRequest,
+    [FromQuery] SearchRequest? searchRequest,
     CancellationToken cancellationToken = default)
     {
-        var result = await _unitOfWork.SaleService.GetSales(paginationRequest, sortRequest, dateRangeRequest, cancellationToken);
+        _logger.LogInformation("get sales");
+        var result = await _unitOfWork.SaleService.GetSales(paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
 
@@ -35,9 +45,13 @@ public class SalesController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromBody] SaleRequest saleRequest,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("create sale");
         var result = await _unitOfWork.SaleService.CreateSale(saleRequest, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return CreatedAtAction(nameof(GetSale), new {id = result.Value.Id}, result.Value);
     }
@@ -47,9 +61,13 @@ public class SalesController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromRoute]Guid id,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("remove sale({id})", id);
         var result = await _unitOfWork.SaleService.RemoveSale(id, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
@@ -60,9 +78,13 @@ public class SalesController(IUnitOfWork unitOfWork) : ControllerBase
     [FromBody]SaleUpdatePaidRequest saleUpdatePaidRequest,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("pay for sale({id})", id);
         var result = await _unitOfWork.SaleService.UpdateSalePaidAmount(id, saleUpdatePaidRequest, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
@@ -72,9 +94,25 @@ public class SalesController(IUnitOfWork unitOfWork) : ControllerBase
     ([FromQuery(Name = "invoice-number")]string invoice,
     CancellationToken cancellationToken = default)
     {
+        _logger.LogInformation("get sale by invoice number({inv})", invoice);
         var result = await _unitOfWork.SaleService.GetSaleByInvoiceNumber(invoice, cancellationToken);
         if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
+        }
         return Ok(result.Value);
     }
+
+    [HttpOptions("")]
+    public async Task<IActionResult> Details()
+    {
+        var result = new
+        {
+            SearchDetails = SaleSearchs.SaleSortColumns(),
+            SortDetails = SaleSorts.SaleSortColumns(),
+        };
+        return Ok(result);
+    }
+
 }

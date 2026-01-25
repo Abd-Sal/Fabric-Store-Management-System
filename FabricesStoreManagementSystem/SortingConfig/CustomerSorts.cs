@@ -14,4 +14,10 @@ public class CustomerSorts
             "id" => customer => customer.Id,
             _ => customer => customer.CreatedAt
         };
+
+    public static SortColumnsResponse CustomerSortColumns()
+    => new SortColumnsResponse(
+            ["name", "address", "email", "phone", "isactive", "createdat", "id"],
+            "createdat"
+        );
 }

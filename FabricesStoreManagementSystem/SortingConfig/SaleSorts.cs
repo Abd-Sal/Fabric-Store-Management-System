@@ -14,6 +14,14 @@ public class SaleSorts
             "totalamount" => sale => sale.TotalAmount,
             "discount" => sale => sale.Discount,
             "id" => sale => sale.Discount,
-            _ => sale => sale.Id
+            _ => sale => sale.CreatedAt
         };
+
+    public static SortColumnsResponse SaleSortColumns()
+        => new SortColumnsResponse(
+                ["invoicenumber", "productscount", "netamount",
+                "paidamount", "status", "createdat", "totalamount",
+                "id", "discount"],
+                "createdat"
+            );
 }

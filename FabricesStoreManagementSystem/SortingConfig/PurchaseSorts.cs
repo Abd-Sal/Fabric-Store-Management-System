@@ -14,4 +14,11 @@ public class PurchaseSorts
             "id" => purchase => purchase.Id,
             _ => purchase => purchase.CreatedAt
         };
+
+    public static SortColumnsResponse PurchaseSortColumns()
+        => new SortColumnsResponse(
+                ["invoicenumber", "paidamount", "totalamount",
+                "productscount", "createdat", "id", "status"],
+                "createdat"
+            );
 }
