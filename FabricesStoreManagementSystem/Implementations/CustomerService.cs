@@ -8,6 +8,7 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
     public async Task<Result<CustomerResponse>> CreateCustomer
         (CustomerRequest request, CancellationToken cancellationToken = default)
     {
+
         _logger.LogInformation("check for customer email");
         if (request.Email is not null &&
             await _appDbContext.Customers.AnyAsync(x => x.Email != null &&
@@ -78,7 +79,7 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
         (Guid id, CustomerRequest request, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("check for customer existance");
-        if (!(await _appDbContext.Customers.AsNoTracking().AnyAsync(x => x.Id == id && x.IsActive, cancellationToken)))
+        if (await _appDbContext.Customers.SingleOrDefaultAsync(x => x.Id == id && x.IsActive, cancellationToken) is not { } customer)
         {
             _logger.LogError("customer({id}) not found", id);
             return Result.Failure<List<SaleResponse>>(CustomerErrors.NotFound);
@@ -103,18 +104,13 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
         }
 
         _logger.LogInformation("start updating customer({id})", id);
-        await _appDbContext.Customers.Where(x => x.Id == id)
-            .ExecuteUpdateAsync(setters =>
-                setters
-                    .SetProperty(x => x.FirstName, request.FirstName)
-                    .SetProperty(x => x.LastName, request.LastName)
-                    .SetProperty(x => x.Email, request.Email)
-                    .SetProperty(x => x.Phone, request.Phone)
-                    .SetProperty(x => x.Address, request.Address)
-                    ,
-                    cancellationToken
-            );
 
+        customer.FirstName = request.FirstName;
+        customer.LastName = request.LastName;
+        customer.Email = request.Email;
+        customer.Phone = request.Phone;
+        customer.Address = request.Address;
+        _appDbContext.Customers.Update(customer);
         _logger.LogInformation("customer was updateded with id({id})", id);
         return Result.Success();
     }
@@ -162,12 +158,8 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
             return Result.Success();
 
         _logger.LogInformation("start updating customer with id({id})", id);
-        await _appDbContext.Customers.Where(x => x.Id == customer.Id)
-            .ExecuteUpdateAsync(setters =>
-                setters
-                    .SetProperty(x => x.IsActive, state.HasValue ? state : !customer.IsActive),
-                    cancellationToken
-            );
+        customer.IsActive = state.HasValue ? (bool)state : !customer.IsActive;
+        _appDbContext.Customers.Update(customer);
         _logger.LogInformation("customer with id({id}) state updated to {state}",id, !customer.IsActive);
         return Result.Success();
     }

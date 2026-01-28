@@ -1,0 +1,17 @@
+﻿global using FabricesStoreManagementSystem.DTOs.Common;
+global using FabricesStoreManagementSystem.Tests.Helpers;
+global using FabricesStoreManagementSystem.Tests.DemoRepo;
+global using FabricesStoreManagementSystem.Abstraction;
+global using FabricesStoreManagementSystem.DTOs.Supplier;
+global using FabricesStoreManagementSystem.Errors;
+global using FabricesStoreManagementSystem.DTOs.Catalog;
+global using FabricesStoreManagementSystem.Entities;
+global using FabricesStoreManagementSystem.Enums;
+global using FabricesStoreManagementSystem.Implementations;
+global using FabricesStoreManagementSystem.Data;
+global using FabricesStoreManagementSystem.DTOs.Customer;
+
+global using FluentAssertions;
+
+global using Microsoft.Extensions.Logging.Abstractions;
+global using Microsoft.EntityFrameworkCore;

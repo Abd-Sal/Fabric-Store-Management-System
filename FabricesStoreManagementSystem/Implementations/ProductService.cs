@@ -174,5 +174,4 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
 
         return Result.Success(response);
     }
-
 }

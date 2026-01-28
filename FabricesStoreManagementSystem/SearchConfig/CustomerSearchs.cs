@@ -5,7 +5,7 @@ public class CustomerSearchs
     public static Expression<Func<Customer, object>> CustomerResponseSearch(SearchRequest searchRequest)
         => searchRequest.SearchColumn?.ToLower() switch
         {
-            "name" => customer => new { customer.FirstName, customer.LastName },
+            "name" => customer => $"{customer.FirstName} {customer.LastName}",
             "address" => customer => customer.Address ?? "",
             "email" => customer => customer.Email ?? "",
             "phone" => customer => customer.Phone ?? "",

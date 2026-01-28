@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="FabricesStoreManagementSystem.Tests/FabricesStoreManagementSystem.Tests.csproj" Id="e1bf4689-9831-491f-a352-c5a7f9e6d25f" />
   <Project Path="FabricesStoreManagementSystem/FabricesStoreManagementSystem.csproj" />
 </Solution>

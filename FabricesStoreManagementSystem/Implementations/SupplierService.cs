@@ -11,14 +11,14 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
         _logger.LogInformation("check for supplier email");
         if (request.Email is not null &&
             await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x =>
-            x.Email != null && x.Email != request.Email, cancellationToken)
+            x.Email != null && x.Email == request.Email, cancellationToken)
             )
             return Result.Failure<SupplierResponse>(SupplierErrors.ConflictEmail);
 
         _logger.LogInformation("check for supplier phone");
         if (request.Phone is not null &&
             await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x =>
-            x.Phone != null && x.Phone != request.Phone, cancellationToken)
+            x.Phone != null && x.Phone == request.Phone, cancellationToken)
             )
             return Result.Failure<SupplierResponse>(SupplierErrors.ConflictPhone);
 
@@ -113,12 +113,8 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
             return Result.Success();
 
         _logger.LogInformation("starrt updating supplier with id({id})", supplier.Id);
-        await _appDbContext.Suppliers.Where(x => x.Id == id)
-            .ExecuteUpdateAsync(setters =>
-                setters
-                    .SetProperty(x => x.IsActive, state.HasValue ? state : !supplier.IsActive),
-                cancellationToken
-            );
+        supplier.IsActive = state.HasValue ? (bool)state : !supplier.IsActive;
+        _appDbContext.Suppliers.Update(supplier);
         _logger.LogInformation("supplier with id({id}) state updated to {state}", id, !supplier.IsActive);
         return Result.Success();
     }
@@ -127,13 +123,13 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
         (Guid id, SupplierRequest request, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("check for supplier({id}) existance", id);
-        if (!(await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x => x.Id == id && x.IsActive, cancellationToken)))
+        if(await _appDbContext.Suppliers.SingleOrDefaultAsync(x => x.Id == id && x.IsActive, cancellationToken) is not { } supplier)
             return Result.Failure(SupplierErrors.NotFound);
 
         _logger.LogInformation("check for supplier email");
         if (request.Email is not null &&
             await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x =>
-            x.Email != null && x.Email != request.Email && x.Id != id, cancellationToken)
+            x.Email != null && x.Email == request.Email && x.Id != id, cancellationToken)
             )
         {
             _logger.LogError("email conflict");
@@ -143,7 +139,7 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
         _logger.LogInformation("check for supplier phone");
         if (request.Phone is not null &&
             await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x =>
-            x.Phone != null && x.Phone != request.Phone && x.Id != id, cancellationToken)
+            x.Phone != null && x.Phone == request.Phone && x.Id != id, cancellationToken)
             )
         {
             _logger.LogError("phone conflict");
@@ -151,15 +147,11 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
         }
 
         _logger.LogInformation("starrt updating supplier with id({id})", id);
-        await _appDbContext.Suppliers.Where(x => x.Id == id)
-            .ExecuteUpdateAsync(setters =>
-                setters
-                    .SetProperty(x => x.Name, request.Name)
-                    .SetProperty(x => x.Email, request.Email)
-                    .SetProperty(x => x.Phone, request.Phone)
-                    .SetProperty(x => x.Address, request.Address),
-                    cancellationToken
-            );
+        supplier.Name = request.Name;
+        supplier.Email = request.Email;
+        supplier.Phone = request.Phone;
+        supplier.Address = request.Address;
+        _appDbContext.Suppliers.Update(supplier);
         _logger.LogInformation("supplier was updated with id({id})", id);
         return Result.Success();
     }

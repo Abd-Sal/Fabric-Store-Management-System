@@ -7,8 +7,8 @@ public class SupplierSorts
         {
             "name" => supplier => supplier.Name,
             "address" => supplier => supplier.Address ?? "",
-            "email" => supplier => supplier.Email != null ? supplier.Email : supplier.CreatedAt,
-            "phone" => supplier => supplier.Phone != null ? supplier.Phone : supplier.CreatedAt,
+            "email" => supplier => supplier.Email ?? "",
+            "phone" => supplier => supplier.Phone ?? "",
             "isactive" => supplier => supplier.IsActive,
             "createdat" => supplier => supplier.CreatedAt,
             "id" => supplier => supplier.Id,

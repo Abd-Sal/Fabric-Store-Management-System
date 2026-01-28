@@ -1,4 +1,4 @@
-﻿namespace FabricesStoreManagmentSystem.Implementations;
+﻿namespace FabricesStoreManagementSystem.Implementations;
 
 public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> logger) : ICatalogService
 {
@@ -16,9 +16,9 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         }
 
         _logger.LogInformation("check product existance");
-        var checkIDs = await _appDbContext.Products.AsNoTracking()
-            .AnyAsync(x => request.Items.Select(i => i.ProductID).Contains(x.Id));
-
+        var checkIDs = (await _appDbContext.Products.AsNoTracking()
+            .Where(x => request.Items.Select(y => y.ProductID).Contains(x.Id))
+            .CountAsync(cancellationToken)) == request.Items.Count;
         if (!checkIDs)
         {
             _logger.LogError("product or more not found");
@@ -45,7 +45,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             }
 
         _logger.LogInformation("check code duplication");
-        if (resultCutting.Select(x => x.Value).Distinct().Count() != resultCutting.Select(x => x.Value).Count())
+        if (resultCutting.Select(x => x.Value).Distinct().Count() != 1)
         {
             _logger.LogError("there is one or more product code duplication");
             return Result.Failure<CatalogResponse>(CatalogErrors.ProductsNotSameCode);
@@ -72,7 +72,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             return Result.Failure<string>(ProductErrors.NotFound);
         }
 
-        var productInventory = await _appDbContext.Inventory.FindAsync(product.ProductID, cancellationToken);
+        var productInventory = await _appDbContext.Inventory.SingleOrDefaultAsync(x => x.ProductID == product.ProductID, cancellationToken);
         _logger.LogInformation("check product inventory existance");
         if (productInventory is null)
         {
