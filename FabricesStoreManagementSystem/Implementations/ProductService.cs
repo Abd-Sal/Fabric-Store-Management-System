@@ -9,7 +9,7 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
         (ProductRequest request, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("check for product code and color duplication");
-        if (!(await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Code == request.Code && x.Color == request.Color, cancellationToken)))
+        if (await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Code == request.Code && x.Color == request.Color, cancellationToken))
             return Result.Failure<ProductResponse>(ProductErrors.CodeWithColorConflict);
         var product = new Product
         {
@@ -44,6 +44,9 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
         if (product is null)
             return Result.Failure<ProductWithInventoryResponse>(ProductErrors.NotFound);
 
+        if(product.Inventory is null)
+            return Result.Failure<ProductWithInventoryResponse>(ProductErrors.NoQuantity);
+
         var maxProductPurchase =
             await _appDbContext.Purchases.AsNoTracking()
             .Include(x => x.PurchaseItems)
@@ -67,8 +70,8 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
 
         if (dateRangeRequest is not null)
             query = query
-                .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
-                            DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
+                .Where(x => DateOnly.FromDateTime(x.CreatedAt) >= dateRangeRequest.From &&
+                            DateOnly.FromDateTime(x.CreatedAt) <= dateRangeRequest.To);
 
         if (searchRequest is not null)
             query = query
@@ -119,8 +122,8 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
 
         if (dateRangeRequest is not null)
             query = query
-                .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
-                            DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
+                .Where(x => DateOnly.FromDateTime(x.CreatedAt) >= dateRangeRequest.From &&
+                            DateOnly.FromDateTime(x.CreatedAt) <= dateRangeRequest.To);
 
         if (searchRequest is not null)
             query = query
@@ -154,8 +157,8 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
 
         if (dateRangeRequest is not null)
             query = query
-                .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
-                            DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
+                .Where(x => DateOnly.FromDateTime(x.CreatedAt) >= dateRangeRequest.From &&
+                            DateOnly.FromDateTime(x.CreatedAt) <= dateRangeRequest.To);
 
         if (searchRequest is not null)
             query = query

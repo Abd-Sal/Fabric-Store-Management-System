@@ -2,7 +2,7 @@
 
 public class ProductsRepo
 {
-    public static List<Product> Products = new List<Product>()
+    public static List<Product> Products() => new List<Product>()
         {
             //P-001
             new Product { Id = Guid.Parse("cd8f4113-fc90-477f-8f3d-023cc98cb671"),  Code = "P-001", Color = "Red", Unit = "Meter" },

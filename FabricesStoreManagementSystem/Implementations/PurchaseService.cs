@@ -167,8 +167,8 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
 
         if (dateRangeRequest is not null)
             query = query
-                    .Where(x => DateOnly.Parse(x.CreatedAt.ToString()) >= dateRangeRequest.From &&
-                                DateOnly.Parse(x.CreatedAt.ToString()) <= dateRangeRequest.To);
+                    .Where(x => DateOnly.FromDateTime(x.CreatedAt) >= dateRangeRequest.From &&
+                                DateOnly.FromDateTime(x.CreatedAt) <= dateRangeRequest.To);
 
         if (searchRequest is not null)
             query = query
