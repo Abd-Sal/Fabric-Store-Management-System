@@ -82,7 +82,6 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
             purchase.Status = PayStatuses.NotPaid;
         }
 
-        _appDbContext.Purchases.Update(purchase);
         _logger.LogInformation("create purchase({id}) done", purchase.Id);
         return Result.Success(purchase.ToPurchaseResponseWithoutItems());
     }
@@ -117,7 +116,6 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
         var res = results.Select(x => x.Value).ToList();
         _logger.LogError("add purchase({id}) items done", id);
         return Result.Success(res);
-
     }
 
     private async Task<Result<PurchaseItem>> CreatePurchaseItem
@@ -131,12 +129,13 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
             return Result.Failure<PurchaseItem>(ProductErrors.NotFound);
         }
 
-        _logger.LogInformation("check product({id}) inventory existance", purchaseItem.ProductID);
-        if (await _appDbContext.Inventory.SingleOrDefaultAsync(x => x.ProductID == purchaseItem.ProductID, cancellationToken) is not { } productInventory)
-        {
-            _logger.LogError("not product inventory existance");
-            return Result.Failure<PurchaseItem>(ProductErrors.NoQuantity);
-        }
+        Inventory productInventory = (await _appDbContext.Inventory
+            .SingleOrDefaultAsync(x => x.ProductID == purchaseItem.ProductID, cancellationToken)) ??
+             new Inventory
+             {
+                 CurrentQuantity = 0,
+                 ProductID = purchaseItem.ProductID
+             };
 
         var stockTransaction = new StockTransaction
         {
@@ -240,8 +239,11 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
         var salesResultProcess = await Task.WhenAll(getSaleProcesses);
         foreach (var item in salesResultProcess)
         {
-            _logger.LogInformation("purchase({id}) item or more causes error", id);
-            return Result.Failure(item.Error);
+            if (item.IsFailure)
+            {
+                _logger.LogInformation("purchase({id}) item or more causes error", id);
+                return Result.Failure(item.Error);
+            }
         }
 
         var check = salesResultProcess.Select(x => x.Value.TotalItems).Max();
@@ -260,16 +262,19 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
                 return Result.Failure(ended.Error);
 
         _logger.LogInformation("remove payment for purchase({id})", id);
-        await _appDbContext.Payments.Where(x => x.ReferenceID == id)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.Payments.RemoveRange(
+            await _appDbContext.Payments.Where(x => x.ReferenceID == id).ToListAsync(cancellationToken)
+        );
 
         _logger.LogInformation("remove items for purchase({id})", id);
-        await _appDbContext.PurchaseItems.Where(x => x.PurchaseID == id)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.PurchaseItems.RemoveRange(
+            await _appDbContext.PurchaseItems.Where(x => x.PurchaseID == id).ToListAsync(cancellationToken)
+        );
 
         _logger.LogInformation("remove purchase({id})", id);
-        await _appDbContext.Purchases.Where(x => x.Id == id)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.Purchases.Remove(
+            (await _appDbContext.Purchases.FindAsync(id, cancellationToken))!
+        );
 
         _logger.LogInformation("remove purchase({id}) done", id);
         return Result.Success();
