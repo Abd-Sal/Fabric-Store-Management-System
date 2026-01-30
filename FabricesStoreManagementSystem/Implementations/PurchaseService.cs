@@ -69,7 +69,7 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
             await _appDbContext.Payments.AddAsync(payment, cancellationToken);
             _logger.LogError("add payment({id}) for purchase({id})", payment.Id, purchase.Id);
         }
-        else if (purchase.PaidAmount < purchase.TotalAmount)
+        else if (purchase.PaidAmount  > 0 && purchase.PaidAmount < purchase.TotalAmount)
         {
             _logger.LogInformation("update purchase({id}) status to 'NotCompleted'", purchase.Id);
             purchase.Status = PayStatuses.NotCompleted;

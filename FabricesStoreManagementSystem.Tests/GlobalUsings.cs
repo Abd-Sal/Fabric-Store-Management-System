@@ -8,6 +8,7 @@ global using FabricesStoreManagementSystem.Errors;
 global using FabricesStoreManagementSystem.Entities;
 global using FabricesStoreManagementSystem.Enums;
 global using FabricesStoreManagementSystem.DTOs.Purchase;
+global using FabricesStoreManagementSystem.DTOs.Sale;
 global using FabricesStoreManagementSystem.Implementations;
 global using FabricesStoreManagementSystem.Data;
 global using FabricesStoreManagementSystem.DTOs.Customer;

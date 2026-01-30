@@ -1,11 +1,13 @@
-﻿namespace FabricesStoreManagementSystem.Tests.Implementations;
+﻿using System.Net.NetworkInformation;
+
+namespace FabricesStoreManagementSystem.Tests.Implementations;
 
 public class PurchaseServiceTests
 {
     [Theory]
     [MemberData(nameof(PurchaseServiceTestsHelpers.GetPurchaseCreateSuccessTestsData), MemberType = typeof(PurchaseServiceTestsHelpers))]
     public async Task CreatePurchase_ShouldSuccess
-        (PurchaseRequest request)
+        (PurchaseRequest request, PayStatuses status)
     {
         //Arrrange
         var db = DbContextFactory.Create();
@@ -33,6 +35,7 @@ public class PurchaseServiceTests
             .ToListAsync();
         stockTransactions.Should().NotBeNull();
         stockTransactions.Count.Should().Be(request.PurchaseItems.Count);
+        result.Value.Status.Should().Be(status);
     }
 
     [Theory]

@@ -13,7 +13,8 @@ public class PurchaseServiceTestsHelpers
                 {
                     new PurchaseItemRequest(ProductsRepo.Products()[0].Id, 2, 100)
                 }
-            )
+            ),
+            PayStatuses.NotCompleted
         };
 
         yield return new object[]
@@ -26,7 +27,8 @@ public class PurchaseServiceTestsHelpers
                     new PurchaseItemRequest(ProductsRepo.Products()[0].Id, 2, 100),
                     new PurchaseItemRequest(ProductsRepo.Products()[1].Id, 2, 100)
                 }
-            )
+            ),
+            PayStatuses.Paid
         };
 
         yield return new object[]
@@ -39,7 +41,8 @@ public class PurchaseServiceTestsHelpers
                     new PurchaseItemRequest(ProductsRepo.Products()[2].Id, 2, 100),
                     new PurchaseItemRequest(ProductsRepo.Products()[3].Id, 2, 100)
                 }
-            )
+            ),
+            PayStatuses.NotPaid
         };
     }
 

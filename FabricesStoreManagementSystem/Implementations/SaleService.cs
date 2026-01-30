@@ -73,7 +73,7 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
             _logger.LogInformation("net amount and paid amount is equal so update sale status to 'Paid'");
             await _appDbContext.Payments.AddAsync(payment, cancellationToken);
         }
-        else if (sale.PaidAmount < sale.NetAmount)
+        else if (sale.PaidAmount > 0 && sale.PaidAmount < sale.NetAmount)
         {
             _logger.LogInformation("paid amount less than net amount so the sale status is 'NotCompleted'");
             sale.Status = PayStatuses.NotCompleted;
@@ -85,7 +85,6 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
             sale.Status = PayStatuses.NotPaid;
         }
 
-        _appDbContext.Sales.Update(sale);
         _logger.LogInformation("Sale with id({id}) Done", sale.Id);
         return Result.Success(sale.ToSaleResponseWithNoItems());
     }
@@ -185,7 +184,7 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
             status = PayStatuses.Paid;
             await _appDbContext.Payments.AddAsync(payment, cancellationToken);
         }
-        else if (sale.PaidAmount < sale.NetAmount)
+        else if (paid> 0 && paid < sale.NetAmount)
         {
             _logger.LogInformation("update status to 'NotCompleted'");
             status = PayStatuses.NotCompleted;
@@ -198,13 +197,9 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
         }
 
         _logger.LogInformation("update status to 'NotPiad'");
-        await _appDbContext.Sales.Where(x => x.Id == id)
-            .ExecuteUpdateAsync(setters =>
-                setters
-                    .SetProperty(x => x.PaidAmount, paid)
-                    .SetProperty(x => x.Status, status),
-                cancellationToken
-            );
+        sale.Status = status;
+        sale.PaidAmount = paid;
+        _appDbContext.Sales.Update(sale);
         _logger.LogInformation("updating status done id({id})", id);
         return Result.Success();
     }
@@ -228,18 +223,22 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
         _logger.LogInformation("end return products to stock");
         _logger.LogInformation("check if there is error in returning process");
         foreach (var ended in endedReturnQuantities)
-            return Result.Failure(ended.Error);
+            if(ended.IsFailure)
+                return Result.Failure(ended.Error);
 
-        await _appDbContext.Payments.Where(x => x.ReferenceID == id)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.Payments.RemoveRange(
+            await _appDbContext.Payments.Where(x => x.ReferenceID == id).ToListAsync()
+        );
         _logger.LogInformation("remove payment");
 
-        await _appDbContext.SaleItems.Where(x => x.SaleID == id)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.SaleItems.RemoveRange(
+            await _appDbContext.SaleItems.Where(x => x.SaleID == id).ToListAsync()
+        );
         _logger.LogInformation("remove sale items");
 
-        await _appDbContext.Sales.Where(x => x.Id == id)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.Sales.Remove(
+            (await _appDbContext.Sales.FindAsync(id, cancellationToken))!
+        );
         _logger.LogInformation("remove sale id({id})", id);
 
         return Result.Success();
