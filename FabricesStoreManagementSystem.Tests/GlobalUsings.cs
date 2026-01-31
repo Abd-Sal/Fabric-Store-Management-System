@@ -12,6 +12,7 @@ global using FabricesStoreManagementSystem.DTOs.Sale;
 global using FabricesStoreManagementSystem.Implementations;
 global using FabricesStoreManagementSystem.Data;
 global using FabricesStoreManagementSystem.DTOs.Customer;
+global using FabricesStoreManagementSystem.DTOs.Catalog;
 
 global using FluentAssertions;
 

@@ -17,6 +17,11 @@ public class ProductErrors
             "there is product duplicated in invoice",
             StatusCodes.Status409Conflict);
 
+    public static Error DuplicatedInCatalog =
+        new("Product.DuplicatedInCatalog",
+            "there is product duplicated in catalog",
+            StatusCodes.Status409Conflict);
+
     public static Error NoQuantity =
         new("Product.NoQuantity",
             "there is not quantity of this product",

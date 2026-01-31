@@ -13,7 +13,7 @@ public class ProductInventoriesRepo
             new Inventory { Id = Guid.Parse("f2e5e0f2-7c02-46e8-8c78-c8e041b91ce0"), ProductID = ProductsRepo.Products()[6].Id, CurrentQuantity = 10 },
             new Inventory { Id = Guid.Parse("c493ef9b-4c6c-4ce6-92ef-793a6118109a"), ProductID = ProductsRepo.Products()[7].Id, CurrentQuantity = 10 },
             new Inventory { Id = Guid.Parse("a471ad22-f84b-45b5-a796-8b92e6a6c0ff"), ProductID = ProductsRepo.Products()[8].Id, CurrentQuantity = 00 },
-            new Inventory { Id = Guid.Parse("0fa3943c-0fef-477e-8de0-7521bfda42f9"), ProductID = ProductsRepo.Products()[9].Id, CurrentQuantity = 00 },
+            //new Inventory { Id = Guid.Parse("0fa3943c-0fef-477e-8de0-7521bfda42f9"), ProductID = ProductsRepo.Products()[9].Id, CurrentQuantity = 00 },
             new Inventory { Id = Guid.Parse("9035d59d-9ef1-4392-bc91-58869938d78f"), ProductID = ProductsRepo.Products()[10].Id, CurrentQuantity = 10 },
             new Inventory { Id = Guid.Parse("9dae54a0-bb33-49f3-ad8b-f4eee9895f24"), ProductID = ProductsRepo.Products()[11].Id, CurrentQuantity = 10 },
             new Inventory { Id = Guid.Parse("1f940527-eb55-4658-b766-d0138307946f"), ProductID = ProductsRepo.Products()[12].Id, CurrentQuantity = 10 },

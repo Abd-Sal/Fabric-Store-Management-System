@@ -5,7 +5,7 @@ public class ProductsRepo
     public static List<Product> Products() => new List<Product>()
         {
             //P-001
-            new Product { Id = Guid.Parse("cd8f4113-fc90-477f-8f3d-023cc98cb671"),  Code = "P-001", Color = "Red", Unit = "Meter" },
+            new Product { Id = Guid.Parse("cd8f4113-fc90-477f-8f3d-023cc98cb671"), Code = "P-001", Color = "Red", Unit = "Meter" },
             new Product { Id = Guid.Parse("b984d319-9f44-41f1-a1dc-ea25fd5447f1"), Code = "P-001", Color = "Green", Unit = "Meter" },
             new Product { Id = Guid.Parse("21e72f95-c8bc-4b13-9bca-2949ac7f68f7"), Code = "P-001", Color = "Blue", Unit = "Meter" },
             new Product { Id = Guid.Parse("1706e837-80b4-4632-98d6-51bf38fb5f42"), Code = "P-001", Color = "Gray", Unit = "Meter" },

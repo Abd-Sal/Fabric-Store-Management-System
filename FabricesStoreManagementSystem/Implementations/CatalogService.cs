@@ -12,17 +12,27 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         if (request.Items.Count != request.Items.DistinctBy(x => x.ProductID).Count())
         {
             _logger.LogError("there is duplcated product");
-            return Result.Failure<CatalogResponse>(ProductErrors.DuplicatedInInvoice);
+            return Result.Failure<CatalogResponse>(ProductErrors.DuplicatedInCatalog);
         }
 
         _logger.LogInformation("check product existance");
-        var checkIDs = (await _appDbContext.Products.AsNoTracking()
+        var tempProducts = await _appDbContext.Products.AsNoTracking()
             .Where(x => request.Items.Select(y => y.ProductID).Contains(x.Id))
-            .CountAsync(cancellationToken)) == request.Items.Count;
+            .Select(x => new { x.Id, x.Code })
+            .ToListAsync(cancellationToken);
+
+        var checkIDs = tempProducts.Count == request.Items.Count;
         if (!checkIDs)
         {
             _logger.LogError("product or more not found");
             return Result.Failure<CatalogResponse>(ProductErrors.NotFoundID);
+        }
+        var checkCodes = tempProducts.DistinctBy(x => x.Code).Count() != 1;
+        _logger.LogInformation("check code duplication");
+        if (checkCodes)
+        {
+            _logger.LogError("there is one or more product code duplication");
+            return Result.Failure<CatalogResponse>(CatalogErrors.ProductsNotSameCode);
         }
 
         var catalog = new Catalog
@@ -43,13 +53,6 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
                 _logger.LogError("occure error through cutting process");
                 return Result.Failure<CatalogResponse>(res.Error);
             }
-
-        _logger.LogInformation("check code duplication");
-        if (resultCutting.Select(x => x.Value).Distinct().Count() != 1)
-        {
-            _logger.LogError("there is one or more product code duplication");
-            return Result.Failure<CatalogResponse>(CatalogErrors.ProductsNotSameCode);
-        }
         
         catalog.CatalogCode = resultCutting.First().Value;
 
@@ -110,7 +113,6 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         await _appDbContext.CatalogsProducts.AddAsync(catalogProduct, cancellationToken);
         await _appDbContext.StockTransactions.AddAsync(stockTransaction, cancellationToken);
         _appDbContext.Inventory.Update(productInventory);
-
         _logger.LogInformation("add catalog product({id}), and add stock transaction({id}), update inventory", product.ProductID, stockTransaction.Id);
         return Result.Success(productDetails.Code);
     }
@@ -122,7 +124,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         if (request.Items.Count != request.Items.DistinctBy(x => x).Count())
         {
             _logger.LogError("there is duplication product");
-            return Result.Failure<CatalogResponse>(ProductErrors.DuplicatedInInvoice);
+            return Result.Failure<CatalogResponse>(ProductErrors.DuplicatedInCatalog);
         }
 
         _logger.LogInformation("check supplier({id}) existance", request.SupplierID);
@@ -133,13 +135,23 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         }
 
         _logger.LogInformation("check products existance");
-        var checkIDs = await _appDbContext.Products.AsNoTracking()
-            .AnyAsync(x => request.Items.Contains(x.Id));
-
-        if (!checkIDs)
+        var existingIds = await _appDbContext.Products
+            .AsNoTracking()
+            .Where(x => request.Items.Contains(x.Id))
+            .Select(x => new {x.Id, x.Code})
+            .ToListAsync(cancellationToken);
+        if (existingIds.Count != request.Items.Count)
         {
             _logger.LogError("product or more not found");
             return Result.Failure<CatalogResponse>(ProductErrors.NotFoundID);
+        }
+
+        var checkCodes = existingIds.DistinctBy(x => x.Code).Count();
+        _logger.LogInformation("check code duplication");
+        if (checkCodes != 1)
+        {
+            _logger.LogError("there is one or more code duplicated");
+            return Result.Failure<CatalogResponse>(CatalogErrors.ProductsNotSameCode);
         }
 
         var catalog = new Catalog
@@ -160,13 +172,6 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
                 _logger.LogError("start cutting process");
                 return Result.Failure<CatalogResponse>(res.Error);
             }
-
-        _logger.LogInformation("check code duplication");
-        if (resultCutting.Select(x => x.Value).Distinct().Count() != resultCutting.Select(x => x.Value).Count())
-        {
-            _logger.LogError("there is one or more code duplicated");
-            return Result.Failure<CatalogResponse>(CatalogErrors.ProductsNotSameCode);
-        }
 
         catalog.CatalogCode = resultCutting.First().Value;
 
@@ -239,8 +244,10 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             return Result.Failure(GeneralErrors.UnexpectedError);
         }
 
-        await _appDbContext.Catalogs.Where(x => x.Id == id)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.Catalogs.Remove(
+            (await _appDbContext.Catalogs.FindAsync(id, cancellationToken))!
+        );
+
         _logger.LogInformation("remove catalog({id}) done", catalog.Id);
         return result;
     }
@@ -249,8 +256,10 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         (Guid catalogID, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("remove products from catalog({id})", catalogID);
-        await _appDbContext.CatalogsProducts.Where(x => x.CatalogID == catalogID)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.CatalogsProducts.RemoveRange(
+            await _appDbContext.CatalogsProducts.Where(x => x.CatalogID == catalogID).ToListAsync(cancellationToken)
+        );
+
         return Result.Success();
     }
 
@@ -274,17 +283,19 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             }
 
         _logger.LogInformation("remove stock transaction");
-        await _appDbContext.StockTransactions
-            .Where(x => x.ReferenceID == catalogID && x.ReferenceType == ReferenceTypes.Sample)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.StockTransactions.RemoveRange(
+            await _appDbContext.StockTransactions.Where(x => x.ReferenceID == catalogID && x.ReferenceType == ReferenceTypes.Sample).ToListAsync(cancellationToken)
+        );
 
         _logger.LogInformation("remove products from catalog");
-        await _appDbContext.CatalogsProducts.Where(x => x.CatalogID == catalogID)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.CatalogsProducts.RemoveRange(
+            await _appDbContext.CatalogsProducts.Where(x => x.CatalogID == catalogID).ToListAsync(cancellationToken)
+        );
 
         _logger.LogInformation("remove assigning rows for catalog");
-        await _appDbContext.CatalogsAssigns.Where(x => x.CatalogID == catalogID)
-            .ExecuteDeleteAsync(cancellationToken);
+        _appDbContext.CatalogsAssigns.RemoveRange(
+            await _appDbContext.CatalogsAssigns.Where(x => x.CatalogID == catalogID).ToListAsync(cancellationToken)
+        );
 
         _logger.LogInformation("remove catalog({id}) done", catalogID);
         return Result.Success();
@@ -343,6 +354,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         };
 
         catalog.LastUpdateAt = DateTime.UtcNow;
+        catalog.Status = CatalogStatus.Assigned;
 
         await _appDbContext.CatalogsAssigns.AddAsync(catalogAssign, cancellationToken);
         _appDbContext.Catalogs.Update(catalog);
