@@ -13,7 +13,11 @@ global using FabricesStoreManagementSystem.Implementations;
 global using FabricesStoreManagementSystem.Data;
 global using FabricesStoreManagementSystem.DTOs.Customer;
 global using FabricesStoreManagementSystem.DTOs.Catalog;
+global using FabricesStoreManagementSystem.Validations;
+global using FabricesStoreManagementSystem.Data.Configurations;
+global using FabricesStoreManagementSystem.DTOs.Auth;
 
+global using FluentValidation.TestHelper;
 global using FluentAssertions;
 
 global using Microsoft.Extensions.Logging.Abstractions;

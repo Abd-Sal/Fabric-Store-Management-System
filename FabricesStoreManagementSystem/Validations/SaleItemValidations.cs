@@ -49,16 +49,8 @@ public class SaleItemValidations : AbstractValidator<SaleItemRequest>
         if (float.IsNaN(quantity) || float.IsInfinity(quantity))
             return false;
 
-        // Convert to string and check decimal places
-        var str = Math.Abs(quantity).ToString("F10", CultureInfo.InvariantCulture);
-        var parts = str.Split('.');
-
-        if (parts.Length == 2)
-        {
-            var decimalPart = parts[1].TrimEnd('0');
-            return decimalPart.Length <= 1; // Only 1 decimal place allowed
-        }
-        return true;
+        var rounded = MathF.Round(quantity, 1);
+        return Math.Abs(quantity - rounded) < 0.0001f;
     }
 
     // FLOAT version - increments of 0.1 (one decimal place)

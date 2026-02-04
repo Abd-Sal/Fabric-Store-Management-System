@@ -1,6 +1,5 @@
 ﻿namespace FabricesStoreManagementSystem.Validations;
 
-
 public class CatalogProductValidations : AbstractValidator<CatalogProductRequest>
 {
     private const float MIN_QUANTITY = 0.1f;

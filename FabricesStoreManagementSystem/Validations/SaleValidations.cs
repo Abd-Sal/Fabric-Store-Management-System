@@ -12,17 +12,11 @@ public class SaleValidations : AbstractValidator<SaleRequest>
 
         // Customer validation
         RuleFor(x => x.CustomerID)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithMessage("معرف العميل مطلوب.")
             .NotEqual(Guid.Empty)
             .WithMessage("معرف العميل لا يمكن أن يكون فارغًا.");
 
-        // DISCOUNT AS AMOUNT
+        // Discount validation (decimal value type - remove NotEmpty)
         RuleFor(x => x.Discount)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithMessage("مبلغ الخصم مطلوب.")
             .GreaterThanOrEqualTo(0)
             .WithMessage("مبلغ الخصم لا يمكن أن يكون سالبًا.")
             .LessThanOrEqualTo(MAX_DISCOUNT_AMOUNT)
@@ -32,11 +26,8 @@ public class SaleValidations : AbstractValidator<SaleRequest>
             .Must(BeValidCurrencyAmount)
             .WithMessage("مبلغ الخصم يجب أن يكون مضاعفًا للـ 0.01.");
 
-        // Paid amount validation - ONLY basic validation since partial payments are allowed
+        // Paid amount validation (decimal value type - remove NotEmpty)
         RuleFor(x => x.PaidAmount)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithMessage("المبلغ المدفوع مطلوب.")
             .GreaterThanOrEqualTo(0)
             .WithMessage("المبلغ المدفوع لا يمكن أن يكون سالبًا.")
             .Must(HaveValidCurrencyPrecision)
@@ -46,13 +37,10 @@ public class SaleValidations : AbstractValidator<SaleRequest>
 
         // Sale items validation
         RuleFor(x => x.SaleItems)
-            .Cascade(CascadeMode.Stop)
             .NotNull()
             .WithMessage("عناصر البيع مطلوبة.")
             .NotEmpty()
             .WithMessage("يجب أن تحتوي على عنصر بيع واحد على الأقل.")
-            .Must(items => items?.Count > 0)
-            .WithMessage("قائمة عناصر البيع لا يمكن أن تكون فارغة.")
             .Must(HaveUniqueProductIds)
             .WithMessage("تم العثور على معرفات منتجات مكررة في عناصر البيع.")
             .Must(HaveReasonableItemCount)
@@ -68,28 +56,35 @@ public class SaleValidations : AbstractValidator<SaleRequest>
             .WithMessage("مبلغ الخصم لا يمكن أن يتجاوز المجموع الفرعي.")
             .When(x => x.SaleItems != null && x.SaleItems.Any());
 
-        // Cross-validation: Net total cannot be negative
+        // Net total cannot be negative
         RuleFor(x => x)
             .Must(x => CalculateNetTotal(x.SaleItems, x.Discount) >= 0)
             .WithMessage("المبلغ الإجمالي الصافي لا يمكن أن يكون سالبًا.")
             .When(x => x.SaleItems != null && x.SaleItems.Any());
 
-        // Business rule: Minimum sale amount after discount
+        // Minimum sale amount after discount
         RuleFor(x => x)
             .Must(x => CalculateNetTotal(x.SaleItems, x.Discount) >= MIN_SALE_AMOUNT)
             .WithMessage($"الحد الأدنى لمبلغ البيع هو {MIN_SALE_AMOUNT:C}.")
             .When(x => x.SaleItems != null && x.SaleItems.Any());
 
-        // OPTIONAL: Business rule - Paid amount cannot exceed net total (to prevent overpayment)
+        // Paid amount cannot exceed net total (prevent overpayment)
         RuleFor(x => x)
             .Must(x => x.PaidAmount <= CalculateNetTotal(x.SaleItems, x.Discount))
             .WithMessage("المبلغ المدفوع يتجاوز المبلغ الإجمالي المستحق.")
             .When(x => x.SaleItems != null && x.SaleItems.Any());
+
+        RuleFor(x => x.PaidAmount)
+            .Must((model, paidAmount) => paidAmount <= CalculateNetTotal(model.SaleItems, model.Discount))
+            .WithMessage("المبلغ المدفوع يتجاوز المبلغ الإجمالي المستحق.")
+            .When(x => x.SaleItems != null && x.SaleItems.Any());
+
     }
+
+    // ------------------- Helper Methods -------------------
 
     private bool HaveValidCurrencyPrecision(decimal amount)
     {
-        // Get the number of decimal places
         var bits = decimal.GetBits(amount);
         int scale = (bits[3] >> 16) & 0x7F;
         return scale <= MAX_DECIMAL_PLACES;
@@ -97,7 +92,6 @@ public class SaleValidations : AbstractValidator<SaleRequest>
 
     private bool BeValidCurrencyAmount(decimal amount)
     {
-        // Check if divisible by 0.01 (valid currency amount)
         return amount % 0.01m == 0;
     }
 
@@ -116,9 +110,7 @@ public class SaleValidations : AbstractValidator<SaleRequest>
 
     private decimal CalculateSubtotal(List<SaleItemRequest> saleItems)
     {
-        if (saleItems == null || !saleItems.Any())
-            return 0;
-
+        if (saleItems == null || !saleItems.Any()) return 0;
         return saleItems.Sum(item => (decimal)item.Quantity * item.UnitPrice);
     }
 

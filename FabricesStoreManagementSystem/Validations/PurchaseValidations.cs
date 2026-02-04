@@ -19,9 +19,6 @@ public class PurchaseValidations : AbstractValidator<PurchaseRequest>
 
         // Paid amount validation
         RuleFor(x => x.PaidAmount)
-            .Cascade(CascadeMode.Stop)
-            .NotEmpty()
-            .WithMessage("المبلغ المدفوع مطلوب.")
             .GreaterThanOrEqualTo(0)
             .WithMessage("المبلغ المدفوع لا يمكن أن يكون سالبًا.")
             .Must(HaveValidCurrencyPrecision)
@@ -29,23 +26,22 @@ public class PurchaseValidations : AbstractValidator<PurchaseRequest>
             .Must(BeValidCurrencyAmount)
             .WithMessage("المبلغ المدفوع يجب أن يكون مضاعفًا للـ 0.01.");
 
-        // Purchase items validation
+        // PurchaseItems validation
         RuleFor(x => x.PurchaseItems)
             .Cascade(CascadeMode.Stop)
             .NotNull()
             .WithMessage("عناصر الشراء مطلوبة.")
             .NotEmpty()
             .WithMessage("يجب أن تحتوي على عنصر شراء واحد على الأقل.")
-            .Must(items => items?.Count > 0)
-            .WithMessage("قائمة عناصر الشراء لا يمكن أن تكون فارغة.")
             .Must(HaveUniqueProductIds)
             .WithMessage("تم العثور على معرفات منتجات مكررة في عناصر الشراء.")
             .Must(HaveReasonableItemCount)
             .WithMessage("عدد كبير جدًا من عناصر الشراء في معاملة واحدة.");
 
-        // Validate each purchase item
+        // Validate each purchase item only if list is not null
         RuleForEach(x => x.PurchaseItems)
-            .SetValidator(new PurchaseItemValidations());
+            .SetValidator(new PurchaseItemValidations())
+            .When(x => x.PurchaseItems != null);
 
         // Cross-validation: Paid amount should not exceed total cost
         RuleFor(x => x)

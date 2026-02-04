@@ -13,16 +13,16 @@ public class ProductValidations : AbstractValidator<ProductRequest>
         ClassLevelCascadeMode = CascadeMode.Stop;
 
         // Name validation (optional)
-        RuleFor(x => x.Name)
-            .NotEmpty()
-            .WithMessage("اسم المنتج مطلوب.")
-            .When(x => x.Name != null) // Only validate if provided
-            .Length(1, ProductConfigurations.NameMaxLength)
-            .WithMessage($"اسم المنتج يجب أن يكون بين 1 و {ProductConfigurations.NameMaxLength} حرفًا.")
-            .Matches(@"^[\p{IsArabic}\s\-\.\,\d]+$")
-            .WithMessage("اسم المنتج يمكن أن يحتوي على أحرف عربية وأرقام ومسافات فقط.")
-            .Must(name => !string.IsNullOrWhiteSpace(name))
-            .WithMessage("اسم المنتج لا يمكن أن يكون فارغًا أو مسافات فقط.");
+        When(x => x.Name != null, () =>
+        {
+            RuleFor(x => x.Name)
+                .Must(name => !string.IsNullOrWhiteSpace(name))
+                .WithMessage("مادة الصنع لا يمكن أن تكون فارغة أو مسافات فقط.")
+                .Length(1, ProductConfigurations.NameMaxLength)
+                .WithMessage($"اسم المنتج يجب أن يكون بين 1 و {ProductConfigurations.NameMaxLength} حرفًا.")
+                .Matches(@"^[\p{IsArabic}\s\-\.\,\d]+$")
+                .WithMessage("اسم المنتج يمكن أن يحتوي على أحرف عربية وأرقام ومسافات فقط.");
+        });
 
         // Code validation (required)
         RuleFor(x => x.Code)
@@ -59,13 +59,16 @@ public class ProductValidations : AbstractValidator<ProductRequest>
             .WithMessage("وحدة القياس يجب أن تكون باللغة العربية.");
 
         // Material validation (optional)
-        RuleFor(x => x.Material)
-            .NotEmpty()
-            .WithMessage("مادة المنتج مطلوبة.")
-            .When(x => x.Material != null) // Only validate if provided
-            .Length(1, ProductConfigurations.MaterialMaxLength)
-            .WithMessage($"مادة المنتج يجب أن تكون بين 1 و {ProductConfigurations.MaterialMaxLength} حرفًا.")
-            .Matches(@"^[\p{IsArabic}\s\-\.\,]+$")
-            .WithMessage("مادة المنتج يمكن أن تحتوي على أحرف عربية ومسافات فقط.");
+        When(x => x.Material != null, () =>
+        {
+            RuleFor(x => x.Material)
+                .Must(name => !string.IsNullOrWhiteSpace(name))
+                .WithMessage("مادة المنتج مطلوبة.")
+                .When(x => x.Material != null) // Only validate if provided
+                .Length(1, ProductConfigurations.MaterialMaxLength)
+                .WithMessage($"مادة المنتج يجب أن تكون بين 1 و {ProductConfigurations.MaterialMaxLength} حرفًا.")
+                .Matches(@"^[\p{IsArabic}\s\-\.\,]+$")
+                .WithMessage("مادة المنتج يمكن أن تحتوي على أحرف عربية ومسافات فقط.");
+        });
     }
 }

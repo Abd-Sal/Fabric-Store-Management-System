@@ -3,5 +3,5 @@
 public record CatalogFromSupplierRequest(
     Guid SupplierID,
     string? Description,
-    List<Guid> Items    //productIDs
+    List<Guid> Items
 );

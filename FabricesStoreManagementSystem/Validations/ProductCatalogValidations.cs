@@ -13,15 +13,17 @@ public class ProductCatalogValidations : AbstractValidator<ProductCatalogRequest
         // Product ID validation
         RuleFor(x => x.Id)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty()
+            .NotNull()
             .WithMessage("معرف المنتج مطلوب.")
             .NotEqual(Guid.Empty)
+            .WithMessage("معرف المنتج لا يمكن أن يكون فارغًا.")
+            .NotEmpty()
             .WithMessage("معرف المنتج لا يمكن أن يكون فارغًا.");
 
         // Quantity validation (float)
         RuleFor(x => x.Quantity)
             .Cascade(CascadeMode.Stop)
-            .NotEmpty()
+            .NotNull()
             .WithMessage("الكمية مطلوبة.")
             .GreaterThan(0)
             .WithMessage("الكمية يجب أن تكون أكبر من الصفر.")
@@ -34,7 +36,7 @@ public class ProductCatalogValidations : AbstractValidator<ProductCatalogRequest
             .Must(HasMaximumOneDecimalPlace)
             .WithMessage("الكمية يمكن أن تحتوي على منزلة عشرية واحدة كحد أقصى.")
             .Must(BeInTenthIncrements)
-            .WithMessage("الكمية يجب أن تكون مضاعفًا للـ 0.1 (مثل 0.5، 1.0، 2.5).");
+            .WithMessage("الكمية يجب أن تكون مضاعفًا للـ 0.1 (مثل 0.2، 1.0، 2.5).");
     }
 
     private bool BeValidFloatNumber(float quantity)
@@ -81,9 +83,9 @@ public class ProductCatalogValidations : AbstractValidator<ProductCatalogRequest
         if (float.IsNaN(quantity) || float.IsInfinity(quantity))
             return false;
 
-        // Check if quantity is divisible by 0.1 (with tolerance for float precision)
-        var remainder = quantity % 0.1f;
-        return Math.Abs(remainder) < TOLERANCE ||
-               Math.Abs(remainder - 0.1f) < TOLERANCE;
+        // Scale by 10 and allow tiny floating-point tolerance
+        var scaled = quantity * 10f;
+
+        return Math.Abs(scaled - MathF.Round(scaled)) < TOLERANCE;
     }
 }

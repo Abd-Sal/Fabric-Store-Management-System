@@ -104,11 +104,11 @@ public class PurchaseItemValidations : AbstractValidator<PurchaseItemRequest>
         if (float.IsNaN(quantity) || float.IsInfinity(quantity))
             return false;
 
-        // Check if divisible by 0.1 (with tolerance for float precision)
-        var remainder = quantity % 0.1f;
-        const float TOLERANCE = 0.00001f;
+        // Multiply by 10 and round to nearest integer
+        var scaled = Math.Round(quantity * 10f);
+        var difference = Math.Abs(scaled / 10f - quantity);
 
-        return Math.Abs(remainder) < TOLERANCE ||
-               Math.Abs(remainder - 0.1f) < TOLERANCE;
+        const float TOLERANCE = 0.0001f;
+        return difference < TOLERANCE;
     }
 }

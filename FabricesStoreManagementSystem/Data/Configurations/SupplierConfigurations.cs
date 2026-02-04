@@ -1,6 +1,6 @@
 ﻿namespace FabricesStoreManagementSystem.Data.Configurations;
 
-class SupplierConfigurations : IEntityTypeConfiguration<Supplier>
+public class SupplierConfigurations : IEntityTypeConfiguration<Supplier>
 {
     public const int NameMaxLength = 150;
     public const int AddressMaxLength = 500;

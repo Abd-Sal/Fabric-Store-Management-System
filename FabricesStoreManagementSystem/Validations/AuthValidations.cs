@@ -148,7 +148,8 @@ public class AuthValidations : AbstractValidator<LoginRequest>
         {
             ";", "--", "/*", "*/", "@@", "char(", "nchar(",
             "varchar(", "nvarchar(", "alter ", "create ", "delete ",
-            "drop ", "exec ", "execute ", "insert ", "select ", "update ", "union "
+            "drop ", "exec ", "execute ", "insert ", "select ", "update ", "union ",
+            "'"
         };
 
         var upperInput = input.ToUpperInvariant();

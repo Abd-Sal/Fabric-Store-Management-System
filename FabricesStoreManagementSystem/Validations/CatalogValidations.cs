@@ -11,12 +11,16 @@ public class CatalogValidations : AbstractValidator<CatalogRequest>
 
         // Description validation (optional)
         RuleFor(x => x.Description)
+            .NotEmpty()
+            .WithMessage("الوصف لا يمكن أن يكون فارغًا أو مسافات فقط.")
+            .When(x => x.Description != null); // Only check NotEmpty if not null
+
+        RuleFor(x => x.Description)
             .MaximumLength(CatalogConfigurations.DescriptionMaxLenght)
             .WithMessage($"الوصف لا يمكن أن يتجاوز {CatalogConfigurations.DescriptionMaxLenght} حرفًا.")
-            .When(x => !string.IsNullOrWhiteSpace(x.Description))
-            .Must(desc => desc == null || !string.IsNullOrWhiteSpace(desc))
-            .WithMessage("الوصف لا يمكن أن يكون فارغًا أو مسافات فقط.")
-            .When(x => x.Description != null)
+            .When(x => !string.IsNullOrWhiteSpace(x.Description));
+
+        RuleFor(x => x.Description)
             .Matches(@"^[\p{IsArabic}a-zA-Z0-9\s\-\.\,\!\?]+$")
             .WithMessage("الوصف يحتوي على أحرف غير مسموح بها.")
             .When(x => !string.IsNullOrWhiteSpace(x.Description));
@@ -40,12 +44,6 @@ public class CatalogValidations : AbstractValidator<CatalogRequest>
         // Validate each catalog product
         RuleForEach(x => x.Items)
             .SetValidator(new CatalogProductValidations());
-
-        // Business rule: Catalog should have meaningful content
-        RuleFor(x => x)
-            .Must(x => IsCatalogMeaningful(x.Items))
-            .WithMessage("الكتالوج يحتوي على كمية قليلة جدًا من المنتجات.")
-            .When(x => x.Items != null && x.Items.Any());
     }
 
     private bool HaveUniqueProductIds(List<CatalogProductRequest> items)
@@ -62,15 +60,5 @@ public class CatalogValidations : AbstractValidator<CatalogRequest>
         const float MAX_TOTAL_QUANTITY = 1000f;
         var totalQuantity = items.Sum(item => item.Quantity);
         return totalQuantity <= MAX_TOTAL_QUANTITY;
-    }
-
-    private bool IsCatalogMeaningful(List<CatalogProductRequest> items)
-    {
-        if (items == null || items.Count < 3) return false;
-
-        // A meaningful catalog should have at least 3 different products
-        // with reasonable quantities
-        var meaningfulProducts = items.Count(item => item.Quantity >= 1);
-        return meaningfulProducts >= 3;
     }
 }
