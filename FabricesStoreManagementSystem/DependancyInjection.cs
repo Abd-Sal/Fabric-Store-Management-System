@@ -55,6 +55,7 @@ public static class DependancyInjection
     
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
+        services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();
         services.AddScoped<ICustomerService, CustomerService>();
         services.AddScoped<ISupplierService, SupplierService>();
         services.AddScoped<IProductService, ProductService>();

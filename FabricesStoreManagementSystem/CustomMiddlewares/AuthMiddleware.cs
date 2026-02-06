@@ -1,4 +1,6 @@
-﻿namespace FabricesStoreManagementSystem.CustomMiddlewares;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace FabricesStoreManagementSystem.CustomMiddlewares;
 
 public class AuthMiddleware(
         RequestDelegate next,
@@ -15,13 +17,14 @@ public class AuthMiddleware(
         var checkAuth = context.Request.Headers.Authorization.ToString()
             .Contains(_optionsMonitor.Id.ToString());
 
-        if (checkAuth)
+        if (!checkAuth)
         {
             var result = Result.Failure(new Error(
                 "Unauthorized",
                 "Invalid or expired authorization token",
                 StatusCodes.Status401Unauthorized))
                 .ToProblem();
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
             return;
         }
         await _next(context);

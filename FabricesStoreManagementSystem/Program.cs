@@ -12,7 +12,6 @@ public class Program
                 .ReadFrom.Configuration(context.Configuration);
         });
 
-
         builder.Services.InjectOurServices(builder.Configuration);
 
         var app = builder.Build();
