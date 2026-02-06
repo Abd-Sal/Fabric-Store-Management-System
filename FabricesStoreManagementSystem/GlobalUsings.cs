@@ -14,6 +14,7 @@ global using System.Text.RegularExpressions;
 global using FabricesStoreManagementSystem.SearchConfig;
 global using FabricesStoreManagementSystem.DTOs.Catalog;
 global using FabricesStoreManagementSystem.DTOs.Common;
+global using FabricesStoreManagementSystem.DTOs.Payment;
 global using FabricesStoreManagementSystem.SortingConfig;
 global using FabricesStoreManagementSystem.Enums;
 global using FabricesStoreManagementSystem.Entities;

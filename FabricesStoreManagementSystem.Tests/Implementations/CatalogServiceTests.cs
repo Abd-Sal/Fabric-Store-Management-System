@@ -3,6 +3,122 @@
 public class CatalogServiceTests
 {
     [Theory]
+    [MemberData(nameof(CatalogServiceTestsHelpers.GetPayForCatalogFailTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
+    public async Task PayForCatalog_ShouldFail
+        (CatalogFormPurchaseCatalogRequest? temp, PurchaseUpdatePaidRequest request, Error error)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<CatalogService>.Instance;
+        var service = new CatalogService(db, logger);
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.SaveChangesAsync();
+
+        //Act
+        var id = Guid.Empty;
+        if (temp is not null)
+        {
+            var addTmp = await service.PurchaseCatalog(temp);
+            if (addTmp.IsSuccess)
+            {
+                id = addTmp.Value.Id;
+                await db.SaveChangesAsync();
+            }
+        }
+        var result = await service.PayForCatalog(id, request);
+        if (result.IsSuccess)
+            await db.SaveChangesAsync();
+
+        //Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(error);
+    }
+
+    [Theory]
+    [MemberData(nameof(CatalogServiceTestsHelpers.GetPayForCatalogSuccessTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
+    public async Task PayForCatalog_ShouldSuccess
+        (CatalogFormPurchaseCatalogRequest temp, PurchaseUpdatePaidRequest request, bool isPaid)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<CatalogService>.Instance;
+        var service = new CatalogService(db, logger);
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.SaveChangesAsync();
+
+        //Act
+        var addTmp = await service.PurchaseCatalog(temp);
+        if (addTmp.IsSuccess)
+            await db.SaveChangesAsync();
+        var result = await service.PayForCatalog(addTmp.Value.Id, request);
+        if (result.IsSuccess)
+            await db.SaveChangesAsync();
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+        var payment = await db.Payments.SingleOrDefaultAsync(x => x.ReferenceID == addTmp.Value.Id);
+        payment.Should().NotBeNull();
+        payment.Amount.Should().Be(request.PaidAmount);
+        var catalog = await db.Catalogs.FindAsync(addTmp.Value.Id);
+        catalog.Should().NotBeNull();
+        catalog.IsPaid.Should().Be(isPaid);
+    }
+
+    [Theory]
+    [MemberData(nameof(CatalogServiceTestsHelpers.GetCatalogPurchaseSuccessTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
+    public async Task PurchaseCatalog_ShouldSuccess
+        (CatalogFormPurchaseCatalogRequest request, bool isPaid)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<CatalogService>.Instance;
+        var service = new CatalogService(db, logger);
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.PurchaseCatalog(request);
+        if (result.IsSuccess)
+            await db.SaveChangesAsync();
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Code.Should().Be(ProductsRepo.Products()[0].Code);
+        result.Value.Status.Should().Be(CatalogStatus.Available);
+        result.Value.IsPaid.Should().Be(isPaid);
+    }
+
+    [Theory]
+    [MemberData(nameof(CatalogServiceTestsHelpers.GetCatalogPurchaseFailTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
+    public async Task PurchaseCatalog_ShouldFail
+        (CatalogFormPurchaseCatalogRequest request, Error errCode)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<CatalogService>.Instance;
+        var service = new CatalogService(db, logger);
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.PurchaseCatalog(request);
+        if (result.IsSuccess)
+            await db.SaveChangesAsync();
+
+        //Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(errCode);
+    }
+
+    [Theory]
     [MemberData(nameof(CatalogServiceTestsHelpers.GetCatalogCreateSuccessTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
     public async Task CreateCatalog_ShouldSuccess
         (CatalogRequest request)

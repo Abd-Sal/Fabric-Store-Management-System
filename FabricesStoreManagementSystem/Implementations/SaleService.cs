@@ -176,7 +176,7 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
             ReferenceID = sale.Id,
             ReferenceType = ReferenceTypes.Sale,
             PayMethod = PaymentMethod.Cash,
-            Amount = sale.PaidAmount
+            Amount = request.PaidAmount
         };
         if (paid == sale.NetAmount)
         {

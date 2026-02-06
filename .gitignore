@@ -15,6 +15,7 @@
 
 # Custom logs directory
 /FabricesStoreManagementSystem/Logs
+coveragereport
 
 # Mono auto generated files
 mono_crash.*

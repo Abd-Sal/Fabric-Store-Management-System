@@ -337,7 +337,7 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
             ReferenceID = purchase.Id,
             ReferenceType = ReferenceTypes.Purchase,
             PayMethod = PaymentMethod.Cash,
-            Amount = purchase.PaidAmount
+            Amount = request.PaidAmount
         };
         if (paid == purchase.TotalAmount)
         {
@@ -359,13 +359,9 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
             status = PayStatuses.NotPaid;
         }
 
-        await _appDbContext.Purchases.Where(x => x.Id == id)
-            .ExecuteUpdateAsync(setters =>
-                setters
-                    .SetProperty(x => x.PaidAmount, paid)
-                    .SetProperty(x => x.Status, status),
-                cancellationToken
-            );
+        purchase.PaidAmount = paid;
+        purchase.Status = status;
+        _appDbContext.Purchases.Update(purchase);
         _logger.LogInformation("execute update purchase({id}) done", id);
         return Result.Success();
     }

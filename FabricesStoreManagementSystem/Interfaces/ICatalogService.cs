@@ -2,6 +2,8 @@
 
 public interface ICatalogService
 {
+    Task<Result> PayForCatalog(Guid id, PurchaseUpdatePaidRequest request, CancellationToken cancellationToken = default);
+    Task<Result<CatalogResponse>> PurchaseCatalog(CatalogFormPurchaseCatalogRequest request, CancellationToken cancellationToken = default);
     Task<Result<CatalogResponse>> CreateCatalog(CatalogRequest request, CancellationToken cancellationToken = default);
     Task<Result<CatalogResponse>> CreateCatalog(CatalogFromSupplierRequest request, CancellationToken cancellationToken = default);
     Task<Result> RemoveCatalog(Guid id, CancellationToken cancellationToken = default);

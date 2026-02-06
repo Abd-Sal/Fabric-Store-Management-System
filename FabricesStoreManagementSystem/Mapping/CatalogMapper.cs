@@ -5,14 +5,17 @@ public static class CatalogMapper
     public static CatalogResponse ToCatalogResponse(this Catalog catalog)
         => new CatalogResponse(
                 catalog.Id, catalog.CatalogCode, catalog.Description,
-                catalog.Status, catalog.CreatedAt,catalog.LastUpdateAt,
-                null
+                catalog.Status, catalog.IsPurchased, catalog.Price,
+                catalog.PaidAmount, catalog.IsPaid,
+                catalog.CreatedAt,catalog.LastUpdateAt, null
             );
 
     public static CatalogResponse ToCatalogResponseWithItems(this Catalog catalog)
         => new CatalogResponse(
                 catalog.Id, catalog.CatalogCode, catalog.Description,
-                catalog.Status, catalog.CreatedAt,catalog.LastUpdateAt,
+                catalog.Status, catalog.IsPurchased, catalog.Price,
+                catalog.PaidAmount, catalog.IsPaid,
+                catalog.CreatedAt, catalog.LastUpdateAt,
                 catalog.CatalogsProducts.Select(x => x.ToCatalogProductResponse()).ToList()
             );
 

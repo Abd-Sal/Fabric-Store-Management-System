@@ -1,9 +1,68 @@
-﻿using System.Net.NetworkInformation;
-
-namespace FabricesStoreManagementSystem.Tests.Implementations;
+﻿namespace FabricesStoreManagementSystem.Tests.Implementations;
 
 public class PurchaseServiceTests
 {
+    [Theory]
+    [MemberData(nameof(PurchaseServiceTestsHelpers.GetPurchasePayFailTestsData), MemberType = typeof(PurchaseServiceTestsHelpers))]
+    public async Task UpdatePurchasePaidAmount_ShouldFail
+        (Guid id, PurchaseUpdatePaidRequest request, Error error)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<PurchaseService>.Instance;
+        var productLogger = NullLogger<ProductService>.Instance;
+        var productService = new ProductService(db, productLogger);
+        var service = new PurchaseService(db, productService, logger);
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.Purchases.AddRangeAsync(PurchasesRepo.Purchases());
+        await db.PurchaseItems.AddRangeAsync(PurchaseItemsRepo.PurchaseItems());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.UpdatePurchasePaidAmount(id, request);
+        if (result.IsSuccess)
+            await db.SaveChangesAsync();
+
+        //Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(error);
+    }
+
+    [Theory]
+    [MemberData(nameof(PurchaseServiceTestsHelpers.GetPurchasePaySuccessTestsData), MemberType = typeof(PurchaseServiceTestsHelpers))]
+    public async Task UpdatePurchasePaidAmount_ShouldSuccess
+        (Guid id, PurchaseUpdatePaidRequest request, PayStatuses status)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<PurchaseService>.Instance;
+        var productLogger = NullLogger<ProductService>.Instance;
+        var productService = new ProductService(db, productLogger);
+        var service = new PurchaseService(db, productService, logger);
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.Purchases.AddRangeAsync(PurchasesRepo.Purchases());
+        await db.PurchaseItems.AddRangeAsync(PurchaseItemsRepo.PurchaseItems());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.UpdatePurchasePaidAmount(id, request);
+        if (result.IsSuccess)
+            await db.SaveChangesAsync();
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+        var payment = await db.Payments.SingleOrDefaultAsync(x => x.ReferenceID == id);
+        payment.Should().NotBeNull();
+        payment.Amount.Should().Be(request.PaidAmount);
+        var purchase = await db.Purchases.FindAsync(id);
+        purchase.Should().NotBeNull();
+        purchase.Status.Should().Be(status);
+    }
+
     [Theory]
     [MemberData(nameof(PurchaseServiceTestsHelpers.GetPurchaseCreateSuccessTestsData), MemberType = typeof(PurchaseServiceTestsHelpers))]
     public async Task CreatePurchase_ShouldSuccess

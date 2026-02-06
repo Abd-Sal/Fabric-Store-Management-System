@@ -11,7 +11,8 @@ public class UnitOfWork : IUnitOfWork
         ILogger<SaleService> saleServiceLogger,
         ILogger<CustomerService> customerServiceLogger,
         ILogger<SupplierService> supplierServiceLogger,
-        ILogger<CatalogService> catalogServiceLogger
+        ILogger<CatalogService> catalogServiceLogger,
+        ILogger<PaymentService> paymentServiceLogger
     )
     {
         _appDbContext = appDbContext;
@@ -21,6 +22,7 @@ public class UnitOfWork : IUnitOfWork
         PurchaseService = new PurchaseService(appDbContext, ProductService, purchaseServiceLogger);
         SaleService = new SaleService(appDbContext, saleServiceLogger);
         CatalogService = new CatalogService(appDbContext, catalogServiceLogger);
+        PaymentService = new PaymentService(appDbContext, paymentServiceLogger);
     }
 
     public ICatalogService CatalogService{ get; }
@@ -34,6 +36,8 @@ public class UnitOfWork : IUnitOfWork
     public IPurchaseService PurchaseService { get; }
 
     public ISaleService SaleService { get; }
+
+    public IPaymentService PaymentService { get; }
 
 
     public int SaveChanges()

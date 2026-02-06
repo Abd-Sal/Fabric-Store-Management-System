@@ -1,6 +1,4 @@
-﻿using Serilog;
-
-namespace FabricesStoreManagementSystem;
+﻿namespace FabricesStoreManagementSystem;
 
 public static class DependancyInjection
 {
@@ -62,6 +60,7 @@ public static class DependancyInjection
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPurchaseService, PurchaseService>();
         services.AddScoped<ISaleService, SaleService>();
+        services.AddScoped<IPaymentService, PaymentService>();
         return services;
     }
 }

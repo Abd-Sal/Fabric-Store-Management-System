@@ -36,4 +36,15 @@ public class CatalogErrors
         new("Catalog.UnableToProcessCatalogWhichUnavailable",
             "cannot manipulate catalog which not in available status",
             StatusCodes.Status400BadRequest);
+    
+    public static Error PaidMoreThanAmount =
+        new("Catalog.PaidMoreThanAmount",
+            "the pay amount is greater than amount",
+            StatusCodes.Status400BadRequest);
+
+    public static Error AlreadyPaid =
+        new("Catalog.AlreadyPaid",
+            "the catalog is already paid",
+            StatusCodes.Status400BadRequest);
+
 }

@@ -2,6 +2,197 @@
 
 public class CatalogServiceTestsHelpers
 {
+    public static IEnumerable<object[]> GetPayForCatalogFailTestsData()
+    {
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                "Test Description",
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                100,
+                100
+            ),
+            new PurchaseUpdatePaidRequest(100),
+            CatalogErrors.AlreadyPaid
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                "Test Description",
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                100,
+                50
+            ),
+            new PurchaseUpdatePaidRequest(150),
+            PurchaseErrors.PaidMoreThanTotal
+        };
+
+        yield return new object[]
+        {
+            null,
+            new PurchaseUpdatePaidRequest(150),
+            CatalogErrors.NotFound
+        };
+    }
+
+    public static IEnumerable<object[]> GetPayForCatalogSuccessTestsData()
+    {
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                "Test Description",
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                100,
+                0
+            ),
+            new PurchaseUpdatePaidRequest(100),
+            true
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                "Test Description",
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                100,
+                0
+            ),
+            new PurchaseUpdatePaidRequest(50),
+            false
+        };
+    }
+
+    public static IEnumerable<object[]> GetCatalogPurchaseSuccessTestsData()
+    {
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                "Test Description",
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                52.0m,
+                52.0m
+            ),
+            true
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                "Test Description",
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                52.0m,
+                0m
+            ),
+            false
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                "Test Description",
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                52.0m,
+                10m
+            ),
+            false
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                null,
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                52.0m,
+                10m
+            ),
+            false
+        };
+    }
+
+    public static IEnumerable<object[]> GetCatalogPurchaseFailTestsData()
+    {
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                Guid.Parse("302b1ef7-ed11-43fc-bbd8-a8b09be22deb"),
+                "Test Description",
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                52.0m,
+                52.0m
+            ),
+            SupplierErrors.NotFound
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[6].Id,
+                "Test Description",
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                52.0m,
+                0m
+            ),
+            SupplierErrors.NotFound
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                "Test Description",
+                [Guid.Parse("eccdbf32-6237-4843-aec3-0b743f5b027c"), Guid.Parse("eccdbf32-6237-4843-aec3-0b743f5b027c")],
+                52.0m,
+                10m
+            ),
+            ProductErrors.DuplicatedInCatalog
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                null,
+                [ProductsRepo.Products()[0].Id, Guid.Parse("eccdbf32-6237-4843-aec3-0b743f5b027c")],
+                52.0m,
+                10m
+            ),
+            ProductErrors.NotFoundID
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                null,
+                ProductsRepo.Products().Slice(0, 15).Select(x => x.Id).ToList(),
+                52.0m,
+                10m
+            ),
+            CatalogErrors.ProductsNotSameCode
+        };
+
+        yield return new object[]
+        {
+            new CatalogFormPurchaseCatalogRequest(
+                SuppliersRepo.Suppliers()[0].Id,
+                null,
+                ProductsRepo.Products().Slice(0, 5).Select(x => x.Id).ToList(),
+                52.0m,
+                100m
+            ),
+            CatalogErrors.PaidMoreThanAmount
+        };
+    }
+
     public static IEnumerable<object[]> GetCatalogCreateSuccessTestsData()
     {
         yield return new object[]

@@ -7,6 +7,13 @@ public class Catalog
     public string CatalogCode { get; set; } = null!;
     public string? Description { get; set; }
     public int ProductsCount { get; set; }
+    public bool IsPurchased { get; set; } = false;
+    public decimal? Price { get; set; } = null;
+    public decimal? PaidAmount { get; set; } = null;
+    public bool? IsPaid =>
+        Price is not null && PaidAmount is not null
+        ? Price == PaidAmount
+        : null;
     public CatalogStatus Status { get; set; } = CatalogStatus.Available;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LastUpdateAt { get; set; }

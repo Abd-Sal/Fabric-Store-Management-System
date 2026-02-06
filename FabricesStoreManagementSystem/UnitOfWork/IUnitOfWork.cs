@@ -8,6 +8,8 @@ public interface IUnitOfWork
     public IProductService ProductService { get; }
     public IPurchaseService PurchaseService { get; }
     public ISaleService SaleService { get; }
+    public IPaymentService PaymentService { get; }
+
 
     public int SaveChanges();
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

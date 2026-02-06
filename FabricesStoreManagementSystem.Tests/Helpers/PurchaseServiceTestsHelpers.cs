@@ -2,6 +2,54 @@
 
 public class PurchaseServiceTestsHelpers
 {
+    public static IEnumerable<object[]> GetPurchasePayFailTestsData()
+    {
+        yield return new object[]
+        {
+            Guid.Parse("7f130c68-7fd1-49af-aa40-641e77625526"),
+            new PurchaseUpdatePaidRequest(50),
+            PurchaseErrors.NotFound
+        };
+
+        yield return new object[]
+        {
+            PurchasesRepo.Purchases()[0].Id,
+            new PurchaseUpdatePaidRequest(500),
+            PurchaseErrors.AlreadyPaid
+        };
+
+        yield return new object[]
+        {
+            PurchasesRepo.Purchases()[2].Id,
+            new PurchaseUpdatePaidRequest(1500),
+            PurchaseErrors.PaidMoreThanTotal
+        };
+
+        yield return new object[]
+        {
+            PurchasesRepo.Purchases()[1].Id,
+            new PurchaseUpdatePaidRequest(1500),
+            PurchaseErrors.PaidMoreThanTotal
+        };
+    }
+
+    public static IEnumerable<object[]> GetPurchasePaySuccessTestsData()
+    {
+        yield return new object[]
+        {
+            PurchasesRepo.Purchases()[2].Id,
+            new PurchaseUpdatePaidRequest(50),
+            PayStatuses.NotCompleted
+        };
+
+        yield return new object[]
+        {
+            PurchasesRepo.Purchases()[2].Id,
+            new PurchaseUpdatePaidRequest(500),
+            PayStatuses.Paid
+        };
+    }
+    
     public static IEnumerable<object[]> GetPurchaseCreateSuccessTestsData()
     {
         yield return new object[]

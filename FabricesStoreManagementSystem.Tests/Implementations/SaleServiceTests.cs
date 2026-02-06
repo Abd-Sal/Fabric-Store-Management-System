@@ -291,6 +291,10 @@ public class SaleServiceTests
         var sale = await db.Sales.FindAsync(id);
         sale.Should().NotBeNull();
         sale.Status.Should().Be(status);
+
+        var payment = await db.Payments.SingleOrDefaultAsync(x => x.ReferenceID == id);
+        payment.Should().NotBeNull();
+        payment.Amount.Should().Be(request.PaidAmount);
     }
 
     [Theory]

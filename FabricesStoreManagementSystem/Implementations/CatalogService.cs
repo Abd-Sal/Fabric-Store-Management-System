@@ -198,7 +198,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             CatalogID = catalogID,
             PorductID = productID,
             Quantity = 0,
-            IsDeducted = false
+            IsDeducted = false,
         };
 
         await _appDbContext.CatalogsProducts.AddAsync(catalogProduct, cancellationToken);
@@ -242,6 +242,14 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         {
             _logger.LogInformation("unexpected error happen after try to remove catalog");
             return Result.Failure(GeneralErrors.UnexpectedError);
+        }
+
+        if (catalog.IsPurchased)
+        {
+            _logger.LogError("remove payment for purchased catalog");
+            _appDbContext.Payments.RemoveRange(
+                await _appDbContext.Payments.Where(x => x.ReferenceID == id).ToListAsync(cancellationToken)
+            );
         }
 
         _appDbContext.Catalogs.Remove(
@@ -457,5 +465,133 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             return Result.Failure<CatalogResponse>(CatalogErrors.NotFound);
 
         return Result.Success(catalog.ToCatalogResponse());
+    }
+
+    public async Task<Result<CatalogResponse>> PurchaseCatalog
+        (CatalogFormPurchaseCatalogRequest request, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("check products duplication");
+        if (request.Items.Count != request.Items.DistinctBy(x => x).Count())
+        {
+            _logger.LogError("there is duplication product");
+            return Result.Failure<CatalogResponse>(ProductErrors.DuplicatedInCatalog);
+        }
+
+        _logger.LogInformation("check supplier({id}) existance", request.SupplierID);
+        if (!(await _appDbContext.Suppliers.AnyAsync(x => x.Id == request.SupplierID && x.IsActive, cancellationToken)))
+        {
+            _logger.LogError("supplier({id}) not found", request.SupplierID);
+            return Result.Failure<CatalogResponse>(SupplierErrors.NotFound);
+        }
+
+        _logger.LogInformation("check products existance");
+        var existingIds = await _appDbContext.Products
+            .AsNoTracking()
+            .Where(x => request.Items.Contains(x.Id))
+            .Select(x => new { x.Id, x.Code })
+            .ToListAsync(cancellationToken);
+        if (existingIds.Count != request.Items.Count)
+        {
+            _logger.LogError("product or more not found");
+            return Result.Failure<CatalogResponse>(ProductErrors.NotFoundID);
+        }
+
+        var checkCodes = existingIds.DistinctBy(x => x.Code).Count();
+        _logger.LogInformation("check code duplication");
+        if (checkCodes != 1)
+        {
+            _logger.LogError("there is one or more code duplicated");
+            return Result.Failure<CatalogResponse>(CatalogErrors.ProductsNotSameCode);
+        }
+
+        var catalog = new Catalog
+        {
+            CatalogCode = "",
+            Description = request.Description,
+            Status = CatalogStatus.Available,
+            ProductsCount = request.Items.Count,
+            IsPurchased = true,
+            Price = request.Amount,
+            PaidAmount = request.PaidAmount
+        };
+
+        _logger.LogInformation("start cutting process");
+        var cutProcesses = request.Items.Select(x => CreateCatalogProductBySupplier(catalog.Id, x, cancellationToken));
+        var resultCutting = Task.WhenAll(cutProcesses).Result;
+        _logger.LogInformation("end cutting process");
+        foreach (var res in resultCutting)
+            if (res.IsFailure)
+            {
+                _logger.LogError("start cutting process");
+                return Result.Failure<CatalogResponse>(res.Error);
+            }
+
+        catalog.CatalogCode = resultCutting.First().Value;
+
+        if (request.PaidAmount > request.Amount)
+        {
+            _logger.LogError("paid more than amount");
+            return Result.Failure<CatalogResponse>(CatalogErrors.PaidMoreThanAmount);
+        }
+
+        if (request.PaidAmount > 0)
+        {
+            var payment = new Payment
+            {
+                Amount = request.PaidAmount,
+                ReferenceID = catalog.Id,
+                ReferenceType = ReferenceTypes.Purchase,
+                PayMethod = PaymentMethod.Cash,
+            };
+            _logger.LogInformation("add purchase catalog payment");
+            await _appDbContext.Payments.AddAsync(payment, cancellationToken);
+        }
+
+        await _appDbContext.Catalogs.AddAsync(catalog);
+        _logger.LogInformation("Puchase catalog");
+        return Result.Success(catalog.ToCatalogResponse());
+    }
+
+    public async Task<Result> PayForCatalog
+        (Guid id, PurchaseUpdatePaidRequest request, CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("check purchase({id}) existance", id);
+        if (await _appDbContext.Catalogs.SingleOrDefaultAsync
+            (x => x.Id == id && x.IsPurchased, cancellationToken) is not { } catalogPurchase)
+        {
+            _logger.LogError("not found purchasee catalog({id})", id);
+            return Result.Failure(CatalogErrors.NotFound);
+        }
+
+        _logger.LogInformation("check purchase catalog({id}) status if already 'Paid'", id);
+        if (catalogPurchase.IsPaid is not null && (bool)catalogPurchase.IsPaid)
+        {
+            _logger.LogError("purchased catalog({id}) status is already paid", id);
+            return Result.Failure(CatalogErrors.AlreadyPaid);
+        }
+
+        var paid = request.PaidAmount + catalogPurchase.PaidAmount;
+        _logger.LogInformation("check purchase catalog({id}) paid if greater than total amount", id);
+        if (paid > catalogPurchase.Price)
+        {
+            _logger.LogError("paid amount is greater than purchase catalog({id}) total amount", id);
+            return Result.Failure(PurchaseErrors.PaidMoreThanTotal);
+        }
+
+        var payment = new Payment
+        {
+            ReferenceID = catalogPurchase.Id,
+            ReferenceType = ReferenceTypes.Purchase,
+            PayMethod = PaymentMethod.Cash,
+            Amount = request.PaidAmount
+        };
+        _logger.LogInformation("add payment({id}) for purchased catalog({id})", payment.Id, id);
+        await _appDbContext.Payments.AddAsync(payment, cancellationToken);
+
+        catalogPurchase.PaidAmount = paid;
+        catalogPurchase.LastUpdateAt = DateTime.UtcNow;
+        _appDbContext.Catalogs.Update(catalogPurchase);
+        _logger.LogInformation("execute update purchased catalog({id}) done", id);
+        return Result.Success();
     }
 }
