@@ -8,8 +8,8 @@ public class PaymentsController(IUnitOfWork unitOfWork) : ControllerBase
 
     [HttpGet]
     public async Task<IActionResult> GetAllPayments
-        (PaginationRequest paginationRequest,
-        DateRangeRequest? dateRangeRequest,
+        ([FromQuery] PaginationRequest paginationRequest,
+        [FromQuery] DateRangeRequest? dateRangeRequest,
         Guid? id,
         CancellationToken cancellationToken = default)
     {
