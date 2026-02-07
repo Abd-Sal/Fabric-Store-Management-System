@@ -56,6 +56,22 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
         return CreatedAtAction(nameof(GetCatalog), new {id = result.Value.Id}, result.Value);
     }
 
+    [HttpPost("purchase-catalog")]
+    public async Task<IActionResult> PurchaseCatalog
+    ([FromBody] CatalogFormPurchaseCatalogRequest catalogFormPurchaseCatalogRequest,
+    CancellationToken cancellationToken = default)
+    {
+        _logger.LogError("purchase catalog by stock");
+        var result = await _unitOfWork.CatalogService.PurchaseCatalog(catalogFormPurchaseCatalogRequest, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
+            return result.ToProblem();
+        }
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return CreatedAtAction(nameof(GetCatalog), new { id = result.Value.Id }, result.Value);
+    }
+
     [HttpPost("by-supplier")]
     public async Task<IActionResult> CreateCatalogBySupplier
     ([FromBody] CatalogFromSupplierRequest catalogFromSupplierRequest,
@@ -127,6 +143,23 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
     {
         _logger.LogError("destroy catalog({id})", id);
         var result = await _unitOfWork.CatalogService.DestructionCatalog(id, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
+            return result.ToProblem();
+        }
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/pay")]
+    public async Task<IActionResult> PayForPurchasedCatalog
+    ([FromRoute] Guid id,
+    PurchaseUpdatePaidRequest purchaseUpdatePaidRequest,
+    CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("pay for purchased catalog({id})", id);
+        var result = await _unitOfWork.CatalogService.PayForCatalog(id, purchaseUpdatePaidRequest, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
