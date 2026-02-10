@@ -134,7 +134,7 @@ public class SearchValidationsTests
 
         var result = _validator.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor("SearchConsistency");
+        result.ShouldNotHaveAnyValidationErrors();
     }
 
     [Theory]

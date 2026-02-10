@@ -135,7 +135,7 @@ public class ProductServiceTests
     [Theory]
     [MemberData(nameof(ProductServiceTestsHelpers.GetProductsSuccessTestsData), MemberType = typeof(ProductServiceTestsHelpers))]
     public async Task GetProducts_ShouldSuccess
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest  dateRangeRequest, SearchRequest  searchRequest)
     {
         //Arrange
         var db = DbContextFactory.Create();
@@ -154,7 +154,7 @@ public class ProductServiceTests
     [Theory]
     [MemberData(nameof(ProductServiceTestsHelpers.GetProductsPurchasesAndSalesSuccessTestsData), MemberType = typeof(ProductServiceTestsHelpers))]
     public async Task GetSalesByProduct_ShouldSuccess
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest  dateRangeRequest, SearchRequest  searchRequest)
     {
         var db = DbContextFactory.Create();
         var logger = NullLogger<ProductService>.Instance;
@@ -172,7 +172,7 @@ public class ProductServiceTests
     [Theory]
     [MemberData(nameof(ProductServiceTestsHelpers.GetProductsPurchasesAndSalesFailTestsData), MemberType = typeof(ProductServiceTestsHelpers))]
     public async Task GetSalesByProduct_ShouldFail
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, Error error)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest  dateRangeRequest, SearchRequest  searchRequest, Error error)
     {
         var db = DbContextFactory.Create();
         var logger = NullLogger<ProductService>.Instance;
@@ -191,7 +191,7 @@ public class ProductServiceTests
     [Theory]
     [MemberData(nameof(ProductServiceTestsHelpers.GetProductsPurchasesAndSalesSuccessTestsData), MemberType = typeof(ProductServiceTestsHelpers))]
     public async Task GetPurchasesByProduct_ShouldSuccess
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest  dateRangeRequest, SearchRequest  searchRequest)
     {
         var db = DbContextFactory.Create();
         var logger = NullLogger<ProductService>.Instance;
@@ -209,7 +209,7 @@ public class ProductServiceTests
     [Theory]
     [MemberData(nameof(ProductServiceTestsHelpers.GetProductsPurchasesAndSalesFailTestsData), MemberType = typeof(ProductServiceTestsHelpers))]
     public async Task GetPurchasesByProduct_ShouldFail
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, Error error)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest  dateRangeRequest, SearchRequest  searchRequest, Error error)
     {
         var db = DbContextFactory.Create();
         var logger = NullLogger<ProductService>.Instance;

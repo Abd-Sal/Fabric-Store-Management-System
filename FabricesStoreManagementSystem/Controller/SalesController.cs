@@ -26,8 +26,8 @@ public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger
     public async Task<IActionResult> GetSales
     ([FromQuery] PaginationRequest paginationRequest,
     [FromQuery] SortRequest sortRequest,
-    [FromQuery] DateRangeRequest? dateRangeRequest,
-    [FromQuery] SearchRequest? searchRequest,
+    [FromQuery] DateRangeRequest dateRangeRequest,
+    [FromQuery] SearchRequest searchRequest,
     CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("get sales");

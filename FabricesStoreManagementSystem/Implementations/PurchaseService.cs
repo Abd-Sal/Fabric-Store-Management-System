@@ -160,16 +160,20 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
     }
 
     public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchases
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Purchases.AsNoTracking();
 
-        if (dateRangeRequest is not null)
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
+            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
             query = query
-                    .Where(x => DateOnly.FromDateTime(x.CreatedAt) >= dateRangeRequest.From &&
-                                DateOnly.FromDateTime(x.CreatedAt) <= dateRangeRequest.To);
+                .Where(x => x.CreatedAt >= from &&
+                            x.CreatedAt <= to);
+        }
 
-        if (searchRequest is not null)
+        if (searchRequest is not null && searchRequest.Search is not null)
             query = query
                 .Where(x => PurchaseSearchs.PurchaseResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
 
@@ -232,8 +236,8 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
                             .GetSalesByProduct(x.ProductID,
                                                 new PaginationRequest(1, 1),
                                                 new SortRequest(null, null),
-                                                new DateRangeRequest(DateOnly.FromDateTime(purchase.CreatedAt), DateOnly.FromDateTime(DateTime.UtcNow)),
-                                                null,
+                                                new DateRangeRequest(null, null),
+                                                new SearchRequest(null, null),
                                                 cancellationToken));
 
         var salesResultProcess = await Task.WhenAll(getSaleProcesses);
@@ -247,7 +251,7 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
         }
 
         var check = salesResultProcess.Select(x => x.Value.TotalItems).Max();
-        if (check > 0)
+        if (check >= 1)
         {
             _logger.LogError("return purchase items faild");
             return Result.Failure(PurchaseErrors.UnableToReturnPurchase);

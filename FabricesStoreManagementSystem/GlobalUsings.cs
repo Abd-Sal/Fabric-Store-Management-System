@@ -10,6 +10,7 @@ global using System.Linq.Expressions;
 global using System.Reflection;
 global using System.Globalization;
 global using System.Text.RegularExpressions;
+global using System.Text.Json;
 
 global using FabricesStoreManagementSystem.SearchConfig;
 global using FabricesStoreManagementSystem.DTOs.Catalog;
@@ -36,7 +37,8 @@ global using FabricesStoreManagementSystem.Data.Configurations;
 global using FabricesStoreManagementSystem.UnitOfWork;
 global using FabricesStoreManagementSystem.ResultsExtension;
 global using FabricesStoreManagementSystem.CustomMiddlewares;
+global using FabricesStoreManagementSystem.Validations;
 
 global using Serilog;
 global using FluentValidation;
-global using SharpGrip.FluentValidation.AutoValidation.Endpoints.Extensions;
+global using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;

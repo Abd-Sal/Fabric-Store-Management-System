@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-
-namespace FabricesStoreManagementSystem.CustomMiddlewares;
+﻿namespace FabricesStoreManagementSystem.CustomMiddlewares;
 
 public class AuthMiddleware(
         RequestDelegate next,
@@ -23,10 +21,4 @@ public class AuthMiddleware(
         }
         await _next(context);
     }
-}
-
-public static class InjectMiddleware
-{
-    public static IApplicationBuilder UseCustomAuthMiddleware(this IApplicationBuilder builder)
-        => builder.UseMiddleware<AuthMiddleware>();
 }

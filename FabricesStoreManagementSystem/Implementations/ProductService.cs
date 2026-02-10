@@ -64,16 +64,20 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
     }
 
     public async Task<Result<PaginatedList<ProductResponse>>> GetProducts
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Products.AsNoTracking();
 
-        if (dateRangeRequest is not null)
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
+            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
             query = query
-                .Where(x => DateOnly.FromDateTime(x.CreatedAt) >= dateRangeRequest.From &&
-                            DateOnly.FromDateTime(x.CreatedAt) <= dateRangeRequest.To);
+                .Where(x => x.CreatedAt >= from &&
+                            x.CreatedAt <= to);
+        }
 
-        if (searchRequest is not null)
+        if (searchRequest is not null && searchRequest.Search is not null)
             query = query
                 .Where(x => ProductSearchs.ProductResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
 
@@ -109,7 +113,7 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
     }
 
     public async Task<Result<PaginatedList<SaleResponse>>> GetSalesByProduct
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
             return Result.Failure<PaginatedList<SaleResponse>>(ProductErrors.NotFound);
@@ -120,12 +124,16 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
             .SelectMany(x => x.SaleItems)
             .Select(x => x.Sale);
 
-        if (dateRangeRequest is not null)
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
+            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
             query = query
-                .Where(x => DateOnly.FromDateTime(x.CreatedAt) >= dateRangeRequest.From &&
-                            DateOnly.FromDateTime(x.CreatedAt) <= dateRangeRequest.To);
+                .Where(x => x.CreatedAt >= from &&
+                            x.CreatedAt <= to);
+        }
 
-        if (searchRequest is not null)
+        if (searchRequest is not null && searchRequest.Search is not null)
             query = query
                 .Where(x => SaleSearchs.SaleResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search.ToLower()));
 
@@ -144,7 +152,7 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
     }
 
     public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchasesByProduct
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
             return Result.Failure<PaginatedList<PurchaseResponse>>(ProductErrors.NotFound);
@@ -155,12 +163,16 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
             .SelectMany(x => x.PurchaseItems)
             .Select(x => x.Purchase);
 
-        if (dateRangeRequest is not null)
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
+            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
             query = query
-                .Where(x => DateOnly.FromDateTime(x.CreatedAt) >= dateRangeRequest.From &&
-                            DateOnly.FromDateTime(x.CreatedAt) <= dateRangeRequest.To);
+                .Where(x => x.CreatedAt >= from &&
+                            x.CreatedAt <= to);
+        }
 
-        if (searchRequest is not null)
+        if (searchRequest is not null && searchRequest.Search is not null)
             query = query
                 .Where(x => PurchaseSearchs.PurchaseResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
 

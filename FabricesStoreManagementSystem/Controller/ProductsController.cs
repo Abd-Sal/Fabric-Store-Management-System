@@ -26,8 +26,8 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
     public async Task<IActionResult> GetProducts
         ([FromQuery]PaginationRequest paginationRequest,
         [FromQuery]SortRequest sortRequest,
-        [FromQuery]DateRangeRequest? dateRangeRequest,
-        [FromQuery]SearchRequest? searchRequest,
+        [FromQuery]DateRangeRequest dateRangeRequest,
+        [FromQuery]SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
         _logger.LogError("get products");
@@ -92,8 +92,8 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         ([FromRoute]Guid id,
         [FromQuery]PaginationRequest paginationRequest,
         [FromQuery]SortRequest sortRequest,
-        [FromQuery]DateRangeRequest? dateRangeRequest,
-        [FromQuery]SearchRequest? searchRequest,
+        [FromQuery]DateRangeRequest dateRangeRequest,
+        [FromQuery]SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
         _logger.LogError("get sales by product({id}) ", id);
@@ -111,8 +111,8 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         ([FromRoute]Guid id,
         [FromQuery]PaginationRequest paginationRequest,
         [FromQuery]SortRequest sortRequest,
-        [FromQuery]DateRangeRequest? dateRangeRequest,
-        [FromQuery]SearchRequest? searchRequest,
+        [FromQuery]DateRangeRequest dateRangeRequest,
+        [FromQuery]SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
         _logger.LogError("get purchase by product({id}) ", id);

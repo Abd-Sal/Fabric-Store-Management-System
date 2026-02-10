@@ -5,7 +5,7 @@ public class PaymentServiceTests
     [Theory]
     [MemberData(nameof(PaymentServiceTestsHelpers.GetPaymentsTestsData), MemberType = typeof(PaymentServiceTestsHelpers))]
     public async Task GetPayments_shouldSuccess
-        (PaginationRequest paginationRequest, DateRangeRequest? dateRangeRequest, Guid? searchReferanceID)
+        (PaginationRequest paginationRequest, DateRangeRequest dateRangeRequest, Guid searchReferanceID)
     {
         //Arrange
         var db = DbContextFactory.Create();

@@ -51,13 +51,13 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
     }
 
     public async Task<Result<PaginatedList<CustomerResponse>>> GetCustomers
-        (PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest? searchRequest, bool includeOnlyActive = true, CancellationToken cancellationToken = default)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest searchRequest, bool includeOnlyActive = true, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Customers.AsNoTracking();
         if (includeOnlyActive)
             query = query.Where(x => x.IsActive);
 
-        if (searchRequest is not null)
+        if (searchRequest is not null && searchRequest.Search is not null)
             query = query
                 .Where(x => CustomerSearchs.CustomerResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search.ToLower()));
 
@@ -116,7 +116,7 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
     }
 
     public async Task<Result<PaginatedList<SaleResponse>>> GetSalesByCustomer
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Customers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
             return Result.Failure<PaginatedList<SaleResponse>>(CustomerErrors.NotFound);
@@ -124,7 +124,7 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
         var query = _appDbContext.Sales.AsNoTracking()
             .Where(x => x.CustomerID == id);
 
-        if (searchRequest is not null)
+        if (searchRequest is not null && searchRequest.Search is not null)
             query = query
                 .Where(x => SaleSearchs.SaleResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search.ToLower()));
 

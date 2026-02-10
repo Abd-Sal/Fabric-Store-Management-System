@@ -333,7 +333,7 @@ public class CatalogServiceTests
     [Theory]
     [MemberData(nameof(CatalogServiceTestsHelpers.GetCatalogsSuccessTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
     public async Task GetCatalogs_ShouldSuccess
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest  dateRangeRequest, SearchRequest  searchRequest)
     {
         //Arrange
         var db = DbContextFactory.Create();

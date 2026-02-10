@@ -37,7 +37,7 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
     }
 
     public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchasesBySupplier
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
             return Result.Failure<PaginatedList<PurchaseResponse>>(SupplierErrors.NotFound);
@@ -45,7 +45,7 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
         var query = _appDbContext.Purchases.AsNoTracking()
             .Where(x => x.SupplierID == id);
 
-        if (searchRequest is not null)
+        if (searchRequest is not null && searchRequest.Search is not null)
             query = query
                 .Where(x => PurchaseSearchs.PurchaseResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
 
@@ -74,13 +74,13 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
     }
 
     public async Task<Result<PaginatedList<SupplierResponse>>> GetSuppliers
-        (PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest? searchRequest, bool includeOnlyActive = true, CancellationToken cancellationToken = default)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest searchRequest, bool includeOnlyActive = true, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Suppliers.AsNoTracking();
         if (includeOnlyActive)
             query = query.Where(x => x.IsActive);
 
-        if (searchRequest is not null)
+        if (searchRequest is not null && searchRequest.Search is not null)
             query = query
                 .Where(x => SupplierSearchs.SupplierResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
 

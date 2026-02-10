@@ -29,7 +29,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
         ([FromRoute] bool? state,
         [FromQuery] PaginationRequest paginatinoRequest,
         [FromQuery] SortRequest sortRequest,
-        [FromQuery] SearchRequest? searchRequest,
+        [FromQuery] SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
         _logger.LogError("get customers");
@@ -117,7 +117,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             ([FromRoute] Guid id,
             [FromQuery] PaginationRequest paginatinoRequest,
             [FromQuery] SortRequest sortRequest,
-            [FromQuery] SearchRequest? searchRequest,
+            [FromQuery] SearchRequest searchRequest,
             CancellationToken cancellationToken = default)
     {
         _logger.LogError("get sales by customer({id})", id);

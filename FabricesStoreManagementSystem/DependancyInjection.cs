@@ -15,6 +15,7 @@ public static class DependancyInjection
             .AddEfCoreConfig(configuration)
             .AddSwaggerConfig()
             .AddOptionsServices()
+            .AddFluentValidationConfig()
             .AddServices();
 
         return services;
@@ -46,13 +47,13 @@ public static class DependancyInjection
         return services;
     }
     
-    private static IServiceCollection AddFluentValidation(this IServiceCollection services)
+    private static IServiceCollection AddFluentValidationConfig(this IServiceCollection services)
     {
-        services.AddFluentValidation();
         services.AddFluentValidationAutoValidation();
+        services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         return services;
     }
-    
+
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<IUnitOfWork, UnitOfWork.UnitOfWork>();

@@ -99,7 +99,7 @@ public class SupplierServiceTests
     [Theory]
     [MemberData(nameof(SupplierServiceTestsHelpers.GetSupplierTestData), MemberType = typeof(SupplierServiceTestsHelpers))]
     public async Task GetSuppliers_ShouldSuccess
-        (PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest? searchRequest, bool includeOnlyActive)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest  searchRequest, bool includeOnlyActive)
     {
         //Arrange
         var db = DbContextFactory.Create();
@@ -245,7 +245,7 @@ public class SupplierServiceTests
     [Theory]
     [MemberData(nameof(SupplierServiceTestsHelpers.GetSupplierSalesSuccessTestData), MemberType = typeof(SupplierServiceTestsHelpers))]
     public async Task GetSalesBySupplier_ShouldSuccess
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest? searchRequest)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest  searchRequest)
     {
         //Arrange
         var db = DbContextFactory.Create();

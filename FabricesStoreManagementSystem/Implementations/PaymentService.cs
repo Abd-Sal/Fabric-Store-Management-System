@@ -6,16 +6,20 @@ public class PaymentService(AppDbContext appDbContext, ILogger<PaymentService> l
     private readonly ILogger<PaymentService> _logger = logger;
 
     public async Task<Result<PaginatedList<PaymentResponse>>> GetPayments
-        (PaginationRequest paginationRequest, DateRangeRequest? dateRangeRequest, Guid? searchReferanceID, CancellationToken cancellationToken = default)
+        (PaginationRequest paginationRequest, DateRangeRequest dateRangeRequest, Guid searchReferanceID, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Payments.AsNoTracking();
 
-        if (dateRangeRequest is not null)
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
+            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
             query = query
-                .Where(x => DateOnly.FromDateTime(x.PaidAt) >= dateRangeRequest.From &&
-                            DateOnly.FromDateTime(x.PaidAt) <= dateRangeRequest.To);
+                .Where(x => x.PaidAt >= from &&
+                            x.PaidAt <= to);
+        }
 
-        if (searchReferanceID is not null && searchReferanceID.HasValue && searchReferanceID != Guid.Empty)
+        if (searchReferanceID != Guid.Empty)
             query = query
                 .Where(x => x.ReferenceID.ToString().ToLower().Contains(searchReferanceID.ToString()!));
 

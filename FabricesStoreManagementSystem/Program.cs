@@ -6,6 +6,10 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        Log.Logger = new LoggerConfiguration()
+                    .WriteTo.Console()
+                    .CreateBootstrapLogger();
+
         builder.Host.UseSerilog((context, configuration) =>
         {
             configuration
@@ -15,6 +19,15 @@ public class Program
         builder.Services.InjectOurServices(builder.Configuration);
 
         var app = builder.Build();
+
+        // Log application start with ERROR level to make it stand out
+        Log.Error("=== APPLICATION STARTING ===");
+        Log.Error($"Start Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Log.Error($"Current Directory: {Environment.CurrentDirectory}");
+        Log.Error($"Command Line Args: {string.Join(" ", args)}");
+        Log.Error($"Machine Name: {Environment.MachineName}");
+        Log.Error($"OS Version: {Environment.OSVersion}");
+        Log.Error($".NET Version: {Environment.Version}");
 
         if (app.Environment.IsDevelopment())
         {
@@ -29,7 +42,7 @@ public class Program
 
         app.UseStaticFiles();
 
-        app.CustomLoginEndpoints();
+        app.UseCustomLoginMiddleware();
 
         app.UseCustomAuthMiddleware();
 

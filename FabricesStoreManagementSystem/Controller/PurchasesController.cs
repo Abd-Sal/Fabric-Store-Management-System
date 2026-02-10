@@ -26,8 +26,8 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
     public async Task<IActionResult> GetPurchases
     ([FromQuery] PaginationRequest paginationRequest,
     [FromQuery] SortRequest sortRequest,
-    [FromQuery] DateRangeRequest? dateRangeRequest,
-    [FromQuery] SearchRequest? searchRequest,
+    [FromQuery] DateRangeRequest dateRangeRequest,
+    [FromQuery] SearchRequest searchRequest,
     CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("get purchases");

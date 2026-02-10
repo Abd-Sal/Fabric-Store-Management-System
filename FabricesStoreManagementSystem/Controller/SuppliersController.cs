@@ -29,7 +29,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
         ([FromRoute] bool? state,
         [FromQuery] PaginationRequest paginatinoRequest,
         [FromQuery] SortRequest sortRequest,
-        [FromQuery] SearchRequest? searchRequest,
+        [FromQuery] SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("get suppliers");
@@ -117,7 +117,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             ([FromRoute]Guid id,
             [FromQuery] PaginationRequest paginatinoRequest,
             [FromQuery] SortRequest sortRequest,
-            [FromQuery] SearchRequest? searchRequest,
+            [FromQuery] SearchRequest searchRequest,
             CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("get purchases by supplier({id})", id);

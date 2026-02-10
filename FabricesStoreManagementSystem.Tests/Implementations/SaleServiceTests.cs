@@ -87,7 +87,7 @@ public class SaleServiceTests
     [Theory]
     [MemberData(nameof(SaleServiceTestsHelpers.GetSalesSuccessTestsData), MemberType = typeof(SaleServiceTestsHelpers))]
     public async Task GetSales_ShouldSuccess
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest  dateRangeRequest, SearchRequest  searchRequest)
     {
         //Arrrange
         var db = DbContextFactory.Create();

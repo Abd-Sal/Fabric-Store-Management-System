@@ -273,16 +273,20 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
     }
 
     public async Task<Result<PaginatedList<SaleResponse>>> GetSales
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest, CancellationToken cancellationToken = default)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
     {
         var query = _appDbContext.Sales.AsNoTracking();
 
-        if(dateRangeRequest is not null)
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
+            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
             query = query
-                .Where(x => DateOnly.FromDateTime(x.CreatedAt) >= dateRangeRequest.From &&
-                            DateOnly.FromDateTime(x.CreatedAt) <= dateRangeRequest.To);
+                .Where(x => x.CreatedAt >= from &&
+                            x.CreatedAt <= to);
+        }
 
-        if (searchRequest is not null)
+        if (searchRequest is not null && searchRequest.Search is not null)
             query = query
                 .Where(x => SaleSearchs.SaleResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
 

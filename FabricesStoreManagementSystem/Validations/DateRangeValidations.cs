@@ -6,29 +6,35 @@ public class DateRangeValidations : AbstractValidator<DateRangeRequest>
     {
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
 
-        RuleFor(x => x.From)
-            .NotEmpty()
-            .WithMessage("تاريخ البداية مطلوب.")
-            .Must(date => date != default)
-            .WithMessage("تاريخ البداية لا يمكن أن يكون فارغًا.")
-            .LessThanOrEqualTo(today)
-            .WithMessage("تاريخ البداية لا يمكن أن يكون في المستقبل.");
+        // Either both From & To are provided, or neither
+        RuleFor(x => x)
+            .Must(x =>
+                (x.From.HasValue && x.To.HasValue) ||
+                (!x.From.HasValue && !x.To.HasValue))
+            .WithMessage("يجب إدخال تاريخ البداية وتاريخ النهاية معًا أو تركهما فارغين.");
 
+        // From validations (only if provided)
+        RuleFor(x => x.From)
+            .LessThanOrEqualTo(today)
+            .WithMessage("تاريخ البداية لا يمكن أن يكون في المستقبل.")
+            .When(x => x.From.HasValue);
+
+        // To validations (only if provided)
         RuleFor(x => x.To)
-            .NotEmpty()
-            .WithMessage("تاريخ النهاية مطلوب.")
-            .Must(date => date != default)
-            .WithMessage("تاريخ النهاية لا يمكن أن يكون فارغًا.")
             .LessThanOrEqualTo(today)
             .WithMessage("تاريخ النهاية لا يمكن أن يكون في المستقبل.")
-            .GreaterThanOrEqualTo(x => x.From)
-            .WithMessage("تاريخ النهاية يجب أن يكون في نفس يوم أو بعد تاريخ البداية.")
-            .When(x => x.From != default);
+            .When(x => x.To.HasValue);
 
-        // Additional business rule: maximum range (e.g., 1 year)
-        RuleFor(x => x.To)
-            .Must((request, to) => to.DayNumber - request.From.DayNumber <= 365)
+        // From <= To (only if both provided)
+        RuleFor(x => x)
+            .Must(x => x.From <= x.To)
+            .WithMessage("تاريخ النهاية يجب أن يكون في نفس يوم أو بعد تاريخ البداية.")
+            .When(x => x.From.HasValue && x.To.HasValue);
+
+        // Max range: 1 year (only if both provided)
+        RuleFor(x => x)
+            .Must(x => x.To!.Value.DayNumber - x.From!.Value.DayNumber <= 365)
             .WithMessage("نطاق التاريخ لا يمكن أن يتجاوز سنة واحدة.")
-            .When(x => x.From != default && x.To != default);
+            .When(x => x.From.HasValue && x.To.HasValue);
     }
 }

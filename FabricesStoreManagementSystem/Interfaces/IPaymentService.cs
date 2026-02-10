@@ -2,5 +2,5 @@
 
 public interface IPaymentService
 {
-    Task<Result<PaginatedList<PaymentResponse>>> GetPayments(PaginationRequest paginationRequest, DateRangeRequest? dateRangeRequest, Guid? searchReferanceID, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedList<PaymentResponse>>> GetPayments(PaginationRequest paginationRequest, DateRangeRequest dateRangeRequest, Guid searchReferanceID, CancellationToken cancellationToken = default);
 }

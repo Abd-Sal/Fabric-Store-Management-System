@@ -35,7 +35,7 @@ public class DateRangeValidationsTests
 
         var result = _validator.TestValidate(request);
 
-        result.ShouldHaveValidationErrorFor(x => x.From);
+        result.ShouldHaveValidationErrorFor(x => x);
     }
 
     #endregion
@@ -68,7 +68,7 @@ public class DateRangeValidationsTests
 
         var result = _validator.TestValidate(request);
 
-        result.ShouldHaveValidationErrorFor(x => x.To);
+        result.ShouldHaveValidationErrorFor(x => x);
     }
 
     [Theory]
@@ -83,7 +83,7 @@ public class DateRangeValidationsTests
 
         var result = _validator.TestValidate(request);
 
-        result.ShouldHaveValidationErrorFor(x => x.To)
+        result.ShouldHaveValidationErrorFor(x => x)
               .WithErrorMessage("تاريخ النهاية يجب أن يكون في نفس يوم أو بعد تاريخ البداية.");
     }
 
@@ -103,7 +103,7 @@ public class DateRangeValidationsTests
 
         var result = _validator.TestValidate(request);
 
-        result.ShouldHaveValidationErrorFor(x => x.To)
+        result.ShouldHaveValidationErrorFor(x => x)
               .WithErrorMessage("نطاق التاريخ لا يمكن أن يتجاوز سنة واحدة.");
     }
 

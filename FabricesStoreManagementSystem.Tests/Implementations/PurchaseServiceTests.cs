@@ -133,7 +133,7 @@ public class PurchaseServiceTests
     [Theory]
     [MemberData(nameof(PurchaseServiceTestsHelpers.GetPurchasesSuccessTestsData), MemberType = typeof(PurchaseServiceTestsHelpers))]
     public async Task GetPurchases_ShouldSuccess
-        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest? dateRangeRequest, SearchRequest? searchRequest)
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest  dateRangeRequest, SearchRequest  searchRequest)
     {
         //Arrrange
         var db = DbContextFactory.Create();
@@ -308,7 +308,7 @@ public class PurchaseServiceTests
         {
             CustomerID = CustomersRepo.Customers()[0].Id,
             ProductsCount = 1,
-            Discount = 0,
+            Discount = 1,
             NetAmount = 10,
             TotalAmount = 11,
             PaidAmount = 10,

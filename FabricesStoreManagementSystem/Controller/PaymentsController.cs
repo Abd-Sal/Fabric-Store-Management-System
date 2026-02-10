@@ -9,8 +9,8 @@ public class PaymentsController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAllPayments
         ([FromQuery] PaginationRequest paginationRequest,
-        [FromQuery] DateRangeRequest? dateRangeRequest,
-        [FromQuery] Guid? id,
+        [FromQuery] DateRangeRequest dateRangeRequest,
+        [FromQuery] Guid id,
         CancellationToken cancellationToken = default)
     {
         var result = await _unitOfWork.PaymentService.GetPayments(paginationRequest, dateRangeRequest, id, cancellationToken);

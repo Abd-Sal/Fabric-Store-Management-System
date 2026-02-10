@@ -6,7 +6,7 @@ public class PaginatedList<T>(List<T> items, int pageNumber, int count, int page
     public int PageNumber { get; set; } = pageNumber;
     public int TotalItems { get; set; } = count;
     public int TotalPages { get; set; } = (int)Math.Ceiling(count / (double)pageSize);
-    public bool HasPreviousPage => PageNumber > 1;
+    public bool HasPreviousPage => PageNumber > 1 && TotalPages > 0;
     public bool HasNextPage => PageNumber < TotalPages;
 
     public static async Task<PaginatedList<T>> CreateAsync
