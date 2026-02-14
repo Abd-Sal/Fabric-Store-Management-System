@@ -287,8 +287,7 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
         }
 
         if (searchRequest is not null && searchRequest.Search is not null)
-            query = query
-                .Where(x => SaleSearchs.SaleResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
+            query = query.SaleResponseSearch(searchRequest);
 
         if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(SaleSorts.SaleResponseSort(sortRequest));

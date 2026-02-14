@@ -55,7 +55,7 @@ public class SupplierValidations : AbstractValidator<SupplierRequest>
 
         // Rule 2: Length validation (only for valid addresses)
         RuleFor(x => x.Address)
-            .Length(1, SupplierConfigurations.AddressMaxLength)
+            .Length(3, SupplierConfigurations.AddressMaxLength)
             .WithMessage($"العنوان يجب أن يكون بين 1 و {SupplierConfigurations.AddressMaxLength} حرفًا.")
             .When(x => !string.IsNullOrWhiteSpace(x.Address));
 
@@ -76,8 +76,8 @@ public class SupplierValidations : AbstractValidator<SupplierRequest>
 
         // Rule 2: Length validation (only for valid, non-whitespace phone numbers)
         RuleFor(x => x.Phone)
-            .Length(1, SupplierConfigurations.PhoneMaxLength)
-            .WithMessage($"رقم الهاتف يجب أن يكون بين 1 و {SupplierConfigurations.PhoneMaxLength} حرفًا.")
+            .Length(4, SupplierConfigurations.PhoneMaxLength)
+            .WithMessage($"رقم الهاتف يجب أن يكون بين 4 و {SupplierConfigurations.PhoneMaxLength} حرفًا.")
             .When(x => !string.IsNullOrWhiteSpace(x.Phone));
 
         // Rule 3: Character validation - allowed characters only
@@ -88,7 +88,7 @@ public class SupplierValidations : AbstractValidator<SupplierRequest>
 
         // Rule 4: Custom validation for phone number format
         RuleFor(x => x.Phone)
-            .Must(phone => IsValidPhoneNumber(phone))
+            .Must(phone => IsValidPhoneNumber(phone!))
             .WithMessage("صيغة رقم الهاتف غير صالحة.")
             .When(x => !string.IsNullOrWhiteSpace(x.Phone));
         #endregion

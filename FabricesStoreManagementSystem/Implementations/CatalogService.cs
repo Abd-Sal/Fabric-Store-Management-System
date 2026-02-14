@@ -441,8 +441,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         }
 
         if (searchRequest is not null && searchRequest.Search is not null)
-            query = query
-                .Where(x => CatalogSearchs.CatalogResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search.ToLower()));
+            query = query.CatalogResponseSearch(searchRequest);
 
         if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(CatalogSorts.CatalogResponseSort(sortRequest));

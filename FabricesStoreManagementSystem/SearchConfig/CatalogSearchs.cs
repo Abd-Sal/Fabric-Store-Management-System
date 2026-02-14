@@ -1,16 +1,16 @@
 ﻿namespace FabricesStoreManagementSystem.SearchConfig;
 
-public class CatalogSearchs
+public static class CatalogSearchs
 {
-    public static Expression<Func<Catalog, object>> CatalogResponseSearch(SearchRequest searchRequest)
+    public static IQueryable<Catalog> CatalogResponseSearch(this IQueryable<Catalog> query, SearchRequest searchRequest)
         => searchRequest.SearchColumn?.ToLower() switch
         {
-            "status" => catalog => catalog.Status,
-            "description" => catalog => catalog.Description ?? "",
-            "supplierid" => catalog => catalog.SupplierID ?? default(Guid),
-            "code" => catalog => catalog.CatalogCode,
-            "id" => catalog => catalog.Id,
-            _ => catalog => catalog.CatalogCode
+            "status" => query.Where(x => EF.Functions.Like(x.Status.ToString(), $"%{searchRequest.Search}%")),
+            "description" => query.Where(x => EF.Functions.Like(x.Description ?? "", $"%{searchRequest.Search}%")),
+            "supplierid" => query.Where(x => EF.Functions.Like(x.SupplierID.ToString(), $"%{searchRequest.Search}%")),
+            "code" => query.Where(x => EF.Functions.Like(x.CatalogCode, $"%{searchRequest.Search}%")),
+            "id" => query.Where(x => EF.Functions.Like(x.Id.ToString(), $"%{searchRequest.Search}%")),
+            _ => query.Where(x => EF.Functions.Like(x.CatalogCode, $"%{searchRequest.Search}%")),
         };
 
     public static SearchColumnsResponse CatalogSortColumns()

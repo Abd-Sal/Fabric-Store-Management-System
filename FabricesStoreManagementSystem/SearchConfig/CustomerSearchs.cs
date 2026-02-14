@@ -1,23 +1,27 @@
 ﻿namespace FabricesStoreManagementSystem.SearchConfig;
 
-public class CustomerSearchs
+public static class CustomerSearchs
 {
-    public static Expression<Func<Customer, object>> CustomerResponseSearch(SearchRequest searchRequest)
+    public static IQueryable<Customer> CustomerResponseSearch(this IQueryable<Customer> query, SearchRequest searchRequest)
         => searchRequest.SearchColumn?.ToLower() switch
         {
-            "name" => customer => $"{customer.FirstName} {customer.LastName}",
-            "address" => customer => customer.Address ?? "",
-            "email" => customer => customer.Email ?? "",
-            "phone" => customer => customer.Phone ?? "",
-            "id" => customer => customer.Id,
-            _ => customer => new { customer.FirstName, customer.LastName }
+            "name" => query.Where(x => EF.Functions.Like($"{x.FirstName} {x.LastName}", $"%{searchRequest.Search}%")),
+            "firstname" => query.Where(x => EF.Functions.Like(x.FirstName, $"%{searchRequest.Search}%")),
+            "lastname" => query.Where(x => EF.Functions.Like(x.LastName, $"%{searchRequest.Search}%")),
+            "address" => query.Where(x => x.Address != null && EF.Functions.Like(x.Address, $"%{searchRequest.Search}%")),
+            "email" => query.Where(x => x.Email != null && EF.Functions.Like(x.Email, $"%{searchRequest.Search}%")),
+            "phone" => query.Where(x => x.Phone != null && EF.Functions.Like(x.Phone, $"%{searchRequest.Search}%")),
+            "id" => query.Where(x => EF.Functions.Like(x.Id.ToString(), $"%{searchRequest.Search}%")),
+            _ => query.Where(x => EF.Functions.Like($"{x.FirstName} {x.LastName}", $"%{searchRequest.Search}%"))
         };
 
     public static SearchColumnsResponse CustomerSortColumns()
     => new SearchColumnsResponse(
             [new LabelValue("الاسم", "name"), new LabelValue("العنوان", "address"),
             new LabelValue("البريد الالكتروني", "email"), new LabelValue("رقم الهاتف", "phone"),
-            new LabelValue("المعرف", "id")],
+            new LabelValue("المعرف", "id"),
+            new LabelValue("الاسم الأول", "firstname"),
+            new LabelValue("الاسم الأخير", "lastname")],
             new LabelValue("الاسم", "name")
         );
 

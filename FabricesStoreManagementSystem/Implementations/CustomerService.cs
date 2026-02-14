@@ -58,8 +58,7 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
             query = query.Where(x => x.IsActive);
 
         if (searchRequest is not null && searchRequest.Search is not null)
-            query = query
-                .Where(x => CustomerSearchs.CustomerResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search.ToLower()));
+            query = query.CustomerResponseSearch(searchRequest);
 
         if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(CustomerSorts.CustomerResponseSort(sortRequest));
@@ -125,9 +124,7 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
             .Where(x => x.CustomerID == id);
 
         if (searchRequest is not null && searchRequest.Search is not null)
-            query = query
-                .Where(x => SaleSearchs.SaleResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search.ToLower()));
-
+            query = query.SaleResponseSearch(searchRequest);
 
         if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(SaleSorts.SaleResponseSort(sortRequest));

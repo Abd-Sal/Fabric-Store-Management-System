@@ -15,22 +15,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
     [FromQuery] SearchRequest searchRequest,
     CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get catalogs");
-        
-        // Validate SearchRequest if provided
-        if (searchRequest is not null)
-        {
-            var validator = new SearchValidations();
-            var validationResult = await validator.ValidateAsync(searchRequest, cancellationToken);
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors
-                    .GroupBy(x => x.PropertyName)
-                    .ToDictionary(x => x.Key, x => x.Select(e => e.ErrorMessage).ToArray());
-                return BadRequest(new { errors });
-            }
-        }
-        
+        _logger.LogError("get catalogs");        
         var result = await _unitOfWork.CatalogService.GetCatalogs(paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
         if (result.IsFailure)
         {

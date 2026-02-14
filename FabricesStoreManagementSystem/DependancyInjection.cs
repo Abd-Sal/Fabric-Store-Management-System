@@ -9,7 +9,7 @@ public static class DependancyInjection
             {
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
-
+        
         services.AddExceptionHandler<GlobalExceptionHandler.GlobalExceptionHandler>();
         services.AddProblemDetails();
 

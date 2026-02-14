@@ -1,14 +1,14 @@
 ﻿namespace FabricesStoreManagementSystem.SearchConfig;
 
-public class SaleSearchs
+public static class SaleSearchs
 {
-    public static Expression<Func<Sale, object>> SaleResponseSearch(SearchRequest searchRequest)
+    public static IQueryable<Sale> SaleResponseSearch(this IQueryable<Sale> query, SearchRequest searchRequest)
         => searchRequest.SearchColumn?.ToLower() switch
         {
-            "status" => sale => sale.Status,
-            "invoicenumber" => sale => sale.InvoiceNumber,
-            "customerid" => sale => sale.CustomerID,
-            _ => product => product.InvoiceNumber
+            "status" => query.Where(x => EF.Functions.Like(x.Status.ToString(), $"%{searchRequest.Search}%")),
+            "invoicenumber" => query.Where(x => EF.Functions.Like(x.InvoiceNumber, $"%{searchRequest.Search}%")),
+            "customerid" => query.Where(x => EF.Functions.Like(x.CustomerID.ToString(), $"%{searchRequest.Search}%")),
+            _ => query.Where(x => EF.Functions.Like(x.InvoiceNumber, $"%{searchRequest.Search}%")),
         };
 
     public static SearchColumnsResponse SaleSortColumns()

@@ -46,8 +46,7 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
             .Where(x => x.SupplierID == id);
 
         if (searchRequest is not null && searchRequest.Search is not null)
-            query = query
-                .Where(x => PurchaseSearchs.PurchaseResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
+            query = query.PurchaseResponseSearch(searchRequest);
 
         if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(PurchaseSorts.PurchaseResponseSort(sortRequest));
@@ -81,8 +80,7 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
             query = query.Where(x => x.IsActive);
 
         if (searchRequest is not null && searchRequest.Search is not null)
-            query = query
-                .Where(x => SupplierSearchs.SupplierResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
+            query = query.SupplierResponseSearch(searchRequest);
 
         if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(SupplierSorts.SupplierResponseSort(sortRequest));
