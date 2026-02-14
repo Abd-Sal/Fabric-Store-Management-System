@@ -2,6 +2,7 @@
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using Microsoft.Extensions.Options;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Diagnostics;
 
 global using System.ComponentModel.DataAnnotations.Schema;
 global using System.ComponentModel.DataAnnotations;
@@ -11,6 +12,7 @@ global using System.Reflection;
 global using System.Globalization;
 global using System.Text.RegularExpressions;
 global using System.Text.Json;
+global using System.Net;
 
 global using FabricesStoreManagementSystem.SearchConfig;
 global using FabricesStoreManagementSystem.DTOs.Catalog;
@@ -26,7 +28,6 @@ global using FabricesStoreManagementSystem.DTOs.Sale;
 global using FabricesStoreManagementSystem.DTOs.Supplier;
 global using FabricesStoreManagementSystem.DTOs.Customer;
 global using FabricesStoreManagementSystem.DTOs.Product;
-global using FabricesStoreManagementSystem.DTOs;
 global using FabricesStoreManagementSystem.Data;
 global using FabricesStoreManagementSystem.Interfaces;
 global using FabricesStoreManagementSystem.Implementations;
@@ -38,6 +39,7 @@ global using FabricesStoreManagementSystem.UnitOfWork;
 global using FabricesStoreManagementSystem.ResultsExtension;
 global using FabricesStoreManagementSystem.CustomMiddlewares;
 global using FabricesStoreManagementSystem.Validations;
+global using FabricesStoreManagementSystem.GlobalExceptionHandler;
 
 global using Serilog;
 global using FluentValidation;

@@ -9,6 +9,10 @@ public static class DependancyInjection
             {
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
             });
+
+        services.AddExceptionHandler<GlobalExceptionHandler.GlobalExceptionHandler>();
+        services.AddProblemDetails();
+
         services.AddOpenApi();
 
         services
@@ -16,7 +20,8 @@ public static class DependancyInjection
             .AddSwaggerConfig()
             .AddOptionsServices()
             .AddFluentValidationConfig()
-            .AddServices();
+            .AddServices()
+            .AdjustCORS(configuration);
 
         return services;
     }
@@ -64,5 +69,21 @@ public static class DependancyInjection
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IPaymentService, PaymentService>();
         return services;
+    }
+
+    private static IServiceCollection AdjustCORS(this IServiceCollection services, IConfiguration configuration)
+    {
+        var hosts = configuration.GetSection("CORS:AllowedHosts").Get<string[]>();
+        var methods = configuration.GetSection("CORS:AllowedMethods").Get<string[]>();
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+            {
+                policy
+                    .WithOrigins(hosts ?? new[] { "http://localhost:5173" })
+                    .WithMethods(methods ?? new[] { "GET", "POST" })
+                    .AllowAnyHeader();
+            });
+        }); return services;
     }
 }

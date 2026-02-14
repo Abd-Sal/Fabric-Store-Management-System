@@ -19,9 +19,7 @@ public class ProductValidations : AbstractValidator<ProductRequest>
                 .Must(name => !string.IsNullOrWhiteSpace(name))
                 .WithMessage("مادة الصنع لا يمكن أن تكون فارغة أو مسافات فقط.")
                 .Length(1, ProductConfigurations.NameMaxLength)
-                .WithMessage($"اسم المنتج يجب أن يكون بين 1 و {ProductConfigurations.NameMaxLength} حرفًا.")
-                .Matches(@"^[\p{IsArabic}\s\-\.\,\d]+$")
-                .WithMessage("اسم المنتج يمكن أن يحتوي على أحرف عربية وأرقام ومسافات فقط.");
+                .WithMessage($"اسم المنتج يجب أن يكون بين 1 و {ProductConfigurations.NameMaxLength} حرفًا.");
         });
 
         // Code validation (required)
@@ -31,8 +29,6 @@ public class ProductValidations : AbstractValidator<ProductRequest>
             .WithMessage("كود المنتج مطلوب.")
             .Length(1, ProductConfigurations.CodeMaxLength)
             .WithMessage($"كود المنتج يجب أن يكون بين 1 و {ProductConfigurations.CodeMaxLength} حرفًا.")
-            .Matches(@"^[A-Za-z0-9\-_]+$")
-            .WithMessage("كود المنتج يمكن أن يحتوي على أحرف إنجليزية وأرقام وشرطات فقط.")
             .Must(code => !code.Contains(" "))
             .WithMessage("كود المنتج لا يمكن أن يحتوي على مسافات.");
 
@@ -42,9 +38,7 @@ public class ProductValidations : AbstractValidator<ProductRequest>
             .NotEmpty()
             .WithMessage("لون المنتج مطلوب.")
             .Length(1, ProductConfigurations.ColorMaxLength)
-            .WithMessage($"لون المنتج يجب أن يكون بين 1 و {ProductConfigurations.ColorMaxLength} حرفًا.")
-            .Matches(@"^[\p{IsArabic}\s]+$")
-            .WithMessage("لون المنتج يجب أن يكون باللغة العربية.");
+            .WithMessage($"لون المنتج يجب أن يكون بين 1 و {ProductConfigurations.ColorMaxLength} حرفًا.");
 
         // Unit validation (required)
         RuleFor(x => x.Unit)
@@ -54,9 +48,7 @@ public class ProductValidations : AbstractValidator<ProductRequest>
             .Length(1, ProductConfigurations.UnitMaxLength)
             .WithMessage($"وحدة القياس يجب أن تكون بين 1 و {ProductConfigurations.UnitMaxLength} حرفًا.")
             .Must(unit => ValidUnits.Contains(unit.Trim()))
-            .WithMessage("وحدة القياس غير صالحة. يرجى اختيار وحدة من القائمة المحددة.")
-            .Matches(@"^[\p{IsArabic}\s]+$")
-            .WithMessage("وحدة القياس يجب أن تكون باللغة العربية.");
+            .WithMessage("وحدة القياس غير صالحة. يرجى اختيار وحدة من القائمة المحددة.");
 
         // Material validation (optional)
         When(x => x.Material != null, () =>
@@ -66,9 +58,7 @@ public class ProductValidations : AbstractValidator<ProductRequest>
                 .WithMessage("مادة المنتج مطلوبة.")
                 .When(x => x.Material != null) // Only validate if provided
                 .Length(1, ProductConfigurations.MaterialMaxLength)
-                .WithMessage($"مادة المنتج يجب أن تكون بين 1 و {ProductConfigurations.MaterialMaxLength} حرفًا.")
-                .Matches(@"^[\p{IsArabic}\s\-\.\,]+$")
-                .WithMessage("مادة المنتج يمكن أن تحتوي على أحرف عربية ومسافات فقط.");
+                .WithMessage($"مادة المنتج يجب أن تكون بين 1 و {ProductConfigurations.MaterialMaxLength} حرفًا.");
         });
     }
 }

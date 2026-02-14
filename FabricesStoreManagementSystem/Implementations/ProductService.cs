@@ -10,7 +10,7 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
     {
         _logger.LogInformation("check for product code and color duplication");
         if (await _appDbContext.Products.AsNoTracking().AnyAsync(x => x.Code == request.Code && x.Color == request.Color, cancellationToken))
-            return Result.Failure<ProductResponse>(ProductErrors.CodeWithColorConflict);
+            return Result.Failure<ProductResponse>(ProductErrors.CodeWithColorConflict(request.Code, request.Color));
         var product = new Product
         {
             Name = request.Name,
@@ -78,8 +78,7 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
         }
 
         if (searchRequest is not null && searchRequest.Search is not null)
-            query = query
-                .Where(x => ProductSearchs.ProductResponseSearch(searchRequest).ToString().ToLower().Contains(searchRequest.Search));
+            query = query.ProductResponseSearch(searchRequest);
 
         if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(ProductSorts.ProductResponseSort(sortRequest));

@@ -27,22 +27,22 @@ public class ProductServiceTestsHelpers
         yield return new object[]
         {
             new ProductRequest("SWAR Fabric", "P-001", "Red", "Meter", "silk"),
-            ProductErrors.CodeWithColorConflict
+            ProductErrors.CodeWithColorConflict("P-001", "Red")
         };
         yield return new object[]
         {
             new ProductRequest(null, "P-001", "Green", "Meter", null),
-            ProductErrors.CodeWithColorConflict
+            ProductErrors.CodeWithColorConflict("P-001", "Green")
         };
         yield return new object[]
         {
             new ProductRequest("SWAR Fabric", "P-002", "Red", "Meter", null),
-            ProductErrors.CodeWithColorConflict
+            ProductErrors.CodeWithColorConflict("P-002", "Red")
         };
         yield return new object[]
         {
             new ProductRequest(null, "P-002", "Green", "Meter", "silk"),
-            ProductErrors.CodeWithColorConflict
+            ProductErrors.CodeWithColorConflict("P-002", "Green")
         };
     }
 

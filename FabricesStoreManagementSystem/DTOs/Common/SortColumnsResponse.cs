@@ -1,7 +1,7 @@
 ﻿namespace FabricesStoreManagementSystem.DTOs.Common;
 
 public record SortColumnsResponse(
-    string[] Columns,
-    string Default,
+    LabelValue[] Columns,
+    LabelValue Default,
     string DefaultSortDirection = "desc"
 );

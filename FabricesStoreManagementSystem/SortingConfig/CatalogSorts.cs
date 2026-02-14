@@ -15,7 +15,9 @@ public class CatalogSorts
 
     public static SortColumnsResponse CatalogSortColumns()
         => new SortColumnsResponse(
-                ["status", "productscount", "code", "createdat", "id"],
-                "createdat"
+                [new LabelValue("الحالة", "status"), new LabelValue("عدد المنتجات", "productscount"),
+                new LabelValue("الكود", "code"), new LabelValue("تاريخ الانشاء", "createdat"),
+                new LabelValue("المعرف", "id")],
+                new LabelValue("تاريخ الانشاء", "createdat")
             );
 }

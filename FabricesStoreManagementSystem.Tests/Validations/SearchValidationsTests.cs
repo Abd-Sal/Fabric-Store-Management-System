@@ -21,7 +21,7 @@ public class SearchValidationsTests
 
         var result = _validator.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.Search);
+        result.ShouldNotHaveAnyValidationErrors();
     }
 
     [Theory]
@@ -157,7 +157,7 @@ public class SearchValidationsTests
 
         var result = _validator.TestValidate(model);
 
-        result.ShouldHaveValidationErrorFor(x => x.Search);
+        result.ShouldNotHaveAnyValidationErrors();
     }
 
     [Fact]

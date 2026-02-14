@@ -1,6 +1,6 @@
 ﻿namespace FabricesStoreManagementSystem.Abstraction;
 
-public class Error : IComparable<Error>
+public class Error : IComparable<Error>, IEquatable<Error>
 {
     public static Error None = new Error(string.Empty, string.Empty, null);
 
@@ -14,6 +14,31 @@ public class Error : IComparable<Error>
     public string Code { get; }
     public string Description { get; }
     public int? StatusCode { get; } = null;
+
+    public bool Equals(Error? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+
+        return Code == other.Code &&
+               Description == other.Description &&
+               StatusCode == other.StatusCode;
+    }
+
+    public override bool Equals(object? obj) => Equals(obj as Error);
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Code, Description, StatusCode);
+    }
+
+    public static bool operator ==(Error? left, Error? right)
+    {
+        if (left is null) return right is null;
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(Error? left, Error? right) => !(left == right);
 
     public int CompareTo(Error? other)
     {

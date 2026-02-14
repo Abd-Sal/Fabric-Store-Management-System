@@ -15,8 +15,10 @@ public class CustomerSearchs
 
     public static SearchColumnsResponse CustomerSortColumns()
     => new SearchColumnsResponse(
-            ["name", "address", "email", "phone", "id"],
-            "name"
+            [new LabelValue("الاسم", "name"), new LabelValue("العنوان", "address"),
+            new LabelValue("البريد الالكتروني", "email"), new LabelValue("رقم الهاتف", "phone"),
+            new LabelValue("المعرف", "id")],
+            new LabelValue("الاسم", "name")
         );
 
 }

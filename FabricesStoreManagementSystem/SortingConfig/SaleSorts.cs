@@ -19,9 +19,11 @@ public class SaleSorts
 
     public static SortColumnsResponse SaleSortColumns()
         => new SortColumnsResponse(
-                ["invoicenumber", "productscount", "netamount",
-                "paidamount", "status", "createdat", "totalamount",
-                "id", "discount"],
-                "createdat"
+                [new LabelValue("رقم الفاتورة", "invoicenumber"), new LabelValue("عدد المنتجات", "productscount"),
+                new LabelValue("صافي القيمة", "netamount"), new LabelValue("المبلغ المدفوع", "paidamount"),
+                new LabelValue("الحالة", "status"), new LabelValue("تاريخ الانشاء", "createdat"),
+                new LabelValue("قيمة الفاتورة", "totalamount"), new LabelValue("المعرف", "id"),
+                new LabelValue("الخصم", "discount")],
+                new LabelValue("تاريخ الانشاء", "createdat")
             );
 }

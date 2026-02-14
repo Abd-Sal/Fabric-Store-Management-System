@@ -2,10 +2,9 @@
 
 public class DateRangeValidations : AbstractValidator<DateRangeRequest>
 {
+    
     public DateRangeValidations()
     {
-        var today = DateOnly.FromDateTime(DateTime.UtcNow);
-
         // Either both From & To are provided, or neither
         RuleFor(x => x)
             .Must(x =>
@@ -15,13 +14,13 @@ public class DateRangeValidations : AbstractValidator<DateRangeRequest>
 
         // From validations (only if provided)
         RuleFor(x => x.From)
-            .LessThanOrEqualTo(today)
+            .LessThanOrEqualTo(x => GetTodayInUserTimezone(x.Timezone))
             .WithMessage("تاريخ البداية لا يمكن أن يكون في المستقبل.")
             .When(x => x.From.HasValue);
 
         // To validations (only if provided)
         RuleFor(x => x.To)
-            .LessThanOrEqualTo(today)
+            .LessThanOrEqualTo(x => GetTodayInUserTimezone(x.Timezone))
             .WithMessage("تاريخ النهاية لا يمكن أن يكون في المستقبل.")
             .When(x => x.To.HasValue);
 
@@ -37,4 +36,24 @@ public class DateRangeValidations : AbstractValidator<DateRangeRequest>
             .WithMessage("نطاق التاريخ لا يمكن أن يتجاوز سنة واحدة.")
             .When(x => x.From.HasValue && x.To.HasValue);
     }
+
+    private static DateOnly GetTodayInUserTimezone(string? timezone)
+    {
+        if (string.IsNullOrEmpty(timezone))
+            timezone = "Arab Standard Time";
+
+        TimeZoneInfo userTimeZone;
+        try
+        {
+            userTimeZone = TimeZoneInfo.FindSystemTimeZoneById(timezone);
+        }
+        catch
+        {
+            userTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Arab Standard Time");
+        }
+
+        var userNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, userTimeZone);
+        return DateOnly.FromDateTime(userNow);
+    }
 }
+

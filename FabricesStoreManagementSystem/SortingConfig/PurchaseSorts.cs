@@ -17,8 +17,10 @@ public class PurchaseSorts
 
     public static SortColumnsResponse PurchaseSortColumns()
         => new SortColumnsResponse(
-                ["invoicenumber", "paidamount", "totalamount",
-                "productscount", "createdat", "id", "status"],
-                "createdat"
+                [new LabelValue("رقم الفاتورة", "invoicenumber"), new LabelValue("المبلغ المدفوع", "paidamount"),
+                new LabelValue("قيمة الفاتورة", "totalamount"), new LabelValue("عدد المنتجات", "productscount"),
+                new LabelValue("تاريخ الانشاء", "createdat"), new LabelValue("المعرف", "id"),
+                new LabelValue("الحالة", "status")],
+                new LabelValue("تاريخ الانشاء", "createdat")
             );
 }

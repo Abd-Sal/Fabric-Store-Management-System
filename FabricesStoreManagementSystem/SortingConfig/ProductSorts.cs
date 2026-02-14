@@ -16,7 +16,9 @@ public class ProductSorts
 
     public static SortColumnsResponse ProductSortColumns()
         => new SortColumnsResponse(
-                ["name", "color", "code", "productcode", "createdat", "id"],
-                "createdat"
+                [new LabelValue("الاسم", "name"), new LabelValue("اللون", "color"),
+                new LabelValue("الكود", "code"), new LabelValue("كود و اللون", "productcode"),
+                new LabelValue("تاريخ الانشاء", "createdat"), new LabelValue("المعرف", "id")],
+                new LabelValue("تاريخ الانشاء", "createdat")
             );
 }

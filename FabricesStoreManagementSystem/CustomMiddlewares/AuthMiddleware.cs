@@ -2,13 +2,11 @@
 
 public class AuthMiddleware(
         RequestDelegate next,
-        IOptionsMonitor<AuthOptions> optionsMonitor,
-        ILogger<AuthMiddleware> logger
+        IOptionsMonitor<AuthOptions> optionsMonitor
     )
 {
     private readonly RequestDelegate _next = next;
     private readonly AuthOptions _optionsMonitor = optionsMonitor.CurrentValue;
-    private readonly ILogger<AuthMiddleware> logger = logger;
 
     public async Task InvokeAsync(HttpContext context)
     {

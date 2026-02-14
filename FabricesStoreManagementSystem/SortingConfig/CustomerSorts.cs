@@ -17,7 +17,10 @@ public class CustomerSorts
 
     public static SortColumnsResponse CustomerSortColumns()
     => new SortColumnsResponse(
-            ["name", "address", "email", "phone", "isactive", "createdat", "id"],
-            "createdat"
+            [new LabelValue("الاسم", "name"), new LabelValue("العنوان", "address"),
+            new LabelValue("البريد الالكتروني", "email"), new LabelValue("رقم الهاتف", "phone"),
+            new LabelValue("حالة الزبون", "isactive"), new LabelValue("تاريخ الانشاء", "createdat"),
+            new LabelValue("المعرف", "id")],
+            new LabelValue("تاريخ الانشاء", "createdat")
         );
 }

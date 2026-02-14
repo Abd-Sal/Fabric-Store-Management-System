@@ -13,7 +13,8 @@ public class PurchaseSearchs
 
     public static SearchColumnsResponse PurchaseSortColumns()
     => new SearchColumnsResponse(
-            ["status", "invoicenumber", "supplierid"],
-            "invoicenumber"
+            [new LabelValue("الحالة", "status"), new LabelValue("رقم الفاتورة", "invoicenumber"),
+            new LabelValue("معرف المورد", "supplierid")],
+            new LabelValue("رقم الفاتورة", "invoicenumber")
         );
 }

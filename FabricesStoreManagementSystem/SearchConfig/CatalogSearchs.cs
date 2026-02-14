@@ -15,7 +15,9 @@ public class CatalogSearchs
 
     public static SearchColumnsResponse CatalogSortColumns()
         => new SearchColumnsResponse(
-                ["description", "status", "code", "supplierid", "id"],
-                "code"
+                [new LabelValue("الوصف", "description"), new LabelValue("الحالة", "status"),
+                new LabelValue("الكود", "code"), new LabelValue("معرف المورد", "supplierid"),
+                new LabelValue("المعرف", "id")],
+                new LabelValue("الكود", "code")
             );
 }

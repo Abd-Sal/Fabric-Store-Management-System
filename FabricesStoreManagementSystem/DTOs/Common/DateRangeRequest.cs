@@ -2,5 +2,6 @@
 
 public record DateRangeRequest(
     DateOnly? From,
-    DateOnly? To
+    DateOnly? To,
+    string Timezone = "Arab Standard Time"
 );

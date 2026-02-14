@@ -13,9 +13,6 @@ public class SearchValidations : AbstractValidator<SearchRequest>
         RuleFor(x => x.Search)
             .MaximumLength(MAX_SEARCH_LENGTH)
             .WithMessage($"مصطلح البحث لا يمكن أن يتجاوز {MAX_SEARCH_LENGTH} حرفًا.")
-            .When(x => !string.IsNullOrWhiteSpace(x.Search))
-            .Must(search => search.Trim().Length >= 2)
-            .WithMessage("مصطلح البحث يجب أن يحتوي على حرفين على الأقل.")
             .When(x => !string.IsNullOrWhiteSpace(x.Search));
 
         // Search column validation - validate only when provided
@@ -30,7 +27,7 @@ public class SearchValidations : AbstractValidator<SearchRequest>
         // Cross-validation: If SearchColumn is provided, Search should be meaningful
         RuleFor(x => x)
             .Must(x => string.IsNullOrWhiteSpace(x.SearchColumn) ||
-                        (!string.IsNullOrWhiteSpace(x.Search) && x.Search.Trim().Length >= 2))
+                        (!string.IsNullOrWhiteSpace(x.Search)))
             .WithMessage("عند تحديد عمود البحث، يجب إدخال مصطلح بحث ذو معنى.")
             .When(x => !string.IsNullOrWhiteSpace(x.SearchColumn));
     }

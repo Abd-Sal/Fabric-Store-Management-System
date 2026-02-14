@@ -32,8 +32,12 @@ public class ProductErrors
             "there is not enough quantity of this product",
             StatusCodes.Status400BadRequest);
 
-    public static Error CodeWithColorConflict =
-        new("Product.CodeWithColorConflict",
-            "product with this code and this color is already exist",
+    //public static Error CodeWithColorConflict =
+    //    new("Product.CodeWithColorConflict",
+    //        "product with this code and this color is already exist",
+    //        StatusCodes.Status409Conflict);
+    public static Error CodeWithColorConflict(string prdCode, string prdColor) =>
+        new("خطأ في المنتج",
+            $"المنتج ذو الكود({prdColor}) و اللون({prdCode}) موجود بالفعل",
             StatusCodes.Status409Conflict);
 }

@@ -29,6 +29,9 @@ public class Program
         Log.Error($"OS Version: {Environment.OSVersion}");
         Log.Error($".NET Version: {Environment.Version}");
 
+
+        app.UseExceptionHandler();
+        
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -36,10 +39,13 @@ public class Program
 
             app.MapOpenApi();
         }
+
         app.UseHsts();
 
         app.UseHttpsRedirection();
 
+        app.UseCors();
+        
         app.UseStaticFiles();
 
         app.UseCustomLoginMiddleware();

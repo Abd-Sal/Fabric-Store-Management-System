@@ -13,7 +13,8 @@ public class SaleSearchs
 
     public static SearchColumnsResponse SaleSortColumns()
     => new SearchColumnsResponse(
-            ["status", "invoicenumber", "customerid"],
-            "invoicenumber"
+            [new LabelValue("الحالة", "status"), new LabelValue("رقم الفاتورة", "invoicenumber"),
+            new LabelValue("معرف الزبون", "customerid")],
+            new LabelValue("رقم الفاتورة", "invoicenumber")
         );
 }
