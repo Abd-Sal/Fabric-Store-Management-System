@@ -12,13 +12,13 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
     ([FromRoute] Guid id,
     CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("get purchase({id})", id);
         var result = await _unitOfWork.PurchaseService.GetPurchase(id, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -30,13 +30,13 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
     [FromQuery] SearchRequest searchRequest,
     CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("get purchases");
         var result = await _unitOfWork.PurchaseService.GetPurchases(paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -45,7 +45,6 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
     ([FromBody] PurchaseRequest purchaseRequest,
     CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("create purchase");
         var result = await _unitOfWork.PurchaseService.CreatePurchase(purchaseRequest, cancellationToken);
         if (result.IsFailure)
         {
@@ -53,6 +52,7 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return CreatedAtAction(nameof(GetPurchase), new { id = result.Value.Id }, result.Value);
     }
 
@@ -61,7 +61,6 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
     ([FromRoute] Guid id,
     CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("remove purchase({id})", id);
         var result = await _unitOfWork.PurchaseService.RemovePurchase(id, cancellationToken);
         if (result.IsFailure)
         {
@@ -69,6 +68,7 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return NoContent();
     }
 
@@ -78,7 +78,6 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
     PurchaseUpdatePaidRequest purchaseUpdatePaidRequest,
     CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("pay for purchase({id})", id);
         var result = await _unitOfWork.PurchaseService.UpdatePurchasePaidAmount(id, purchaseUpdatePaidRequest, cancellationToken);
         if (result.IsFailure)
         {
@@ -86,6 +85,7 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return NoContent();
     }
 
@@ -94,13 +94,13 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
     ([FromQuery(Name = "invoice-number")] string invoice,
     CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("get purchase by invoice number({inv})", invoice);
         var result = await _unitOfWork.PurchaseService.GetPurchaseByInvoiceNumber(invoice, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -112,6 +112,7 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
             SearchDetails = PurchaseSearchs.PurchaseSortColumns(),
             SortDetails = PurchaseSorts.PurchaseSortColumns(),
         };
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result);
     }
 

@@ -13,8 +13,10 @@ public static class SaleSearchs
 
     public static SearchColumnsResponse SaleSortColumns()
     => new SearchColumnsResponse(
-            [new LabelValue("الحالة", "status"), new LabelValue("رقم الفاتورة", "invoicenumber"),
-            new LabelValue("معرف الزبون", "customerid")],
+            new List<LabelValue>{
+                new LabelValue("الحالة", "status"), new LabelValue("رقم الفاتورة", "invoicenumber"),
+                new LabelValue("معرف الزبون", "customerid")
+            }.OrderBy(x => x.Label).ToArray(),
             new LabelValue("رقم الفاتورة", "invoicenumber")
         );
 }

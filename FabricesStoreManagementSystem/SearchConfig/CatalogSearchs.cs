@@ -15,9 +15,11 @@ public static class CatalogSearchs
 
     public static SearchColumnsResponse CatalogSortColumns()
         => new SearchColumnsResponse(
-                [new LabelValue("الوصف", "description"), new LabelValue("الحالة", "status"),
-                new LabelValue("الكود", "code"), new LabelValue("معرف المورد", "supplierid"),
-                new LabelValue("المعرف", "id")],
+                new List<LabelValue>{
+                    new LabelValue("الوصف", "description"), new LabelValue("الحالة", "status"),
+                    new LabelValue("الكود", "code"), new LabelValue("معرف المورد", "supplierid"),
+                    new LabelValue("المعرف", "id")
+                }.OrderBy(x => x.Label).ToArray(),
                 new LabelValue("الكود", "code")
             );
 }

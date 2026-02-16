@@ -15,9 +15,11 @@ public static class SupplierSearchs
 
     public static SearchColumnsResponse SupplierSortColumns()
     => new SearchColumnsResponse(
-            [new LabelValue("الاسم", "name"), new LabelValue("العنوان", "address"),
-            new LabelValue("البريد الالكتروني", "email"), new LabelValue("رقم الهاتف", "phone"),
-            new LabelValue("المعرف", "id")],
+            new List<LabelValue>{
+                new LabelValue("الاسم", "name"), new LabelValue("العنوان", "address"),
+                new LabelValue("البريد الالكتروني", "email"), new LabelValue("رقم الهاتف", "phone"),
+                new LabelValue("المعرف", "id")
+            }.OrderBy(x => x.Label).ToArray(),
             new LabelValue("الاسم", "name")
         );
 }

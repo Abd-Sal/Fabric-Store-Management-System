@@ -16,9 +16,11 @@ public static class ProductSearchs
 
     public static SearchColumnsResponse ProductSortColumns()
     => new SearchColumnsResponse(
-            [new LabelValue("الوحدة", "unit"), new LabelValue("الكود", "code"),
-            new LabelValue("اللون", "color"), new LabelValue("مادة الصنع", "material"),
-            new LabelValue("المعرف", "id"), new LabelValue("الاسم", "name")],
+            new List<LabelValue>{
+                new LabelValue("الوحدة", "unit"), new LabelValue("الكود", "code"),
+                new LabelValue("اللون", "color"), new LabelValue("مادة الصنع", "material"),
+                new LabelValue("المعرف", "id"), new LabelValue("الاسم", "name")
+            }.OrderBy(x => x.Label).ToArray(),
             new LabelValue("الكود", "code")
         );
 }

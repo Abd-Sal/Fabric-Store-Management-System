@@ -99,6 +99,6 @@ public class CustomerValidations : AbstractValidator<CustomerRequest>
         // Remove all non-digit characters for validation
         var digitsOnly = Regex.Replace(phone, @"[^\d]", "");
         // Basic validation: at least 7 digits for a phone number
-        return digitsOnly.Length >= 7 && digitsOnly.Length <= 15;
+        return digitsOnly.Length >= 4 && digitsOnly.Length <= 20;
     }
 }

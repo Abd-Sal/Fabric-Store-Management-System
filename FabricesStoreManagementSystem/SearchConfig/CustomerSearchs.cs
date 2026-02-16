@@ -5,7 +5,6 @@ public static class CustomerSearchs
     public static IQueryable<Customer> CustomerResponseSearch(this IQueryable<Customer> query, SearchRequest searchRequest)
         => searchRequest.SearchColumn?.ToLower() switch
         {
-            "name" => query.Where(x => EF.Functions.Like($"{x.FirstName} {x.LastName}", $"%{searchRequest.Search}%")),
             "firstname" => query.Where(x => EF.Functions.Like(x.FirstName, $"%{searchRequest.Search}%")),
             "lastname" => query.Where(x => EF.Functions.Like(x.LastName, $"%{searchRequest.Search}%")),
             "address" => query.Where(x => x.Address != null && EF.Functions.Like(x.Address, $"%{searchRequest.Search}%")),
@@ -17,12 +16,13 @@ public static class CustomerSearchs
 
     public static SearchColumnsResponse CustomerSortColumns()
     => new SearchColumnsResponse(
-            [new LabelValue("الاسم", "name"), new LabelValue("العنوان", "address"),
-            new LabelValue("البريد الالكتروني", "email"), new LabelValue("رقم الهاتف", "phone"),
-            new LabelValue("المعرف", "id"),
-            new LabelValue("الاسم الأول", "firstname"),
-            new LabelValue("الاسم الأخير", "lastname")],
-            new LabelValue("الاسم", "name")
+            new List<LabelValue>{
+                new LabelValue("العنوان", "address"),
+                new LabelValue("البريد الالكتروني", "email"), new LabelValue("رقم الهاتف", "phone"),
+                new LabelValue("المعرف", "id"), new LabelValue("الاسم الأول", "firstname"),
+                new LabelValue("الاسم الأخير", "lastname")
+            }.OrderBy(x => x.Label).ToArray(),
+            new LabelValue("الاسم الأول", "firstname")
         );
 
 }

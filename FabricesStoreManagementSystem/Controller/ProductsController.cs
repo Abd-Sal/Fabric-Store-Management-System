@@ -12,13 +12,13 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         ([FromRoute] Guid id,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get product({id})", id);
         var result = await _unitOfWork.ProductService.GetProduct(id, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -30,13 +30,13 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         [FromQuery]SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get products");
         var result = await _unitOfWork.ProductService.GetProducts(paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -45,7 +45,6 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         ([FromBody]ProductRequest productRequest,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("create product");
         var result = await _unitOfWork.ProductService.CreateProduct(productRequest, cancellationToken);
         if (result.IsFailure)
         {
@@ -53,6 +52,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return CreatedAtAction(nameof(GetProducts), new {id = result.Value.Id}, result.Value);
     }
 
@@ -61,13 +61,13 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         ([FromRoute]Guid id,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get product({id}) inventory", id);
         var result = await _unitOfWork.ProductService.GetProductInventory(id, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -77,13 +77,13 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         [FromQuery]PaginationRequest paginationRequest,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get product({id}) stock transactions", id);
         var result = await _unitOfWork.ProductService.GetProductStockTransactions(id, paginationRequest, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -96,13 +96,13 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         [FromQuery]SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get sales by product({id}) ", id);
         var result = await _unitOfWork.ProductService.GetSalesByProduct(id, paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -115,13 +115,13 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         [FromQuery]SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get purchase by product({id}) ", id);
         var result = await _unitOfWork.ProductService.GetPurchasesByProduct(id, paginationRequest, sortRequest, dateRangeRequest, searchRequest, cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -133,6 +133,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             SearchDetails = ProductSearchs.ProductSortColumns(),
             SortDetails = ProductSorts.ProductSortColumns(),
         };
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result);
     }
 }

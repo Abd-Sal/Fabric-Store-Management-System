@@ -13,7 +13,6 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
         [FromRoute]bool? state,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("get supplier({id})", id);
         var result = await _unitOfWork.SupplierService.GetSupplier
             (id, includeOnlyActive: state.HasValue ? (bool)state : true, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -21,6 +20,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -32,7 +32,6 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
         [FromQuery] SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("get suppliers");
         var result = await _unitOfWork.SupplierService.GetSuppliers
             (paginatinoRequest, sortRequest, searchRequest, includeOnlyActive: state.HasValue ? (bool)state : true, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -40,6 +39,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -48,7 +48,6 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
         ([FromBody]SupplierRequest supplierRequest,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("create supplier");
         var result = await _unitOfWork.SupplierService.CreateSupplier
             (supplierRequest, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -57,6 +56,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return CreatedAtAction(nameof(GetSupplier), new {id = result.Value.Id}, result.Value);
     }
 
@@ -65,7 +65,6 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             ([FromRoute]Guid id,
             CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("deactivate by supplier({id})", id);
         var result = await _unitOfWork.SupplierService.ToggleSupplierStatus
             (id, false, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -74,6 +73,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return NoContent();
     }
 
@@ -82,7 +82,6 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             ([FromRoute]Guid id,
             CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("activate supplier({id})", id);
         var result = await _unitOfWork.SupplierService.ToggleSupplierStatus
             (id, true, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -91,6 +90,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return NoContent();
     }
 
@@ -100,7 +100,6 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             [FromBody] SupplierRequest supplierRequest,
             CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("update supplier({id})", id);
         var result = await _unitOfWork.SupplierService.UpdateSupplier
             (id, supplierRequest, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -109,6 +108,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return NoContent();
     }
 
@@ -120,7 +120,6 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             [FromQuery] SearchRequest searchRequest,
             CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("get purchases by supplier({id})", id);
         var result = await _unitOfWork.SupplierService.GetPurchasesBySupplier
             (id, paginatinoRequest, sortRequest, searchRequest, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -128,6 +127,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -139,6 +139,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             SearchDetails = SupplierSearchs.SupplierSortColumns(),
             SortDetails = SupplierSorts.SupplierSortColumns(),
         };
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result);
     }
 

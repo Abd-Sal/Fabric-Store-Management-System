@@ -13,7 +13,6 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
         [FromRoute] bool? state,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get customer({id})", id);
         var result = await _unitOfWork.CustomerService.GetCustomer
             (id, includeOnlyActive: state.HasValue ? (bool)state : true, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -21,6 +20,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -32,7 +32,6 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
         [FromQuery] SearchRequest searchRequest,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get customers");
         var result = await _unitOfWork.CustomerService.GetCustomers
             (paginatinoRequest, sortRequest, searchRequest, includeOnlyActive: state.HasValue ? (bool)state : true, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -40,6 +39,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -48,7 +48,6 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
         ([FromBody] CustomerRequest CustomerRequest,
         CancellationToken cancellationToken = default)
     {
-        _logger.LogError("create customer");
         var result = await _unitOfWork.CustomerService.CreateCustomer
             (CustomerRequest, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -57,6 +56,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return CreatedAtAction(nameof(GetCustomer), new { id = result.Value.Id }, result.Value);
     }
 
@@ -65,7 +65,6 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             ([FromRoute] Guid id,
             CancellationToken cancellationToken = default)
     {
-        _logger.LogError("deactivate customer({id})", id);
         var result = await _unitOfWork.CustomerService.ToggleCustomerStatus
             (id, false, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -74,6 +73,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return NoContent();
     }
 
@@ -82,7 +82,6 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             ([FromRoute] Guid id,
             CancellationToken cancellationToken = default)
     {
-        _logger.LogError("activate customer({id})", id);
         var result = await _unitOfWork.CustomerService.ToggleCustomerStatus
             (id, true, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -91,6 +90,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return NoContent();
     }
 
@@ -100,7 +100,6 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             [FromBody] CustomerRequest CustomerRequest,
             CancellationToken cancellationToken = default)
     {
-        _logger.LogError("update customer({id})", id);
         var result = await _unitOfWork.CustomerService.UpdateCustomer
            (id, CustomerRequest, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -109,6 +108,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return NoContent();
     }
 
@@ -120,7 +120,6 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             [FromQuery] SearchRequest searchRequest,
             CancellationToken cancellationToken = default)
     {
-        _logger.LogError("get sales by customer({id})", id);
         var result = await _unitOfWork.CustomerService.GetSalesByCustomer
             (id, paginatinoRequest, sortRequest, searchRequest, cancellationToken: cancellationToken);
         if (result.IsFailure)
@@ -128,6 +127,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result.Value);
     }
 
@@ -139,6 +139,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
             SearchDetails = CustomerSearchs.CustomerSortColumns(),
             SortDetails = CustomerSorts.CustomerSortColumns(),
         };
+        _logger.LogInformation("request: {req}", HttpContext.Request);
         return Ok(result);
     }
 
