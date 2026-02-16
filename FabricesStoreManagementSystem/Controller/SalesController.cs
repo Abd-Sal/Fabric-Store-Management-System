@@ -18,7 +18,7 @@ public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -36,7 +36,7 @@ public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -52,7 +52,7 @@ public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return CreatedAtAction(nameof(GetSale), new {id = result.Value.Id}, result.Value);
     }
 
@@ -68,7 +68,7 @@ public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return NoContent();
     }
 
@@ -85,7 +85,7 @@ public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return NoContent();
     }
 
@@ -100,7 +100,7 @@ public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -112,7 +112,7 @@ public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger
             SearchDetails = SaleSearchs.SaleSortColumns(),
             SortDetails = SaleSorts.SaleSortColumns(),
         };
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result);
     }
 

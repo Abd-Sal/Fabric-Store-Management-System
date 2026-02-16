@@ -6,7 +6,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
     private readonly ILogger<CatalogService> _logger = logger;
-
+    
     [HttpGet("")]
     public async Task<IActionResult> GetCatalogs
     ([FromQuery] PaginationRequest paginationRequest,
@@ -21,7 +21,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -36,7 +36,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -52,7 +52,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return CreatedAtAction(nameof(GetCatalog), new {id = result.Value.Id}, result.Value);
     }
 
@@ -68,7 +68,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return CreatedAtAction(nameof(GetCatalog), new { id = result.Value.Id }, result.Value);
     }
 
@@ -84,7 +84,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return CreatedAtAction(nameof(GetCatalog), new {id = result.Value.Id}, result.Value);
     }
     
@@ -100,7 +100,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -116,7 +116,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -132,7 +132,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return NoContent();
     }
 
@@ -148,7 +148,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return NoContent();
     }
 
@@ -165,7 +165,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return NoContent();
     }
 
@@ -177,7 +177,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             SearchDetails = CatalogSearchs.CatalogSortColumns(),
             SortDetails = CatalogSorts.CatalogSortColumns(),
         };
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result);
     }
 }

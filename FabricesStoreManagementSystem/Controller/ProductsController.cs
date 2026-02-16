@@ -18,7 +18,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -36,7 +36,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -52,7 +52,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return CreatedAtAction(nameof(GetProducts), new {id = result.Value.Id}, result.Value);
     }
 
@@ -67,7 +67,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -83,7 +83,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -102,7 +102,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -121,7 +121,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -133,7 +133,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
             SearchDetails = ProductSearchs.ProductSortColumns(),
             SortDetails = ProductSorts.ProductSortColumns(),
         };
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result);
     }
 }

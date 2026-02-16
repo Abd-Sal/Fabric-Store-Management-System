@@ -20,7 +20,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -39,7 +39,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -56,7 +56,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return CreatedAtAction(nameof(GetSupplier), new {id = result.Value.Id}, result.Value);
     }
 
@@ -73,7 +73,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return NoContent();
     }
 
@@ -90,7 +90,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return NoContent();
     }
 
@@ -108,7 +108,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return NoContent();
     }
 
@@ -127,7 +127,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 
@@ -139,7 +139,7 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             SearchDetails = SupplierSearchs.SupplierSortColumns(),
             SortDetails = SupplierSorts.SupplierSortColumns(),
         };
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result);
     }
 

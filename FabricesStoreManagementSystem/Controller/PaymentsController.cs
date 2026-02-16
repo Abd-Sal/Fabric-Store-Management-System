@@ -20,7 +20,7 @@ public class PaymentsController(IUnitOfWork unitOfWork, ILogger<PaymentsControll
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
             return result.ToProblem();
         }
-        _logger.LogInformation("request: {req}", HttpContext.Request);
+
         return Ok(result.Value);
     }
 }

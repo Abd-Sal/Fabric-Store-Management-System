@@ -68,6 +68,7 @@ public static class DependancyInjection
         services.AddScoped<IPurchaseService, PurchaseService>();
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<CustomLoggingMiddleware>();
         return services;
     }
 

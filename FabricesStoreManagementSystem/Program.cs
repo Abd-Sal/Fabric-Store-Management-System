@@ -21,14 +21,13 @@ public class Program
         var app = builder.Build();
 
         // Log application start with ERROR level to make it stand out
-        Log.Error("=== APPLICATION STARTING ===");
-        Log.Error($"Start Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-        Log.Error($"Current Directory: {Environment.CurrentDirectory}");
-        Log.Error($"Command Line Args: {string.Join(" ", args)}");
-        Log.Error($"Machine Name: {Environment.MachineName}");
-        Log.Error($"OS Version: {Environment.OSVersion}");
-        Log.Error($".NET Version: {Environment.Version}");
-
+        Log.Information("=== APPLICATION STARTING ===");
+        Log.Information($"Start Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+        Log.Information($"Current Directory: {Environment.CurrentDirectory}");
+        Log.Information($"Command Line Args: {string.Join(" ", args)}");
+        Log.Information($"Machine Name: {Environment.MachineName}");
+        Log.Information($"OS Version: {Environment.OSVersion}");
+        Log.Information($".NET Version: {Environment.Version}");
 
         app.UseExceptionHandler();
         
@@ -49,6 +48,8 @@ public class Program
         app.UseStaticFiles();
 
         app.UseCustomLoginMiddleware();
+
+        app.useCustomLoggingMiddlerware();
 
         app.UseCustomAuthMiddleware();
 
