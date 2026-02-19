@@ -9,11 +9,11 @@ public static class ProductMapper
                 product.Material, product.CreatedAt
             );
 
-    public static ProductWithInventoryResponse ToProductWithInventoryResponse(this Product product, decimal price)
+    public static ProductWithInventoryResponse ToProductWithInventoryResponse(this Product product, decimal? price)
         => new ProductWithInventoryResponse(
                 product.ToProductResponse(),
                 product.Inventory?.CurrentQuantity ?? 0,
-                price,
+                price ?? 0,
                 product.Inventory?.LastUpdateAt
             );
 

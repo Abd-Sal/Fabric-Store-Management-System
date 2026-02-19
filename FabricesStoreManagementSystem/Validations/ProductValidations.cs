@@ -28,9 +28,7 @@ public class ProductValidations : AbstractValidator<ProductRequest>
             .NotEmpty()
             .WithMessage("كود المنتج مطلوب.")
             .Length(1, ProductConfigurations.CodeMaxLength)
-            .WithMessage($"كود المنتج يجب أن يكون بين 1 و {ProductConfigurations.CodeMaxLength} حرفًا.")
-            .Must(code => !code.Contains(" "))
-            .WithMessage("كود المنتج لا يمكن أن يحتوي على مسافات.");
+            .WithMessage($"كود المنتج يجب أن يكون بين 1 و {ProductConfigurations.CodeMaxLength} حرفًا.");
 
         // Color validation (required)
         RuleFor(x => x.Color)

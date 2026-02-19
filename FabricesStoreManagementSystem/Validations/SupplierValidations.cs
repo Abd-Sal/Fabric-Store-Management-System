@@ -82,8 +82,8 @@ public class SupplierValidations : AbstractValidator<SupplierRequest>
 
         // Rule 3: Character validation - allowed characters only
         RuleFor(x => x.Phone)
-            .Matches(@"^[\d\s\-\+\(\)]+$")
-            .WithMessage("رقم الهاتف يمكن أن يحتوي على أرقام ومسافات وشرطات وعلامة الجمع وأقواس فقط.")
+            .Matches(@"^[\d\+]+$")
+            .WithMessage("رقم الهاتف يمكن أن يحتوي على أرقام وعلامة الجمع فقط.")
             .When(x => !string.IsNullOrWhiteSpace(x.Phone));
 
         // Rule 4: Custom validation for phone number format

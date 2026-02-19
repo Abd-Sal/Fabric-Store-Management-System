@@ -141,7 +141,7 @@ public class SupplierValidationsTests
         var request = CreateValidSupplierRequest() with { Phone = longPhone };
         _validator.TestValidate(request)
             .ShouldHaveValidationErrorFor(x => x.Phone)
-            .WithErrorMessage($"رقم الهاتف يجب أن يكون بين 1 و {SupplierConfigurations.PhoneMaxLength} حرفًا.");
+            .WithErrorMessage($"رقم الهاتف يجب أن يكون بين 4 و {SupplierConfigurations.PhoneMaxLength} حرفًا.");
     }
 
     [Theory]
@@ -179,11 +179,11 @@ public class SupplierValidationsTests
     [Theory]
     [InlineData("1234567")]
     [InlineData("1234567890")]
-    [InlineData("+1 (234) 567-8900")]
-    [InlineData("012-345-6789")]
-    [InlineData("(966) 11 234 5678")]
+    [InlineData("+12345678900")]
+    [InlineData("0123456789")]
+    [InlineData("966112345678")]
     [InlineData("00966112345678")]
-    [InlineData("+966 55 123 4567")]
+    [InlineData("966551234567")]
     public void Phone_WhenValid_ShouldNotHaveValidationError(string phone)
     {
         var request = CreateValidSupplierRequest() with { Phone = phone };
@@ -316,7 +316,7 @@ public class SupplierValidationsTests
                 new SupplierRequest(
                     "مورد الإلكترونيات المتكامل",
                     "info@electronic.com",
-                    "+966 55 123 4567",
+                    "+966551234567",
                     "الرياض، المملكة العربية السعودية"
                 )
             },
@@ -325,7 +325,7 @@ public class SupplierValidationsTests
                 new SupplierRequest(
                     "ABC Construction Materials",
                     null,
-                    "012-345-6789",
+                    "0123456789",
                     "123 Industrial Zone, Jeddah"
                 )
             },
@@ -343,7 +343,7 @@ public class SupplierValidationsTests
                 new SupplierRequest(
                     "Tech Gear & Equipment",
                     "sales@techgear.com",
-                    "(966) 11 234 5678",
+                    "966112345678",
                     null
                 )
             }

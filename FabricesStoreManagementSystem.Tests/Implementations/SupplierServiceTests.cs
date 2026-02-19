@@ -263,4 +263,27 @@ public class SupplierServiceTests
         var updatedSupplier = await db.Suppliers.FindAsync(id);
         updatedSupplier.Should().NotBeNull();
     }
+
+    [Theory]
+    [InlineData("abd")]
+    [InlineData("abd sal")]
+    [InlineData(" ")]
+    public async Task GetSupplierForBill_ShouldSuccess
+        (string name)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<SupplierService>.Instance;
+        var service = new SupplierService(db, logger);
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.GetSupplierForBill(new SupplierSearchForBillRequest(name));
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+
+    }
+
 }

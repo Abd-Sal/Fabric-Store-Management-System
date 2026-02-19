@@ -186,4 +186,19 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
 
         return Result.Success(response);
     }
+
+    public async Task<Result<List<ProductWithInventoryResponse>>> GetProductsForBill
+        (SearchProductBillByCodeRequest searchCode, CancellationToken cancellationToken = default)
+    {
+        var products = _appDbContext.Products.AsNoTracking()
+            .Include(x => x.Inventory)
+            .Include(x => x.PurchaseItems)
+            .Where(x =>EF.Functions.Like(x.Code + "-" + x.Color, $"%{searchCode.code}%"))
+            .Select(x => x.ToProductWithInventoryResponse(
+                x.PurchaseItems
+                    .Max(p => p.UnitCost)
+            ));
+        return Result.Success(await products.ToListAsync(cancellationToken));
+    }
+
 }

@@ -125,6 +125,20 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         return Ok(result.Value);
     }
 
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchForProductsForBill
+        ([FromQuery] SearchProductBillByCodeRequest searchCode,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _unitOfWork.ProductService.GetProductsForBill(searchCode, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error happen: {err}", result.Error);
+            return result.ToProblem();
+        }
+        return Ok(result.Value);
+    }
+
     [HttpOptions("")]
     public async Task<IActionResult> Details()
     {

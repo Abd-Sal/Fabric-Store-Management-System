@@ -73,17 +73,6 @@ public class ProductValidationsTests
         result.ShouldHaveValidationErrorFor(x => x.Code);
     }
 
-    [Theory]
-    [InlineData("ABC 123")]
-    public void Code_WithInvalidCharacters_ShouldHaveValidationError(string code)
-    {
-        var model = CreateValidRequest(code: code);
-
-        var result = _validator.TestValidate(model);
-
-        result.ShouldHaveValidationErrorFor(x => x.Code);
-    }
-
     [Fact]
     public void Code_WithValidValue_ShouldNotHaveValidationError()
     {

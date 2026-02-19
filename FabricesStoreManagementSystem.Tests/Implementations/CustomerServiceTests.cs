@@ -265,5 +265,27 @@ public class CustomerServiceTests
         updatedCustomer.Should().NotBeNull();
     }
 
+    [Theory]
+    [InlineData("abd")]
+    [InlineData("abd sal")]
+    [InlineData(" ")]
+    public async Task GetCustomerForBill_ShouldSuccess
+        (string name)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<CustomerService>.Instance;
+        var service = new CustomerService(db, logger);
+        await db.Customers.AddRangeAsync(CustomersRepo.Customers());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.GetCustomerForBill(new CustomerSearchForBillRequest(name));
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+
+    }
+
 }
 

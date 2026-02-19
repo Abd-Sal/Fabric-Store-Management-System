@@ -8,4 +8,5 @@ public interface ICustomerService
     Task<Result<PaginatedList<CustomerResponse>>> GetCustomers(PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest searchRequest, bool includeOnlyActive = true, CancellationToken cancellationToken = default);
     Task<Result<CustomerResponse>> GetCustomer(Guid id, bool includeOnlyActive = true, CancellationToken cancellationToken = default);
     Task<Result<PaginatedList<SaleResponse>>> GetSalesByCustomer(Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default);
+    Task<Result<List<CustomerResponse>>> GetCustomerForBill(CustomerSearchForBillRequest request, CancellationToken cancellationToken = default);
 }

@@ -11,7 +11,8 @@ public static class ProductSearchs
             "unit" => query.Where(x => EF.Functions.Like(x.Unit, $"%{searchRequest.Search}%")),
             "name" => query.Where(x => EF.Functions.Like(x.Name ?? "", $"%{searchRequest.Search}%")),
             "material" => query.Where(x => EF.Functions.Like(x.Material ?? "", $"%{searchRequest.Search}%")),
-            _ => query.Where(x => EF.Functions.Like(x.Code, $"%{searchRequest.Search}%"))
+            "productCode" => query.Where(x => EF.Functions.Like(string.Concat(x.Code, "-", x.Color), $"%{searchRequest.Search}%")),
+            _ => query.Where(x => EF.Functions.Like(string.Concat(x.Code, "-", x.Color), $"%{searchRequest.Search}%"))
         };
 
     public static SearchColumnsResponse ProductSortColumns()
@@ -19,8 +20,9 @@ public static class ProductSearchs
             new List<LabelValue>{
                 new LabelValue("الوحدة", "unit"), new LabelValue("الكود", "code"),
                 new LabelValue("اللون", "color"), new LabelValue("مادة الصنع", "material"),
-                new LabelValue("المعرف", "id"), new LabelValue("الاسم", "name")
+                new LabelValue("المعرف", "id"), new LabelValue("الاسم", "name"),
+                new LabelValue("الكود كامل", "productCode")
             }.OrderBy(x => x.Label).ToArray(),
-            new LabelValue("الكود", "code")
+            new LabelValue("الكود كامل", "productCode")
         );
 }

@@ -78,8 +78,8 @@ public class CustomerValidations : AbstractValidator<CustomerRequest>
                 .WithMessage("رقم الهاتف لا يمكن أن يكون فارغًا إذا تم تقديمه.")
                 .Length(1, CustomerConfigurations.PhoneMaxLength)
                 .WithMessage($"رقم الهاتف يجب أن يكون بين 1 و {CustomerConfigurations.PhoneMaxLength} حرفًا.")
-                .Matches(@"^[\d\s\-\+\(\)]+$")
-                .WithMessage("رقم الهاتف يمكن أن يحتوي على أرقام ومسافات وشرطات وعلامة الجمع وأقواس فقط.")
+                .Matches(@"^[\d\+]+$")
+                .WithMessage("رقم الهاتف يمكن أن يحتوي على أرقام وعلامة الجمع فقط.")
                 .Must(IsValidPhoneNumber)
                 .WithMessage("رقم الهاتف غير صالح.");
         });

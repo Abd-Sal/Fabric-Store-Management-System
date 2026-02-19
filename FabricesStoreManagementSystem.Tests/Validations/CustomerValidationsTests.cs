@@ -189,7 +189,7 @@ public class CustomerValidationsTests
     [InlineData("+++()()()")]
     [InlineData("123")]
     [InlineData("12 34")]
-    [InlineData("12345678901234567")]
+    [InlineData("1234567890123456712345678901234567")]
     public void Phone_WhenInvalid_ShouldHaveValidationError(string phone)
     {
         var request = CreateValidCustomerRequest() with
@@ -253,11 +253,11 @@ public class CustomerValidationsTests
     [Theory]
     [InlineData("1234567")]
     [InlineData("1234567890")]
-    [InlineData("+1 (234) 567-8900")]
-    [InlineData("012-345-6789")]
-    [InlineData("(966) 11 234 5678")]
+    [InlineData("+12345678900")]
+    [InlineData("0123456789")]
+    [InlineData("966112345678")]
     [InlineData("00966112345678")]
-    [InlineData("+966 55 123 4567")]
+    [InlineData("+966551234567")]
     public void Phone_WhenValid_ShouldNotHaveValidationError(string phone)
     {
         var request = new CustomerRequest(
@@ -443,7 +443,7 @@ public class CustomerValidationsTests
                     "أحمد بن علي",
                     "العتيبي",
                     null,
-                    "+966 55 123 4567",
+                    "+966551234567",
                     "جدة، حي السلامة"
                 )
             },
@@ -463,7 +463,7 @@ public class CustomerValidationsTests
                     "سارة",
                     "الراشد",
                     "sara.alrashed@domain.com",
-                    "(966) 11 234 5678",
+                    "966112345678",
                     null
                 )
             },
@@ -473,7 +473,7 @@ public class CustomerValidationsTests
                     "Khaled",
                     "Al-Mansour",
                     "khaled@example.com",
-                    "+966 55 111 2222",
+                    "+966551112222",
                     "Riyadh, Saudi Arabia"
                 )
             },

@@ -160,5 +160,20 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
         _logger.LogInformation("customer with id({id}) state updated to {state}",id, !customer.IsActive);
         return Result.Success();
     }
+
+    public async Task<Result<List<CustomerResponse>>> GetCustomerForBill
+        (CustomerSearchForBillRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = _appDbContext.Customers.AsNoTracking()
+                .Where(x => x.IsActive &&
+                    EF.Functions.Like(x.FirstName + " " + x.LastName, $"%{request.Name}%"));
+
+        var result = query
+            .Select(x => x.ToCustomerResponse())
+            .ToListAsync(cancellationToken);
+
+        return Result.Success(await result);
+
+    }
 }
 

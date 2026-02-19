@@ -131,6 +131,21 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
         return Ok(result.Value);
     }
 
+    [HttpGet("search")]
+    public async Task<IActionResult> GetSuppliersForBill
+        ([FromQuery] SupplierSearchForBillRequest search,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _unitOfWork.SupplierService.GetSupplierForBill(search, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
+            return result.ToProblem();
+        }
+        return Ok(result.Value);
+    }
+
+
     [HttpOptions("")]
     public async Task<IActionResult> Details()
     {

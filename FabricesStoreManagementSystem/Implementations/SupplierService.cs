@@ -153,4 +153,20 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
         _logger.LogInformation("supplier was updated with id({id})", id);
         return Result.Success();
     }
+
+    public async Task<Result<List<SupplierResponse>>> GetSupplierForBill
+        (SupplierSearchForBillRequest request, CancellationToken cancellationToken = default)
+    {
+        var query = _appDbContext.Suppliers.AsNoTracking()
+                .Where(x => x.IsActive &&
+                    EF.Functions.Like(x.Name, $"%{request.Name}%"));
+
+        var result = query
+            .Select(x => x.ToSupplierResponse())
+            .ToListAsync(cancellationToken);
+
+        return Result.Success(await result);
+
+    }
 }
+

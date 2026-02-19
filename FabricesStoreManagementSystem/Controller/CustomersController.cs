@@ -124,6 +124,20 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
         return Ok(result.Value);
     }
 
+    [HttpGet("search")]
+    public async Task<IActionResult> GetCustomersForBill
+        ([FromQuery] CustomerSearchForBillRequest search,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _unitOfWork.CustomerService.GetCustomerForBill(search, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
+            return result.ToProblem();
+        }
+        return Ok(result.Value);
+    }
+
     [HttpOptions("")]
     public async Task<IActionResult> Details()
     {
