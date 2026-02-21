@@ -37,6 +37,7 @@ public class DateRangeValidations : AbstractValidator<DateRangeRequest>
             .When(x => x.From.HasValue && x.To.HasValue);
     }
 
+
     private static DateOnly GetTodayInUserTimezone(string? timezone)
     {
         if (string.IsNullOrEmpty(timezone))

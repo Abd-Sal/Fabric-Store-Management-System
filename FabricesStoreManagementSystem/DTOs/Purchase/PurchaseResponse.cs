@@ -7,6 +7,8 @@ public record PurchaseResponse(
     decimal TotalAmount,
     decimal PaidAmount,
     PayStatuses Status,
+    Guid SupplierID,
+    string SupplierName,
     DateTime CreatedAt,
     List<PurchaseItemResponse>? PurchaseItems
 );

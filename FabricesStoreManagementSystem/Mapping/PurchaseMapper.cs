@@ -6,6 +6,7 @@ public static class PurchaseMapper
         => new PurchaseResponse(
                 purchase.Id, purchase.InvoiceNumber, purchase.ProductsCount,
                 purchase.TotalAmount, purchase.PaidAmount, purchase.Status,
+                purchase.SupplierID, purchase.Supplier?.Name ?? "",
                 purchase.CreatedAt, null
             );
 
@@ -13,6 +14,7 @@ public static class PurchaseMapper
         => new PurchaseResponse(
                 purchase.Id, purchase.InvoiceNumber, purchase.ProductsCount,
                 purchase.TotalAmount, purchase.PaidAmount, purchase.Status,
+                purchase.SupplierID, purchase.Supplier?.Name ?? "",
                 purchase.CreatedAt, purchase.PurchaseItems.ToPurchaseItemsResponse().ToList()
             );
 }

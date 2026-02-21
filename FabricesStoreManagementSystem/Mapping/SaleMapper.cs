@@ -7,6 +7,7 @@ public static class SaleMapper
                 sale.Id, sale.InvoiceNumber, sale.ProductsCount,
                 sale.TotalAmount, sale.Discount,
                 sale.NetAmount, sale.PaidAmount, sale.Status,
+                sale.CustomerID, $"{sale.Customer.FirstName} {sale.Customer.LastName}",
                 sale.CreatedAt, null
             );
 
@@ -18,6 +19,7 @@ public static class SaleMapper
                 sale.Id, sale.InvoiceNumber, sale.ProductsCount,
                 sale.TotalAmount, sale.Discount,
                 sale.NetAmount, sale.PaidAmount, sale.Status,
+                sale.CustomerID, $"{sale.Customer.FirstName} {sale.Customer.LastName}",
                 sale.CreatedAt, sale.SaleItems.TotSaleItemsResponse().ToList()
             );
 

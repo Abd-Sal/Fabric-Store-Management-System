@@ -8,6 +8,7 @@ public static class DependancyInjection
             .AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
         
         services.AddExceptionHandler<GlobalExceptionHandler.GlobalExceptionHandler>();

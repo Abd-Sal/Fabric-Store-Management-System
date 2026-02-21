@@ -9,6 +9,8 @@ public record SaleResponse(
     decimal NetAmount,
     decimal PaidAmount,
     PayStatuses Status,
+    Guid CustomerID,
+    string CustoemrName,
     DateTime CreatedAt,
     List<SaleItemResponse>? SaleItems
 );

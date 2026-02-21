@@ -83,38 +83,40 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
         }
 
         _logger.LogInformation("create purchase({id}) done", purchase.Id);
-        return Result.Success(purchase.ToPurchaseResponseWithoutItems());
+        var res = purchase.ToPurchaseResponseWithoutItems();
+        return Result.Success(res);
     }
 
     private async Task<Result<List<PurchaseItem>>> CreatePurchaseItems
         (Guid id, List<PurchaseItemRequest> items, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("start adding purchase({id}) items", id);
-        var processItems = items
-            .Select(x => new PurchaseItem
-            {
-                ProductID = x.ProductID,
-                Quantity = x.Quantity,
-                UnitCost = x.UnitCost,
-                PurchaseID = id,
-            })
-            .Select(x => CreatePurchaseItem(x, cancellationToken));
-        var results = Task.WhenAll(processItems).Result;
-        _logger.LogInformation("end add purchase({id}) items process", id);
-        if (results is null || results.Length == 0)
-        {
-            _logger.LogError("one or more purchase item causes error");
-            return Result.Failure<List<PurchaseItem>>(PurchaseErrors.NoSuccessfulPurchsaeItems);
-        }
 
-        foreach (var r in results)
-            if (r.IsFailure)
+        _logger.LogInformation("start adding purchase({id}) items", id);
+        var results = new List<Result<PurchaseItem>>();
+
+        foreach (var item in items)
+        {
+            var purchaseItem = new PurchaseItem
+            {
+                ProductID = item.ProductID,
+                Quantity = item.Quantity,
+                UnitCost = item.UnitCost,
+                PurchaseID = id,
+            };
+
+            var result = await CreatePurchaseItem(purchaseItem, cancellationToken);
+            results.Add(result);
+
+            if (result.IsFailure)
             {
                 _logger.LogError("one or more purchase item causes error");
-                return Result.Failure<List<PurchaseItem>>(r.Error);
+                return Result.Failure<List<PurchaseItem>>(result.Error);
             }
+        }
+
+        _logger.LogInformation("end add purchase({id}) items process", id);
         var res = results.Select(x => x.Value).ToList();
-        _logger.LogError("add purchase({id}) items done", id);
+        _logger.LogInformation("add purchase({id}) items done", id);
         return Result.Success(res);
     }
 
@@ -129,13 +131,25 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
             return Result.Failure<PurchaseItem>(ProductErrors.NotFound);
         }
 
-        Inventory productInventory = (await _appDbContext.Inventory
-            .SingleOrDefaultAsync(x => x.ProductID == purchaseItem.ProductID, cancellationToken)) ??
-             new Inventory
-             {
-                 CurrentQuantity = 0,
-                 ProductID = purchaseItem.ProductID
-             };
+        Inventory? productInventory = await _appDbContext.Inventory
+            .SingleOrDefaultAsync(x => x.ProductID == purchaseItem.ProductID, cancellationToken);
+
+        if(productInventory is null)
+        {
+            productInventory = new Inventory
+            {
+                CurrentQuantity = purchaseItem.Quantity,
+                ProductID = purchaseItem.ProductID,
+                LastUpdateAt = DateTime.UtcNow
+            };
+            await _appDbContext.Inventory.AddAsync(productInventory, cancellationToken);
+        }
+        else
+        {
+            productInventory.CurrentQuantity += purchaseItem.Quantity;
+            productInventory.LastUpdateAt = DateTime.UtcNow;
+            _appDbContext.Inventory.Update(productInventory);
+        }
 
         var stockTransaction = new StockTransaction
         {
@@ -151,9 +165,6 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
         await _appDbContext.PurchaseItems.AddAsync(purchaseItem, cancellationToken);
         _logger.LogInformation("add stock-transaction({id})", stockTransaction.Id);
         await _appDbContext.StockTransactions.AddAsync(stockTransaction, cancellationToken);
-        productInventory.CurrentQuantity += purchaseItem.Quantity;
-        productInventory.LastUpdateAt = DateTime.UtcNow;
-        _appDbContext.Inventory.Update(productInventory);
 
         _logger.LogInformation("create purchase({id}) done", purchaseItem.PurchaseID);
         return Result.Success(purchaseItem);
@@ -162,15 +173,19 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
     public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchases
         (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
     {
-        var query = _appDbContext.Purchases.AsNoTracking();
+        var query = _appDbContext.Purchases.AsNoTracking()
+            .Include(x => x.Supplier).AsQueryable();
 
         if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
         {
-            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
-            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
-            query = query
-                .Where(x => x.CreatedAt >= from &&
-                            x.CreatedAt <= to);
+            var timezone = !string.IsNullOrEmpty(dateRangeRequest.Timezone)
+                ? dateRangeRequest.Timezone
+                : "Arab Standard Time";
+            var (utcFrom, utcTo) = DateRangeHelper.ConvertToUtcRange(
+                dateRangeRequest.From.Value,
+                dateRangeRequest.To.Value,
+                timezone);
+            query = query.Where(x => x.CreatedAt >= utcFrom && x.CreatedAt <= utcTo);
         }
 
         if (searchRequest is not null && searchRequest.Search is not null)
@@ -194,6 +209,7 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
         (Guid id, CancellationToken cancellationToken = default)
     {
         var purchase = await _appDbContext.Purchases.AsNoTracking()
+            .Include(x => x.Supplier)
             .Include(x => x.PurchaseItems)
             .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
@@ -207,6 +223,7 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
         (string invoiceNumber, CancellationToken cancellationToken = default)
     {
         var purchase = await _appDbContext.Purchases.AsNoTracking()
+            .Include (x => x.Supplier)
             .Include(x => x.PurchaseItems)
             .SingleOrDefaultAsync(x => x.InvoiceNumber == invoiceNumber, cancellationToken);
 

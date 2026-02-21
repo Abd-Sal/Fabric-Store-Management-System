@@ -52,7 +52,6 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
         return CreatedAtAction(nameof(GetPurchase), new { id = result.Value.Id }, result.Value);
     }
 

@@ -70,11 +70,14 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
 
         if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
         {
-            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
-            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
-            query = query
-                .Where(x => x.CreatedAt >= from &&
-                            x.CreatedAt <= to);
+            var timezone = !string.IsNullOrEmpty(dateRangeRequest.Timezone)
+                ? dateRangeRequest.Timezone
+                : "Arab Standard Time";
+            var (utcFrom, utcTo) = DateRangeHelper.ConvertToUtcRange(
+                dateRangeRequest.From.Value,
+                dateRangeRequest.To.Value,
+                timezone);
+            query = query.Where(x => x.CreatedAt >= utcFrom && x.CreatedAt <= utcTo);
         }
 
         if (searchRequest is not null && searchRequest.Search is not null)
@@ -125,11 +128,14 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
 
         if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
         {
-            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
-            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
-            query = query
-                .Where(x => x.CreatedAt >= from &&
-                            x.CreatedAt <= to);
+            var timezone = !string.IsNullOrEmpty(dateRangeRequest.Timezone)
+                ? dateRangeRequest.Timezone
+                : "Arab Standard Time";
+            var (utcFrom, utcTo) = DateRangeHelper.ConvertToUtcRange(
+                dateRangeRequest.From.Value,
+                dateRangeRequest.To.Value,
+                timezone);
+            query = query.Where(x => x.CreatedAt >= utcFrom && x.CreatedAt <= utcTo);
         }
 
         if (searchRequest is not null && searchRequest.Search is not null)
@@ -163,11 +169,14 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
 
         if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
         {
-            var from = DateTime.Parse(dateRangeRequest.From.ToString()!);
-            var to = DateTime.Parse(dateRangeRequest.To.ToString()!);
-            query = query
-                .Where(x => x.CreatedAt >= from &&
-                            x.CreatedAt <= to);
+            var timezone = !string.IsNullOrEmpty(dateRangeRequest.Timezone)
+                ? dateRangeRequest.Timezone
+                : "Arab Standard Time";
+            var (utcFrom, utcTo) = DateRangeHelper.ConvertToUtcRange(
+                dateRangeRequest.From.Value,
+                dateRangeRequest.To.Value,
+                timezone);
+            query = query.Where(x => x.CreatedAt >= utcFrom && x.CreatedAt <= utcTo);
         }
 
         if (searchRequest is not null && searchRequest.Search is not null)
