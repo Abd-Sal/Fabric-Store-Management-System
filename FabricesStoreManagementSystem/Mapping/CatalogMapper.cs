@@ -21,7 +21,7 @@ public static class CatalogMapper
 
     public static CatalogProductResponse ToCatalogProductResponse(this CatalogProduct catalogProduct)
         => new CatalogProductResponse(
-                catalogProduct.Id, catalogProduct.PorductID,
+                catalogProduct.Id, catalogProduct.ProductID,
                 catalogProduct.CatalogID, catalogProduct.Quantity,
                 catalogProduct.IsDeducted
             );

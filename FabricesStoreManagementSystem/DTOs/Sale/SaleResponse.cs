@@ -10,7 +10,7 @@ public record SaleResponse(
     decimal PaidAmount,
     PayStatuses Status,
     Guid CustomerID,
-    string CustoemrName,
+    string CustomerName,
     DateTime CreatedAt,
     List<SaleItemResponse>? SaleItems
 );

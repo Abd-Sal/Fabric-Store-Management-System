@@ -210,4 +210,14 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
         return Result.Success(await products.ToListAsync(cancellationToken));
     }
 
+    public async Task<Result<List<ProductResponse>>> GetProductsByCode
+        (ProductCodeRequest request, CancellationToken cancellationToken = default)
+    {
+        var response = await _appDbContext.Products.AsNoTracking()
+            .Where(x => x.Code.ToLower() == request.code.ToLower())
+            .OrderByDescending(x => x.Color)
+            .Select(x => x.ToProductResponse())
+            .ToListAsync(cancellationToken);
+        return Result.Success(response);
+    }
 }

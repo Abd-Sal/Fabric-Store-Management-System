@@ -265,4 +265,24 @@ public class ProductServiceTests
         //Assert
         result.IsSuccess.Should().BeTrue();
     }
+
+    [Theory]
+    [InlineData("P-001")]
+    [InlineData("5027")]
+    [InlineData("AM")]
+    public async Task GetProductsByCode_ShouldSuccess(string code)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<ProductService>.Instance;
+        var service = new ProductService(db, logger);
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.GetProductsByCode(new ProductCodeRequest(code));
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+    }
 }

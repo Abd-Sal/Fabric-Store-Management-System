@@ -139,6 +139,22 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         return Ok(result.Value);
     }
 
+
+    [HttpGet("get-by-code")]
+    public async Task<IActionResult> GetProductsByCode
+        ([FromQuery] ProductCodeRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _unitOfWork.ProductService.GetProductsByCode(request, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error happen: {err}", result.Error);
+            return result.ToProblem();
+        }
+        return Ok(result.Value);
+    }
+
+
     [HttpOptions("")]
     public async Task<IActionResult> Details()
     {

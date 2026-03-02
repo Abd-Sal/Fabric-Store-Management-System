@@ -3,7 +3,7 @@
 public class CatalogProduct
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
-    public Guid PorductID { get; set; }
+    public Guid ProductID { get; set; }
     public Guid CatalogID { get; set; }
     public float Quantity { get; set; }
     public bool IsDeducted { get; set; } = true;    //is deducted from stock

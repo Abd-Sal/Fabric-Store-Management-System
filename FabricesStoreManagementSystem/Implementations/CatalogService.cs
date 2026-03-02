@@ -7,6 +7,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
 
     public async Task<Result<CatalogResponse>> CreateCatalog
         (CatalogRequest request, CancellationToken cancellationToken = default)
+
     {
         _logger.LogInformation("check product duplication");
         if (request.Items.Count != request.Items.DistinctBy(x => x.ProductID).Count())
@@ -37,26 +38,29 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
 
         var catalog = new Catalog
         {
-            CatalogCode = "",
+            CatalogCode = $"{tempProducts.First().Code}",
             Description = request.Description,
             Status = CatalogStatus.Available,
             ProductsCount = request.Items.Count,
         };
 
+        await _appDbContext.Catalogs.AddAsync(catalog);
+
         _logger.LogInformation("start cutting product process");
-        var cutProcesses = request.Items.Select(x => CutProduct(catalog.Id, x, cancellationToken));
-        var resultCutting = Task.WhenAll(cutProcesses).Result;
-        _logger.LogInformation("end cutting product process");
-        foreach (var res in resultCutting)
-            if (res.IsFailure)
+        var results = new List<Result<string>>();
+        foreach (var item in request.Items)
+        {
+            var result = await CutProduct(catalog.Id, item, cancellationToken);
+            results.Add(result);
+            if (result.IsFailure)
             {
                 _logger.LogError("occure error through cutting process");
-                return Result.Failure<CatalogResponse>(res.Error);
+                return Result.Failure<CatalogResponse>(result.Error);
             }
-        
-        catalog.CatalogCode = resultCutting.First().Value;
+        }
+        _logger.LogInformation("end cutting product process");
 
-        await _appDbContext.Catalogs.AddAsync(catalog);
+        catalog.CatalogCode = results.First().Value;
         _logger.LogInformation("add catalog({id}) done", catalog.Id);
         return Result.Success(catalog.ToCatalogResponse());
     }
@@ -64,7 +68,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
     private async Task<Result<string>> CutProduct
         (Guid catalogID, CatalogProductRequest product, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("cutting product({id}) for catalog({id}) ", product.ProductID, catalogID);
+        _logger.LogInformation("cutting product({productid}) for catalog({catalogid}) ", product.ProductID, catalogID);
         var productDetails = (await _appDbContext.Products.AsNoTracking()
             .Select(x => new { Id = x.Id, Code = x.Code })
             .SingleOrDefaultAsync(x => x.Id == product.ProductID, cancellationToken));
@@ -106,14 +110,14 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         var catalogProduct = new CatalogProduct
         {
             CatalogID = catalogID,
-            PorductID = product.ProductID,
+            ProductID = product.ProductID,
             Quantity = product.Quantity,
         };
 
         await _appDbContext.CatalogsProducts.AddAsync(catalogProduct, cancellationToken);
         await _appDbContext.StockTransactions.AddAsync(stockTransaction, cancellationToken);
         _appDbContext.Inventory.Update(productInventory);
-        _logger.LogInformation("add catalog product({id}), and add stock transaction({id}), update inventory", product.ProductID, stockTransaction.Id);
+        _logger.LogInformation("add catalog product({productid}), and add stock transaction({transactionid}), update inventory", product.ProductID, stockTransaction.Id);
         return Result.Success(productDetails.Code);
     }
 
@@ -163,17 +167,20 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         };
 
         _logger.LogInformation("start cutting process");
-        var cutProcesses = request.Items.Select(x => CreateCatalogProductBySupplier(catalog.Id, x, cancellationToken));
-        var resultCutting = Task.WhenAll(cutProcesses).Result;
-        _logger.LogInformation("end cutting process");
-        foreach (var res in resultCutting)
-            if (res.IsFailure)
+        List<Result<string>> results = new List<Result<string>>();
+        foreach (var item in request.Items)
+        {
+            var result = await CreateCatalogProductBySupplier(catalog.Id, item, cancellationToken);
+            results.Add(result);
+            if (result.IsFailure)
             {
-                _logger.LogError("start cutting process");
-                return Result.Failure<CatalogResponse>(res.Error);
+                _logger.LogError("occure error through cutting process");
+                return Result.Failure<CatalogResponse>(result.Error);
             }
+        }
+        _logger.LogInformation("end cutting process");
 
-        catalog.CatalogCode = resultCutting.First().Value;
+        catalog.CatalogCode = results.First().Value;
 
         await _appDbContext.Catalogs.AddAsync(catalog);
         _logger.LogInformation("add catalog");
@@ -196,7 +203,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         var catalogProduct = new CatalogProduct
         {
             CatalogID = catalogID,
-            PorductID = productID,
+            ProductID = productID,
             Quantity = 0,
             IsDeducted = false,
         };
@@ -280,7 +287,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             .ToListAsync(cancellationToken);
 
         _logger.LogInformation("start returning quantity to stock");
-        var returnProductStockProcess = catalogProducts.Select(x => ReturnProductInventory(x.PorductID, x.Quantity, cancellationToken));
+        var returnProductStockProcess = catalogProducts.Select(x => ReturnProductInventory(x.ProductID, x.Quantity, cancellationToken));
         var resultProductStockProcess = await Task.WhenAll(returnProductStockProcess);
         _logger.LogInformation("end returning quantity to stock");
         foreach (var productProcess in resultProductStockProcess)
@@ -522,18 +529,19 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         };
 
         _logger.LogInformation("start cutting process");
-        var cutProcesses = request.Items.Select(x => CreateCatalogProductBySupplier(catalog.Id, x, cancellationToken));
-        var resultCutting = Task.WhenAll(cutProcesses).Result;
-        _logger.LogInformation("end cutting process");
-        foreach (var res in resultCutting)
-            if (res.IsFailure)
+        List<Result<string>> results = new List<Result<string>>();
+        foreach (var item in request.Items)
+        {
+            var result = await CreateCatalogProductBySupplier(catalog.Id, item, cancellationToken);
+            results.Add(result);
+            if (result.IsFailure)
             {
-                _logger.LogError("start cutting process");
-                return Result.Failure<CatalogResponse>(res.Error);
+                _logger.LogError("occure error through cutting process");
+                return Result.Failure<CatalogResponse>(result.Error);
             }
-
-        catalog.CatalogCode = resultCutting.First().Value;
-
+        }
+        _logger.LogInformation("end cutting process");
+        catalog.CatalogCode = results.First().Value;
         if (request.PaidAmount > request.Amount)
         {
             _logger.LogError("paid more than amount");

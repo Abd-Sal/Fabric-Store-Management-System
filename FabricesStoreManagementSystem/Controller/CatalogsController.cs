@@ -52,7 +52,6 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
             return result.ToProblem();
         }
         await _unitOfWork.SaveChangesAsync(cancellationToken);
-
         return CreatedAtAction(nameof(GetCatalog), new {id = result.Value.Id}, result.Value);
     }
 
