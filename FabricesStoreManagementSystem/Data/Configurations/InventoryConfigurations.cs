@@ -11,6 +11,9 @@ public class InventoryConfigurations : IEntityTypeConfiguration<Inventory>
         builder.HasIndex(x => x.ProductID)
             .IsUnique();
 
+        builder.Property(x => x.CurrentQuantity)
+            .HasPrecision(18, 2);
+
         builder.ToTable("Inventory");
     }
 }

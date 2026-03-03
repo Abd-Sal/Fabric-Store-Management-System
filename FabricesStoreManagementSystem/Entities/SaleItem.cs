@@ -5,7 +5,7 @@ public class SaleItem
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public Guid SaleID { get; set; }
     public Guid ProductID { get; set; }
-    public float Quantity { get; set; }
+    public decimal Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal Total => UnitPrice * (decimal)Quantity;
 

@@ -1,4 +1,4 @@
-﻿namespace FabricesStoreManagementSystem.Tests.Validations;
+namespace FabricesStoreManagementSystem.Tests.Validations;
 
 public class CatalogValidationsTests
 {
@@ -8,10 +8,10 @@ public class CatalogValidationsTests
         Description: "كتالوج المنتجات الأساسية 2024",
         Items: new List<CatalogProductRequest>
         {
-            new(Guid.NewGuid(), 10f),
-            new(Guid.NewGuid(), 15f),
-            new(Guid.NewGuid(), 20f),
-            new(Guid.NewGuid(), 5f)
+            new(Guid.NewGuid(), 10m),
+            new(Guid.NewGuid(), 15m),
+            new(Guid.NewGuid(), 20m),
+            new(Guid.NewGuid(), 5m)
         }
     );
 
@@ -126,7 +126,7 @@ public class CatalogValidationsTests
     public void Items_WhenTooManyItems_ShouldHaveValidationError()
     {
         var items = Enumerable.Range(0, 101)
-            .Select(_ => new CatalogProductRequest(Guid.NewGuid(), 1f))
+            .Select(_ => new CatalogProductRequest(Guid.NewGuid(), 1m))
             .ToList();
         var request = CreateValidCatalogRequest() with { Items = items };
 
@@ -141,9 +141,9 @@ public class CatalogValidationsTests
         var duplicateId = Guid.NewGuid();
         var items = new List<CatalogProductRequest>
         {
-            new(duplicateId, 10f),
-            new(Guid.NewGuid(), 15f),
-            new(duplicateId, 20f)
+            new(duplicateId, 10m),
+            new(Guid.NewGuid(), 15m),
+            new(duplicateId, 20m)
         };
         var request = CreateValidCatalogRequest() with { Items = items };
 
@@ -157,9 +157,9 @@ public class CatalogValidationsTests
     {
         var items = new List<CatalogProductRequest>
         {
-            new(Guid.NewGuid(), 400f),
-            new(Guid.NewGuid(), 400f),
-            new(Guid.NewGuid(), 400f) // Total: 1200 > 1000
+            new(Guid.NewGuid(), 400m),
+            new(Guid.NewGuid(), 400m),
+            new(Guid.NewGuid(), 400m) // Total: 1200 > 1000
         };
         var request = CreateValidCatalogRequest() with { Items = items };
 
@@ -185,9 +185,9 @@ public class CatalogValidationsTests
     {
         var items = new List<CatalogProductRequest>
         {
-            new(Guid.NewGuid(), 5f),  // >= 1
-            new(Guid.NewGuid(), 10f), // >= 1
-            new(Guid.NewGuid(), 15f)  // >= 1
+            new(Guid.NewGuid(), 5m),  // >= 1
+            new(Guid.NewGuid(), 10m), // >= 1
+            new(Guid.NewGuid(), 15m)  // >= 1
         };
         var request = CreateValidCatalogRequest() with { Items = items };
 
@@ -221,7 +221,7 @@ public class CatalogValidationsTests
     {
         yield return new object[]
         {
-            new CatalogRequest("", new List<CatalogProductRequest> { new(Guid.NewGuid(), 10f) })
+            new CatalogRequest("", new List<CatalogProductRequest> { new(Guid.NewGuid(), 10m) })
         };
 
         yield return new object[]
@@ -239,8 +239,8 @@ public class CatalogValidationsTests
         {
             new CatalogRequest("وصف صالح", new List<CatalogProductRequest>
             {
-                new(duplicateId, 10f),
-                new(duplicateId, 15f)
+                new(duplicateId, 10m),
+                new(duplicateId, 15m)
             })
         };
 
@@ -248,8 +248,8 @@ public class CatalogValidationsTests
         {
             new CatalogRequest("وصف صالح", new List<CatalogProductRequest>
             {
-                new(Guid.NewGuid(), 500f),
-                new(Guid.NewGuid(), 600f) // Total: 1100 > 1000
+                new(Guid.NewGuid(), 500m),
+                new(Guid.NewGuid(), 600m) // Total: 1100 > 1000
             })
         };
     }
@@ -270,9 +270,9 @@ public class CatalogValidationsTests
                 null,
                 new List<CatalogProductRequest>
                 {
-                    new(Guid.NewGuid(), 10f),
-                    new(Guid.NewGuid(), 20f),
-                    new(Guid.NewGuid(), 30f)
+                    new(Guid.NewGuid(), 10m),
+                    new(Guid.NewGuid(), 20m),
+                    new(Guid.NewGuid(), 30m)
                 }
             )
         };
@@ -283,10 +283,10 @@ public class CatalogValidationsTests
                 "كتالوج المنتجات الشتوية",
                 new List<CatalogProductRequest>
                 {
-                    new(Guid.NewGuid(), 5f),
-                    new(Guid.NewGuid(), 10f),
-                    new(Guid.NewGuid(), 15f),
-                    new(Guid.NewGuid(), 20f)
+                    new(Guid.NewGuid(), 5m),
+                    new(Guid.NewGuid(), 10m),
+                    new(Guid.NewGuid(), 15m),
+                    new(Guid.NewGuid(), 20m)
                 }
             )
         };
@@ -296,7 +296,7 @@ public class CatalogValidationsTests
             new CatalogRequest(
                 "Product Catalog 2024",
                 Enumerable.Range(0, 50)
-                    .Select(_ => new CatalogProductRequest(Guid.NewGuid(), 10f))
+                    .Select(_ => new CatalogProductRequest(Guid.NewGuid(), 10m))
                     .ToList()
             )
         };
@@ -325,7 +325,7 @@ public class CatalogValidationsTests
     {
         var request = new CatalogRequest(
             "", // Empty description
-            new List<CatalogProductRequest> { new(Guid.NewGuid(), 10f), new(Guid.NewGuid(), 10f), new(Guid.NewGuid(), 10f) }
+            new List<CatalogProductRequest> { new(Guid.NewGuid(), 10m), new(Guid.NewGuid(), 10m), new(Guid.NewGuid(), 10m) }
         );
 
         var result = _validator.TestValidate(request);
@@ -342,7 +342,7 @@ public class CatalogValidationsTests
     public void Catalog_WhenExactlyMaxItems_ShouldNotHaveValidationError()
     {
         var items = Enumerable.Range(0, 100)
-            .Select(_ => new CatalogProductRequest(Guid.NewGuid(), 5f))
+            .Select(_ => new CatalogProductRequest(Guid.NewGuid(), 5m))
             .ToList();
         var request = CreateValidCatalogRequest() with { Items = items };
 
@@ -355,9 +355,9 @@ public class CatalogValidationsTests
     {
         var items = new List<CatalogProductRequest>
         {
-            new(Guid.NewGuid(), 300f), // Valid individually
-            new(Guid.NewGuid(), 350f), // Valid individually
-            new(Guid.NewGuid(), 400f)  // Valid individually, but total 1050 > 1000
+            new(Guid.NewGuid(), 300m), // Valid individually
+            new(Guid.NewGuid(), 350m), // Valid individually
+            new(Guid.NewGuid(), 400m)  // Valid individually, but total 1050 > 1000
         };
         var request = CreateValidCatalogRequest() with { Items = items };
 
@@ -375,9 +375,9 @@ public class CatalogValidationsTests
     {
         var items = new List<CatalogProductRequest>
         {
-            new(Guid.NewGuid(), 10f),    // Valid
-            new(Guid.Empty, 15f),        // Invalid: Empty ProductID
-            new(Guid.NewGuid(), 20f)     // Valid
+            new(Guid.NewGuid(), 10m),    // Valid
+            new(Guid.Empty, 15m),        // Invalid: Empty ProductID
+            new(Guid.NewGuid(), 20m)     // Valid
         };
         var request = CreateValidCatalogRequest() with { Items = items };
 
@@ -394,9 +394,9 @@ public class CatalogValidationsTests
     {
         var items = new List<CatalogProductRequest>
         {
-            new(Guid.NewGuid(), 10f),    // Valid
-            new(Guid.NewGuid(), -5f),    // Invalid: Negative quantity
-            new(Guid.NewGuid(), 20f)     // Valid
+            new(Guid.NewGuid(), 10m),    // Valid
+            new(Guid.NewGuid(), -5m),    // Invalid: Negative quantity
+            new(Guid.NewGuid(), 20m)     // Valid
         };
         var request = CreateValidCatalogRequest() with { Items = items };
 

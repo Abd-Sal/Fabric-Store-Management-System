@@ -301,7 +301,7 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
     }
 
     private async Task<Result> returnQuantity
-        (Guid purchaseID, Guid productID, float returnedQuantity, CancellationToken cancellationToken = default)
+        (Guid purchaseID, Guid productID, decimal returnedQuantity, CancellationToken cancellationToken = default)
     {
         var productInventory = await _appDbContext.Inventory
             .SingleOrDefaultAsync(x => x.ProductID == productID);

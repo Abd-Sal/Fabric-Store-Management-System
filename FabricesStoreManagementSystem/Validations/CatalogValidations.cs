@@ -1,4 +1,4 @@
-﻿namespace FabricesStoreManagementSystem.Validations;
+namespace FabricesStoreManagementSystem.Validations;
 
 public class CatalogValidations : AbstractValidator<CatalogRequest>
 {
@@ -57,7 +57,7 @@ public class CatalogValidations : AbstractValidator<CatalogRequest>
     {
         if (items == null) return true;
 
-        const float MAX_TOTAL_QUANTITY = 1000f;
+        const decimal MAX_TOTAL_QUANTITY = 1000m;
         var totalQuantity = items.Sum(item => item.Quantity);
         return totalQuantity <= MAX_TOTAL_QUANTITY;
     }

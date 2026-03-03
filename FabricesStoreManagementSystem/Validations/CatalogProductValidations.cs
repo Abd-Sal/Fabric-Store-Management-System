@@ -1,9 +1,9 @@
-﻿namespace FabricesStoreManagementSystem.Validations;
+namespace FabricesStoreManagementSystem.Validations;
 
 public class CatalogProductValidations : AbstractValidator<CatalogProductRequest>
 {
-    private const float MIN_QUANTITY = 0.1f;
-    private const float MAX_QUANTITY = 100f; // Reasonable maximum for catalog items
+    private const decimal MIN_QUANTITY = 0.1m;
+    private const decimal MAX_QUANTITY = 100m;
 
     public CatalogProductValidations()
     {
@@ -17,7 +17,7 @@ public class CatalogProductValidations : AbstractValidator<CatalogProductRequest
             .NotEqual(Guid.Empty)
             .WithMessage("معرف المنتج لا يمكن أن يكون فارغًا.");
 
-        // Quantity validation (float)
+        // Quantity validation (decimal)
         RuleFor(x => x.Quantity)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
@@ -28,36 +28,25 @@ public class CatalogProductValidations : AbstractValidator<CatalogProductRequest
             .WithMessage($"الكمية يجب أن تكون {MIN_QUANTITY} على الأقل.")
             .LessThanOrEqualTo(MAX_QUANTITY)
             .WithMessage($"الكمية لا يمكن أن تتجاوز {MAX_QUANTITY}.")
-            .Must(BeValidFloatNumber)
-            .WithMessage("الكمية يجب أن تكون رقمًا صالحًا.")
-            .Must(HasMaximumOneDecimalPlace)
-            .WithMessage("الكمية يمكن أن تحتوي على منزلة عشرية واحدة كحد أقصى.");
+            .Must(HasMaximumTwoDecimalPlace)
+            .WithMessage("الكمية يمكن أن تحتوي على منزلتين عشريتين كحد أقصى.");
     }
 
-    private bool BeValidFloatNumber(float quantity)
+    private bool HasMaximumTwoDecimalPlace(decimal quantity)
     {
-        return !float.IsNaN(quantity) && !float.IsInfinity(quantity);
-    }
-
-    private bool HasMaximumOneDecimalPlace(float quantity)
-    {
-        if (float.IsNaN(quantity) || float.IsInfinity(quantity))
-            return false;
-
         try
         {
-            decimal decimalQuantity = (decimal)quantity;
-            var bits = decimal.GetBits(decimalQuantity);
+            var bits = decimal.GetBits(quantity);
             int scale = (bits[3] >> 16) & 0x7F; // Get decimal places
-            return scale <= 1;
+            return scale <= 2;
         }
         catch (OverflowException)
         {
-            return ValidateFloatOneDecimalFallback(quantity);
+            return ValidatedecimalOneDecimalFallback(quantity);
         }
     }
 
-    private bool ValidateFloatOneDecimalFallback(float quantity)
+    private bool ValidatedecimalOneDecimalFallback(decimal quantity)
     {
         var str = Math.Abs(quantity).ToString("F10", CultureInfo.InvariantCulture);
         var parts = str.Split('.');
@@ -65,7 +54,7 @@ public class CatalogProductValidations : AbstractValidator<CatalogProductRequest
         if (parts.Length == 2)
         {
             var decimalPart = parts[1].TrimEnd('0');
-            return decimalPart.Length <= 1;
+            return decimalPart.Length <= 2;
         }
         return true;
     }

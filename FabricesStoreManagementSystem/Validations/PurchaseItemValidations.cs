@@ -1,10 +1,10 @@
-﻿namespace FabricesStoreManagementSystem.Validations;
+namespace FabricesStoreManagementSystem.Validations;
 
 public class PurchaseItemValidations : AbstractValidator<PurchaseItemRequest>
 {
-    private const float MAX_QUANTITY = 10000f;
+    private const decimal MAX_QUANTITY = 10000m;
     private const decimal MAX_UNIT_COST = 1000000m;
-    private const int UNIT_COST_PRECISION = 2; // 2 decimal places for currency
+    private const int UNIT_COST_PRECISION = 3;
 
     public PurchaseItemValidations()
     {
@@ -30,9 +30,9 @@ public class PurchaseItemValidations : AbstractValidator<PurchaseItemRequest>
             .Must(HaveValidCurrencyPrecision)
             .WithMessage($"تكلفة الوحدة يمكن أن تحتوي على حد أقصى {UNIT_COST_PRECISION} منازل عشرية.")
             .Must(BeValidCurrencyAmount)
-            .WithMessage("تكلفة الوحدة يجب أن تكون مضاعفًا للـ 0.01.");
+            .WithMessage("تكلفة الوحدة يجب أن تكون مضاعفًا للـ 0.001.");
 
-        // Quantity validation (float)
+        // Quantity validation (decimal)
         RuleFor(x => x.Quantity)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
@@ -41,8 +41,6 @@ public class PurchaseItemValidations : AbstractValidator<PurchaseItemRequest>
             .WithMessage("الكمية يجب أن تكون أكبر من الصفر.")
             .LessThanOrEqualTo(MAX_QUANTITY)
             .WithMessage($"الكمية لا يمكن أن تتجاوز {MAX_QUANTITY}.")
-            .Must(BeValidFloatNumber)
-            .WithMessage("الكمية يجب أن تكون رقمًا صالحًا.")
             .Must(HasMaximumOneDecimalPlace)
             .WithMessage("الكمية يمكن أن تحتوي على حد أقصى منزلة عشرية واحدة.")
             .Must(BeInTenthIncrements)
@@ -58,35 +56,26 @@ public class PurchaseItemValidations : AbstractValidator<PurchaseItemRequest>
 
     private bool BeValidCurrencyAmount(decimal amount)
     {
-        return amount % 0.01m == 0;
+        return amount % 0.001m == 0;
     }
 
-    private bool BeValidFloatNumber(float quantity)
+    private bool HasMaximumOneDecimalPlace(decimal quantity)
     {
-        return !float.IsNaN(quantity) && !float.IsInfinity(quantity);
-    }
-
-    private bool HasMaximumOneDecimalPlace(float quantity)
-    {
-        if (float.IsNaN(quantity) || float.IsInfinity(quantity))
-            return false;
-
         try
         {
             // Convert to decimal for precise checking
-            decimal decimalQuantity = (decimal)quantity;
-            var bits = decimal.GetBits(decimalQuantity);
+            var bits = decimal.GetBits(quantity);
             int scale = (bits[3] >> 16) & 0x7F;
-            return scale <= 1;
+            return scale <= 2;
         }
         catch (OverflowException)
         {
-            // Fallback for very large/small floats
-            return ValidateFloatOneDecimalFallback(quantity);
+            // Fallback for very large/small decimals
+            return ValidatedecimalOneDecimalFallback(quantity);
         }
     }
 
-    private bool ValidateFloatOneDecimalFallback(float quantity)
+    private bool ValidatedecimalOneDecimalFallback(decimal quantity)
     {
         var str = Math.Abs(quantity).ToString("F10", CultureInfo.InvariantCulture);
         var parts = str.Split('.');
@@ -94,21 +83,15 @@ public class PurchaseItemValidations : AbstractValidator<PurchaseItemRequest>
         if (parts.Length == 2)
         {
             var decimalPart = parts[1].TrimEnd('0');
-            return decimalPart.Length <= 1;
+            return decimalPart.Length <= 2;
         }
         return true;
     }
 
-    private bool BeInTenthIncrements(float quantity)
+    private bool BeInTenthIncrements(decimal quantity)
     {
-        if (float.IsNaN(quantity) || float.IsInfinity(quantity))
-            return false;
-
-        // Multiply by 10 and round to nearest integer
-        var scaled = Math.Round(quantity * 10f);
-        var difference = Math.Abs(scaled / 10f - quantity);
-
-        const float TOLERANCE = 0.0001f;
-        return difference < TOLERANCE;
+        // Exact for `decimal`: multiples of 0.1 have (quantity * 10) as an integer.
+        var scaled = quantity * 10m;
+        return (scaled % 1m) == 0m;
     }
 }

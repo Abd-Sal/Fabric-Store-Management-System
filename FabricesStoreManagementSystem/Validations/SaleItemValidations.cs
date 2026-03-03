@@ -1,10 +1,10 @@
-﻿namespace FabricesStoreManagementSystem.Validations;
+namespace FabricesStoreManagementSystem.Validations;
 
 public class SaleItemValidations : AbstractValidator<SaleItemRequest>
 {
-    private const float MAX_QUANTITY = 10000f;
+    private const decimal MAX_QUANTITY = 10000m;
     private const decimal MAX_UNIT_PRICE = 1000000m;
-    private const int UNIT_PRICE_PRECISION = 2;
+    private const int UNIT_PRICE_PRECISION = 3;
 
     public SaleItemValidations()
     {
@@ -14,7 +14,6 @@ public class SaleItemValidations : AbstractValidator<SaleItemRequest>
             .NotEqual(Guid.Empty)
             .WithMessage("معرف المنتج لا يمكن أن يكون فارغًا.");
 
-        // Quantity is FLOAT - maximum 1 decimal place
         RuleFor(x => x.Quantity)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
@@ -23,12 +22,11 @@ public class SaleItemValidations : AbstractValidator<SaleItemRequest>
             .WithMessage("الكمية يجب أن تكون أكبر من الصفر.")
             .LessThanOrEqualTo(MAX_QUANTITY)
             .WithMessage($"الكمية لا يمكن أن تتجاوز {MAX_QUANTITY}.")
-            .Must(HaveValidFloatPrecision)  // Max 1 decimal place
-            .WithMessage("الكمية يمكن أن تحتوي على منزلة عشرية واحدة كحد أقصى (مثل 1.5، 2.0).")
-            .Must(BeReasonableFloatIncrement)  // Increments of 0.1
+            .Must(HaveValiddecimalPrecision) 
+            .WithMessage("الكمية يمكن أن تحتوي على منزلتين عشريتين كحد أقصى.")
+            .Must(BeReasonabledecimalIncrement)  // Increments of 0.1
             .WithMessage("الكمية يجب أن تكون مضاعفًا للـ 0.1 (مثل 0.1، 0.5، 1.0).");
 
-        // UnitPrice is DECIMAL - unchanged (2 decimal places for currency)
         RuleFor(x => x.UnitPrice)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
@@ -43,26 +41,19 @@ public class SaleItemValidations : AbstractValidator<SaleItemRequest>
             .WithMessage("سعر الوحدة يجب أن يكون مبلغًا نقديًا صالحًا.");
     }
 
-    // FLOAT version - maximum 1 decimal place
-    private bool HaveValidFloatPrecision(float quantity)
+    private bool HaveValiddecimalPrecision(decimal quantity)
     {
-        if (float.IsNaN(quantity) || float.IsInfinity(quantity))
-            return false;
-
-        var rounded = MathF.Round(quantity, 1);
-        return Math.Abs(quantity - rounded) < 0.0001f;
+        var bits = decimal.GetBits(quantity);
+        int scale = (bits[3] >> 16) & 0x7F;
+        return scale <= 2;
     }
 
-    // FLOAT version - increments of 0.1 (one decimal place)
-    private bool BeReasonableFloatIncrement(float quantity)
+    // decimal version - increments of 0.1 (one decimal place)
+    private bool BeReasonabledecimalIncrement(decimal quantity)
     {
-        if (float.IsNaN(quantity) || float.IsInfinity(quantity))
-            return false;
-
-        // Multiply by 10 and check if integer (for 0.1 increments)
-        var multiplied = quantity * 10f;
-        var integerPart = Math.Round(multiplied);
-        return Math.Abs(multiplied - integerPart) < 0.0001f;
+        // Exact for `decimal`: multiples of 0.1 have (quantity * 10) as an integer.
+        var scaled = quantity * 10m;
+        return (scaled % 1m) == 0m;
     }
 
     // DECIMAL version (unchanged)

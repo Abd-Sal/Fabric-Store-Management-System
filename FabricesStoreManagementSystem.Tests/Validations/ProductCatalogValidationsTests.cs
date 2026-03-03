@@ -1,10 +1,13 @@
-﻿namespace FabricesStoreManagementSystem.Tests.Validations;
+using System.Globalization;
+
+namespace FabricesStoreManagementSystem.Tests.Validations;
 
 public class ProductCatalogValidationsTests
 {
     private readonly ProductCatalogValidations _validator = new();
 
     private static Guid ValidId => Guid.NewGuid();
+    private static decimal D(string value) => decimal.Parse(value, CultureInfo.InvariantCulture);
 
     #region Id validations
 
@@ -13,7 +16,7 @@ public class ProductCatalogValidationsTests
     {
         var request = new ProductCatalogRequest(
             Id: Guid.Empty,
-            Quantity: 1.0f
+            Quantity: 1.0m
         );
 
         var result = _validator.TestValidate(request);
@@ -27,14 +30,14 @@ public class ProductCatalogValidationsTests
     #region Quantity basic validations
 
     [Theory]
-    [InlineData(0f)]
-    [InlineData(-1f)]
-    [InlineData(-0.5f)]
-    public void Quantity_Should_Fail_When_Less_Than_Or_Equal_Zero(float quantity)
+    [InlineData("0")]
+    [InlineData("-1")]
+    [InlineData("-0.5")]
+    public void Quantity_Should_Fail_When_Less_Than_Or_Equal_Zero(string quantity)
     {
         var request = new ProductCatalogRequest(
             ValidId,
-            quantity
+            D(quantity)
         );
 
         var result = _validator.TestValidate(request);
@@ -44,13 +47,13 @@ public class ProductCatalogValidationsTests
     }
 
     [Theory]
-    [InlineData(0.01f)]
-    [InlineData(0.05f)]
-    public void Quantity_Should_Fail_When_Less_Than_Minimum(float quantity)
+    [InlineData("0.01")]
+    [InlineData("0.05")]
+    public void Quantity_Should_Fail_When_Less_Than_Minimum(string quantity)
     {
         var request = new ProductCatalogRequest(
             ValidId,
-            quantity
+            D(quantity)
         );
 
         var result = _validator.TestValidate(request);
@@ -60,13 +63,13 @@ public class ProductCatalogValidationsTests
     }
 
     [Theory]
-    [InlineData(20.1f)]
-    [InlineData(50f)]
-    public void Quantity_Should_Fail_When_Greater_Than_Maximum(float quantity)
+    [InlineData("20.1")]
+    [InlineData("50")]
+    public void Quantity_Should_Fail_When_Greater_Than_Maximum(string quantity)
     {
         var request = new ProductCatalogRequest(
             ValidId,
-            quantity
+            D(quantity)
         );
 
         var result = _validator.TestValidate(request);
@@ -80,16 +83,16 @@ public class ProductCatalogValidationsTests
     #region Decimal precision validations
 
     [Theory]
-    [InlineData(0.1f)]
-    [InlineData(0.5f)]
-    [InlineData(1.0f)]
-    [InlineData(2.5f)]
-    [InlineData(10f)]
-    public void Quantity_Should_Pass_When_Has_At_Most_One_Decimal(float quantity)
+    [InlineData("0.1")]
+    [InlineData("0.5")]
+    [InlineData("1.0")]
+    [InlineData("2.5")]
+    [InlineData("10")]
+    public void Quantity_Should_Pass_When_Has_At_Most_One_Decimal(string quantity)
     {
         var request = new ProductCatalogRequest(
             ValidId,
-            quantity
+            D(quantity)
         );
 
         var result = _validator.TestValidate(request);
@@ -101,35 +104,35 @@ public class ProductCatalogValidationsTests
 
     #region Tenth increment validations
     [Theory]
-    [InlineData(1.11f)]
-    [InlineData(2.55f)]
-    [InlineData(10.999f)]
-    [InlineData(0.222f)]
-    [InlineData(0.123f)]
-    [InlineData(2.35f)]
-    public void Quantity_Should_Fail_When_More_Than_One_Decimal(float quantity)
+    [InlineData("1.111")]
+    [InlineData("2.551")]
+    [InlineData("10.999")]
+    [InlineData("0.2221")]
+    [InlineData("0.123")]
+    [InlineData("2.351")]
+    public void Quantity_Should_Fail_When_More_Than_One_Decimal(string quantity)
     {
-        var request = new ProductCatalogRequest(ValidId, quantity);
+        var request = new ProductCatalogRequest(ValidId, D(quantity));
 
         var result = _validator.TestValidate(request);
 
         result.ShouldHaveValidationErrorFor(x => x.Quantity)
-              .WithErrorMessage("الكمية يمكن أن تحتوي على منزلة عشرية واحدة كحد أقصى.");
+              .WithErrorMessage("الكمية يمكن أن تحتوي على منزلتين عشريتين كحد أقصى.");
     }
 
 
     [Theory]
-    [InlineData(0.1f)]
-    [InlineData(0.2f)]
-    [InlineData(0.5f)]
-    [InlineData(1.0f)]
-    [InlineData(2.5f)]
-    [InlineData(10.0f)]
-    public void Quantity_Should_Pass_When_Multiple_Of_Point_One(float quantity)
+    [InlineData("0.1")]
+    [InlineData("0.2")]
+    [InlineData("0.5")]
+    [InlineData("1.0")]
+    [InlineData("2.5")]
+    [InlineData("10.0")]
+    public void Quantity_Should_Pass_When_Multiple_Of_Point_One(string quantity)
     {
         var request = new ProductCatalogRequest(
             ValidId,
-            quantity
+            D(quantity)
         );
 
         var result = _validator.TestValidate(request);
@@ -146,7 +149,7 @@ public class ProductCatalogValidationsTests
     {
         var request = new ProductCatalogRequest(
             Id: ValidId,
-            Quantity: 1.5f
+            Quantity: 1.5m
         );
 
         var result = _validator.TestValidate(request);

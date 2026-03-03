@@ -1,4 +1,4 @@
-﻿namespace FabricesStoreManagementSystem.Tests.Validations;
+namespace FabricesStoreManagementSystem.Tests.Validations;
 
 public class PurchaseValidationsTests
 {
@@ -6,7 +6,7 @@ public class PurchaseValidationsTests
 
     private static PurchaseItemRequest CreateValidItem(
         Guid? productId = null,
-        float quantity = 1.0f,
+        decimal quantity = 1.0m,
         decimal unitCost = 10.0m)
     {
         return new PurchaseItemRequest(
@@ -186,7 +186,7 @@ public class PurchaseValidationsTests
     {
         var items = new List<PurchaseItemRequest>
         {
-            CreateValidItem(quantity: 10000f, unitCost: 1000m)
+            CreateValidItem(quantity: 10000m, unitCost: 1000m)
         };
         var model = CreateValidRequest(items: items);
 
@@ -200,7 +200,7 @@ public class PurchaseValidationsTests
     {
         var items = new List<PurchaseItemRequest>
         {
-            CreateValidItem(quantity: 0f, unitCost: 10m)
+            CreateValidItem(quantity: 0m, unitCost: 10m)
         };
         var model = CreateValidRequest(items: items);
 
@@ -214,8 +214,8 @@ public class PurchaseValidationsTests
     {
         var items = new List<PurchaseItemRequest>
         {
-            CreateValidItem(quantity: 1f, unitCost: 100m),
-            CreateValidItem(quantity: 2f, unitCost: 50m)
+            CreateValidItem(quantity: 1m, unitCost: 100m),
+            CreateValidItem(quantity: 2m, unitCost: 50m)
         };
         var model = CreateValidRequest(items: items);
 

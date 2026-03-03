@@ -1,4 +1,4 @@
-﻿namespace FabricesStoreManagementSystem.Tests.Validations;
+namespace FabricesStoreManagementSystem.Tests.Validations;
 
 public class SaleItemValidationsTests
 {
@@ -6,7 +6,7 @@ public class SaleItemValidationsTests
 
     private static SaleItemRequest CreateValidRequest(
         Guid? productId = null,
-        float quantity = 1.0f,
+        decimal quantity = 1.0m,
         decimal unitPrice = 10.00m)
     {
         return new SaleItemRequest(
@@ -43,9 +43,9 @@ public class SaleItemValidationsTests
     #region Quantity - Required / Range
 
     [Theory]
-    [InlineData(0f)]
-    [InlineData(-1f)]
-    public void Quantity_LessThanOrEqualZero_ShouldHaveValidationError(float quantity)
+    [InlineData(0.0)]
+    [InlineData(-1.0)]
+    public void Quantity_LessThanOrEqualZero_ShouldHaveValidationError(decimal quantity)
     {
         var model = CreateValidRequest(quantity: quantity);
 
@@ -57,7 +57,7 @@ public class SaleItemValidationsTests
     [Fact]
     public void Quantity_ExceedingMax_ShouldHaveValidationError()
     {
-        var model = CreateValidRequest(quantity: 10000.1f);
+        var model = CreateValidRequest(quantity: 10000.1m);
 
         var result = _validator.TestValidate(model);
 
@@ -69,10 +69,10 @@ public class SaleItemValidationsTests
     #region Quantity - Precision
 
     [Theory]
-    [InlineData(1.11f)]
-    [InlineData(2.555f)]
-    [InlineData(0.123f)]
-    public void Quantity_WithMoreThanOneDecimalPlace_ShouldHaveValidationError(float quantity)
+    [InlineData(1.11)]
+    [InlineData(2.555)]
+    [InlineData(0.123)]
+    public void Quantity_WithMoreThanOneDecimalPlace_ShouldHaveValidationError(decimal quantity)
     {
         var model = CreateValidRequest(quantity: quantity);
 
@@ -82,10 +82,10 @@ public class SaleItemValidationsTests
     }
 
     [Theory]
-    [InlineData(1.0f)]
-    [InlineData(1.5f)]
-    [InlineData(10.1f)]
-    public void Quantity_WithOneDecimalPlace_ShouldNotHaveValidationError(float quantity)
+    [InlineData(1.0)]
+    [InlineData(1.5)]
+    [InlineData(10.1)]
+    public void Quantity_WithOneDecimalPlace_ShouldNotHaveValidationError(decimal quantity)
     {
         var model = CreateValidRequest(quantity: quantity);
 
@@ -99,10 +99,10 @@ public class SaleItemValidationsTests
     #region Quantity - Increment (0.1)
 
     [Theory]
-    [InlineData(1.05f)]
-    [InlineData(0.25f)]
-    [InlineData(2.15f)]
-    public void Quantity_NotMultipleOfPointOne_ShouldHaveValidationError(float quantity)
+    [InlineData(1.05)]
+    [InlineData(0.25)]
+    [InlineData(2.15)]
+    public void Quantity_NotMultipleOfPointOne_ShouldHaveValidationError(decimal quantity)
     {
         var model = CreateValidRequest(quantity: quantity);
 
@@ -112,11 +112,11 @@ public class SaleItemValidationsTests
     }
 
     [Theory]
-    [InlineData(0.1f)]
-    [InlineData(0.5f)]
-    [InlineData(2.0f)]
-    [InlineData(9.9f)]
-    public void Quantity_MultipleOfPointOne_ShouldNotHaveValidationError(float quantity)
+    [InlineData(0.1)]
+    [InlineData(0.5)]
+    [InlineData(2.0)]
+    [InlineData(9.9)]
+    public void Quantity_MultipleOfPointOne_ShouldNotHaveValidationError(decimal quantity)
     {
         var model = CreateValidRequest(quantity: quantity);
 
@@ -188,7 +188,7 @@ public class SaleItemValidationsTests
     public void SaleItemRequest_WithValidValues_ShouldPassValidation()
     {
         var model = CreateValidRequest(
-            quantity: 2.5f,
+            quantity: 2.5m,
             unitPrice: 99.99m
         );
 

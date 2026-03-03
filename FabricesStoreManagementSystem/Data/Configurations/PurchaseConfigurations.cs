@@ -15,6 +15,12 @@ public class PurchaseConfigurations : IEntityTypeConfiguration<Purchase>
             )
             .HasMaxLength(25);
 
+        builder.Property(x => x.PaidAmount)
+            .HasPrecision(18, 3);
+
+        builder.Property(x => x.TotalAmount)
+            .HasPrecision(18, 3);
+
         builder.HasIndex(x => x.SupplierID);
         builder.HasIndex(x => x.InvoiceNumber).IsUnique();
 

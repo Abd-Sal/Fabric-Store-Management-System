@@ -8,6 +8,9 @@ public class CatalogProductConfigurations : IEntityTypeConfiguration<CatalogProd
         builder.Property(x => x.Id)
             .ValueGeneratedNever();
 
+        builder.Property(x => x.Quantity)
+            .HasPrecision(18, 2);
+
         builder.HasIndex(x => new {x.CatalogID, x.ProductID});
 
         builder.ToTable("CatalogsProducts");

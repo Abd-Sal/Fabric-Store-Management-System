@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FabricesStoreManagementSystem.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class Initial_migration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -36,7 +36,7 @@ namespace FabricesStoreManagementSystem.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ReferenceID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ReferenceType = table.Column<string>(type: "nvarchar(35)", maxLength: 35, nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
                     PayMethod = table.Column<string>(type: "nvarchar(35)", maxLength: 35, nullable: false),
                     PaidAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -87,10 +87,10 @@ namespace FabricesStoreManagementSystem.Migrations
                     InvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CustomerID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductsCount = table.Column<int>(type: "int", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Discount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    NetAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PaidAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    Discount = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    NetAmount = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    PaidAmount = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
                     Status = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -111,7 +111,7 @@ namespace FabricesStoreManagementSystem.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CurrentQuantity = table.Column<float>(type: "real", nullable: false),
+                    CurrentQuantity = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     LastUpdateAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
@@ -131,7 +131,7 @@ namespace FabricesStoreManagementSystem.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    QuantityChange = table.Column<float>(type: "real", nullable: false),
+                    QuantityChange = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     TransactionType = table.Column<string>(type: "nvarchar(35)", maxLength: 35, nullable: false),
                     ReferenceID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ReferenceType = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: true),
@@ -158,6 +158,9 @@ namespace FabricesStoreManagementSystem.Migrations
                     CatalogCode = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     ProductsCount = table.Column<int>(type: "int", nullable: false),
+                    IsPurchased = table.Column<bool>(type: "bit", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: true),
+                    PaidAmount = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: true),
                     Status = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastUpdateAt = table.Column<DateTime>(type: "datetime2", nullable: true)
@@ -180,8 +183,8 @@ namespace FabricesStoreManagementSystem.Migrations
                     InvoiceNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     SupplierID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductsCount = table.Column<int>(type: "int", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    PaidAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
+                    PaidAmount = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false),
                     Status = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -203,8 +206,8 @@ namespace FabricesStoreManagementSystem.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     SaleID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<float>(type: "real", nullable: false),
-                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Quantity = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -255,11 +258,10 @@ namespace FabricesStoreManagementSystem.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PorductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CatalogID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<float>(type: "real", nullable: false),
-                    IsDeducted = table.Column<bool>(type: "bit", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Quantity = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    IsDeducted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -271,8 +273,8 @@ namespace FabricesStoreManagementSystem.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_CatalogsProducts_Products_ProductId",
-                        column: x => x.ProductId,
+                        name: "FK_CatalogsProducts_Products_ProductID",
+                        column: x => x.ProductID,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -285,8 +287,8 @@ namespace FabricesStoreManagementSystem.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     PurchaseID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<float>(type: "real", nullable: false),
-                    UnitCost = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Quantity = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    UnitCost = table.Column<decimal>(type: "decimal(18,3)", precision: 18, scale: 3, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -332,14 +334,14 @@ namespace FabricesStoreManagementSystem.Migrations
                 column: "CustomerID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CatalogsProducts_CatalogID_PorductID",
+                name: "IX_CatalogsProducts_CatalogID_ProductID",
                 table: "CatalogsProducts",
-                columns: new[] { "CatalogID", "PorductID" });
+                columns: new[] { "CatalogID", "ProductID" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CatalogsProducts_ProductId",
+                name: "IX_CatalogsProducts_ProductID",
                 table: "CatalogsProducts",
-                column: "ProductId");
+                column: "ProductID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Customers_Email",

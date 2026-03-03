@@ -1,12 +1,15 @@
-﻿namespace FabricesStoreManagementSystem.Tests.Validations;
+using System.Globalization;
+
+namespace FabricesStoreManagementSystem.Tests.Validations;
 
 public class CatalogProductValidationsTests
 {
     private readonly CatalogProductValidations _validator = new();
+    private static decimal D(string value) => decimal.Parse(value, CultureInfo.InvariantCulture);
 
     private static CatalogProductRequest CreateValidRequest() => new(
         ProductID: Guid.NewGuid(),
-        Quantity: 10.5f
+        Quantity: 10.5m
     );
 
     #region ProductID Validation Tests
@@ -37,7 +40,7 @@ public class CatalogProductValidationsTests
     [Fact]
     public void Quantity_WhenZero_ShouldHaveValidationError()
     {
-        var request = CreateValidRequest() with { Quantity = 0f };
+        var request = CreateValidRequest() with { Quantity = 0m };
 
         _validator.TestValidate(request)
             .ShouldHaveValidationErrorFor(x => x.Quantity)
@@ -47,7 +50,7 @@ public class CatalogProductValidationsTests
     [Fact]
     public void Quantity_WhenNegative_ShouldHaveValidationError()
     {
-        var request = CreateValidRequest() with { Quantity = -5f };
+        var request = CreateValidRequest() with { Quantity = -5m };
 
         _validator.TestValidate(request)
             .ShouldHaveValidationErrorFor(x => x.Quantity)
@@ -57,7 +60,7 @@ public class CatalogProductValidationsTests
     [Fact]
     public void Quantity_WhenTooSmall_ShouldHaveValidationError()
     {
-        var request = CreateValidRequest() with { Quantity = 0.05f }; // < 0.1
+        var request = CreateValidRequest() with { Quantity = 0.05m }; // < 0.1
 
         _validator.TestValidate(request)
             .ShouldHaveValidationErrorFor(x => x.Quantity)
@@ -67,7 +70,7 @@ public class CatalogProductValidationsTests
     [Fact]
     public void Quantity_WhenTooLarge_ShouldHaveValidationError()
     {
-        var request = CreateValidRequest() with { Quantity = 150f }; // > 100
+        var request = CreateValidRequest() with { Quantity = 150m }; // > 100
 
         _validator.TestValidate(request)
             .ShouldHaveValidationErrorFor(x => x.Quantity)
@@ -75,41 +78,27 @@ public class CatalogProductValidationsTests
     }
 
     [Theory]
-    [InlineData(float.NaN)]
-    [InlineData(float.PositiveInfinity)]
-    [InlineData(float.NegativeInfinity)]
-    public void Quantity_WhenInvalidFloat_ShouldHaveValidationError(float quantity)
+    [InlineData("1.251")]   // Two decimal places
+    [InlineData("10.1213")] // Three decimal places
+    [InlineData("0.751")]   // Two decimal places
+    public void Quantity_WhenMoreThanOneDecimalPlace_ShouldHaveValidationError(string quantity)
     {
-        var request = CreateValidRequest() with { Quantity = quantity };
-
-        var result = _validator.TestValidate(request);
-
-        // Should fail validation (don't check specific message due to cascade)
-        result.ShouldHaveValidationErrorFor(x => x.Quantity);
-    }
-
-    [Theory]
-    [InlineData(1.25f)]   // Two decimal places
-    [InlineData(10.123f)] // Three decimal places
-    [InlineData(0.75f)]   // Two decimal places
-    public void Quantity_WhenMoreThanOneDecimalPlace_ShouldHaveValidationError(float quantity)
-    {
-        var request = CreateValidRequest() with { Quantity = quantity };
+        var request = CreateValidRequest() with { Quantity = D(quantity) };
 
         _validator.TestValidate(request)
             .ShouldHaveValidationErrorFor(x => x.Quantity)
-            .WithErrorMessage("الكمية يمكن أن تحتوي على منزلة عشرية واحدة كحد أقصى.");
+            .WithErrorMessage("الكمية يمكن أن تحتوي على منزلتين عشريتين كحد أقصى.");
     }
 
     [Theory]
-    [InlineData(1f)]      // No decimal places
-    [InlineData(10.5f)]   // One decimal place
-    [InlineData(0.1f)]    // One decimal place (minimum)
-    [InlineData(100f)]    // No decimal places (maximum)
-    [InlineData(50.0f)]   // One decimal place (zero)
-    public void Quantity_WhenValid_ShouldNotHaveValidationError(float quantity)
+    [InlineData("1")]      // No decimal places
+    [InlineData("10.5")]   // One decimal place
+    [InlineData("0.1")]    // One decimal place (minimum)
+    [InlineData("100")]    // No decimal places (maximum)
+    [InlineData("50.0")]   // One decimal place (zero)
+    public void Quantity_WhenValid_ShouldNotHaveValidationError(string quantity)
     {
-        var request = CreateValidRequest() with { Quantity = quantity };
+        var request = CreateValidRequest() with { Quantity = D(quantity) };
 
         _validator.TestValidate(request)
             .ShouldNotHaveValidationErrorFor(x => x.Quantity);
@@ -141,37 +130,27 @@ public class CatalogProductValidationsTests
     {
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.Empty, 10.5f)
+            new CatalogProductRequest(Guid.Empty, 10.5m)
         };
 
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.NewGuid(), 0f)
+            new CatalogProductRequest(Guid.NewGuid(), 0m)
         };
 
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.NewGuid(), -5f)
+            new CatalogProductRequest(Guid.NewGuid(), -5m)
         };
 
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.NewGuid(), 0.05f)
+            new CatalogProductRequest(Guid.NewGuid(), 0.05m)
         };
 
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.NewGuid(), 150f)
-        };
-
-        yield return new object[]
-        {
-            new CatalogProductRequest(Guid.NewGuid(), float.NaN)
-        };
-
-        yield return new object[]
-        {
-            new CatalogProductRequest(Guid.NewGuid(), 1.25f)
+            new CatalogProductRequest(Guid.NewGuid(), 150m)
         };
     }
 
@@ -187,27 +166,27 @@ public class CatalogProductValidationsTests
     {
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.NewGuid(), 0.1f)
+            new CatalogProductRequest(Guid.NewGuid(), 0.1m)
         };
 
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.NewGuid(), 1f)
+            new CatalogProductRequest(Guid.NewGuid(), 1m)
         };
 
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.NewGuid(), 10.5f)
+            new CatalogProductRequest(Guid.NewGuid(), 10.5m)
         };
 
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.NewGuid(), 50.0f)
+            new CatalogProductRequest(Guid.NewGuid(), 50.0m)
         };
 
         yield return new object[]
         {
-            new CatalogProductRequest(Guid.NewGuid(), 100f)
+            new CatalogProductRequest(Guid.NewGuid(), 100m)
         };
     }
 
@@ -218,7 +197,7 @@ public class CatalogProductValidationsTests
     [Fact]
     public void Validation_ShouldStopOnFirstError_ForProductID()
     {
-        var request = new CatalogProductRequest(Guid.Empty, -5f); // Both invalid
+        var request = new CatalogProductRequest(Guid.Empty, -5m); // Both invalid
 
         var result = _validator.TestValidate(request);
 
@@ -229,7 +208,7 @@ public class CatalogProductValidationsTests
     [Fact]
     public void Validation_ShouldStopOnFirstError_ForQuantity()
     {
-        var request = new CatalogProductRequest(Guid.NewGuid(), 0f);
+        var request = new CatalogProductRequest(Guid.NewGuid(), 0m);
 
         var result = _validator.TestValidate(request);
 
@@ -244,7 +223,7 @@ public class CatalogProductValidationsTests
     [Fact]
     public void Quantity_WhenExactlyMinValue_ShouldNotHaveValidationError()
     {
-        var request = CreateValidRequest() with { Quantity = 0.1f };
+        var request = CreateValidRequest() with { Quantity = 0.1m };
 
         _validator.TestValidate(request)
             .ShouldNotHaveValidationErrorFor(x => x.Quantity);
@@ -253,18 +232,18 @@ public class CatalogProductValidationsTests
     [Fact]
     public void Quantity_WhenExactlyMaxValue_ShouldNotHaveValidationError()
     {
-        var request = CreateValidRequest() with { Quantity = 100f };
+        var request = CreateValidRequest() with { Quantity = 100m };
 
         _validator.TestValidate(request)
             .ShouldNotHaveValidationErrorFor(x => x.Quantity);
     }
 
     [Theory]
-    [InlineData(0.1f)]
-    [InlineData(1.0f)]
-    [InlineData(99.9f)]
-    [InlineData(100.0f)]
-    public void Quantity_WhenWithinRange_ShouldNotHaveValidationError(float quantity)
+    [InlineData(0.1)]
+    [InlineData(1.0)]
+    [InlineData(99.9)]
+    [InlineData(100.0)]
+    public void Quantity_WhenWithinRange_ShouldNotHaveValidationError(decimal quantity)
     {
         var request = CreateValidRequest() with { Quantity = quantity };
 
@@ -273,9 +252,9 @@ public class CatalogProductValidationsTests
     }
 
     [Theory]
-    [InlineData(0.099999f)]    // Just below minimum
-    [InlineData(100.0001f)]    // Just above maximum
-    public void Quantity_WhenOutsideRange_ShouldHaveValidationError(float quantity)
+    [InlineData(0.099999)]    // Just below minimum
+    [InlineData(100.0001)]    // Just above maximum
+    public void Quantity_WhenOutsideRange_ShouldHaveValidationError(decimal quantity)
     {
         var request = CreateValidRequest() with { Quantity = quantity };
 
@@ -288,12 +267,12 @@ public class CatalogProductValidationsTests
     #region Decimal Place Validation Tests
 
     [Theory]
-    [InlineData(10f)]      // No decimal: 10
-    [InlineData(10.0f)]    // One decimal (zero): 10.0
-    [InlineData(10.5f)]    // One decimal: 10.5
-    [InlineData(0.1f)]     // One decimal: 0.1
-    [InlineData(99.9f)]    // One decimal: 99.9
-    public void Quantity_WhenZeroOrOneDecimalPlace_ShouldPassValidation(float quantity)
+    [InlineData(10.0)]      // No decimal: 10
+    [InlineData(10.0)]    // One decimal (zero): 10.0
+    [InlineData(10.5)]    // One decimal: 10.5
+    [InlineData(0.1)]     // One decimal: 0.1
+    [InlineData(99.9)]    // One decimal: 99.9
+    public void Quantity_WhenZeroOrOneDecimalPlace_ShouldPassValidation(decimal quantity)
     {
         var request = CreateValidRequest() with { Quantity = quantity };
 
@@ -302,17 +281,17 @@ public class CatalogProductValidationsTests
     }
 
     [Theory]
-    [InlineData(10.55f)]   // Two decimals: 10.55
-    [InlineData(0.12f)]    // Two decimals: 0.12
-    [InlineData(99.99f)]   // Two decimals: 99.99
-    [InlineData(10.123f)]  // Three decimals: 10.123
-    public void Quantity_WhenMoreThanOneDecimalPlace_ShouldFailValidation(float quantity)
+    [InlineData(10.551)]   // Two decimals: 10.55
+    [InlineData(0.121)]    // Two decimals: 0.12
+    [InlineData(99.991)]   // Two decimals: 99.99
+    [InlineData(10.1231)]  // Three decimals: 10.123
+    public void Quantity_WhenMoreThanOneDecimalPlace_ShouldFailValidation(decimal quantity)
     {
         var request = CreateValidRequest() with { Quantity = quantity };
 
         _validator.TestValidate(request)
             .ShouldHaveValidationErrorFor(x => x.Quantity)
-            .WithErrorMessage("الكمية يمكن أن تحتوي على منزلة عشرية واحدة كحد أقصى.");
+            .WithErrorMessage("الكمية يمكن أن تحتوي على منزلتين عشريتين كحد أقصى.");
     }
 
     #endregion

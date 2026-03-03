@@ -45,10 +45,12 @@ namespace FabricesStoreManagementSystem.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<decimal?>("PaidAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<decimal?>("Price")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<int>("ProductsCount")
                         .HasColumnType("int");
@@ -110,20 +112,18 @@ namespace FabricesStoreManagementSystem.Migrations
                     b.Property<bool>("IsDeducted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("PorductID")
+                    b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<float>("Quantity")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductID");
 
-                    b.HasIndex("CatalogID", "PorductID");
+                    b.HasIndex("CatalogID", "ProductID");
 
                     b.ToTable("CatalogsProducts", (string)null);
                 });
@@ -179,8 +179,9 @@ namespace FabricesStoreManagementSystem.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<float>("CurrentQuantity")
-                        .HasColumnType("real");
+                    b.Property<decimal>("CurrentQuantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("LastUpdateAt")
                         .HasColumnType("datetime2");
@@ -202,7 +203,8 @@ namespace FabricesStoreManagementSystem.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Amount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<DateTime>("PaidAt")
                         .HasColumnType("datetime2");
@@ -279,7 +281,8 @@ namespace FabricesStoreManagementSystem.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<decimal>("PaidAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<int>("ProductsCount")
                         .HasColumnType("int");
@@ -293,7 +296,8 @@ namespace FabricesStoreManagementSystem.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.HasKey("Id");
 
@@ -316,11 +320,13 @@ namespace FabricesStoreManagementSystem.Migrations
                     b.Property<Guid>("PurchaseID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<float>("Quantity")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("UnitCost")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.HasKey("Id");
 
@@ -343,17 +349,20 @@ namespace FabricesStoreManagementSystem.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Discount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<string>("InvoiceNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("NetAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<decimal>("PaidAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.Property<int>("ProductsCount")
                         .HasColumnType("int");
@@ -364,7 +373,8 @@ namespace FabricesStoreManagementSystem.Migrations
                         .HasColumnType("nvarchar(25)");
 
                     b.Property<decimal>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.HasKey("Id");
 
@@ -381,14 +391,16 @@ namespace FabricesStoreManagementSystem.Migrations
                     b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<float>("Quantity")
-                        .HasColumnType("real");
+                    b.Property<decimal>("Quantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid>("SaleID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
 
                     b.HasKey("Id");
 
@@ -414,8 +426,9 @@ namespace FabricesStoreManagementSystem.Migrations
                     b.Property<Guid>("ProductID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<float>("QuantityChange")
-                        .HasColumnType("real");
+                    b.Property<decimal>("QuantityChange")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<Guid?>("ReferenceID")
                         .HasColumnType("uniqueidentifier");
@@ -519,7 +532,7 @@ namespace FabricesStoreManagementSystem.Migrations
 
                     b.HasOne("FabricesStoreManagementSystem.Entities.Product", "Product")
                         .WithMany("CatalogsProducts")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

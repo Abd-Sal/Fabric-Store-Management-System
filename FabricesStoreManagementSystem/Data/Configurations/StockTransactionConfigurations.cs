@@ -28,6 +28,9 @@ public class StockTransactionConfigurations : IEntityTypeConfiguration<StockTran
             .HasMaxLength(25)
             .IsRequired(false);
 
+        builder.Property(x => x.QuantityChange)
+            .HasPrecision(18, 2);
+
         builder.HasIndex(x => x.ProductID);
         builder.HasIndex(x => x.ReferenceID);
         builder.HasIndex(x => new {x.ReferenceID, x.ReferenceType});

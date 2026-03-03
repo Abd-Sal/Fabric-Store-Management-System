@@ -4,6 +4,6 @@ public record CatalogProductResponse(
     Guid Id,
     Guid ProductID,
     Guid CatalogID,
-    float Quantity,
+    decimal Quantity,
     bool IsDeducted
 );

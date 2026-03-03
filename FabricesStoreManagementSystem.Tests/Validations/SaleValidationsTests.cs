@@ -1,4 +1,4 @@
-﻿namespace FabricesStoreManagementSystem.Tests.Validations;
+namespace FabricesStoreManagementSystem.Tests.Validations;
 
 public class SaleValidationsTests
 {
@@ -101,7 +101,7 @@ public class SaleValidationsTests
     public void SaleItems_DuplicateProductIDs_ShouldHaveValidationError()
     {
         var item1 = CreateValidSaleItem();
-        var item2 = new SaleItemRequest(item1.ProductID, 2f, 10m);
+        var item2 = new SaleItemRequest(item1.ProductID, 2m, 10m);
 
         var model = new SaleRequest(Guid.NewGuid(), 0m, 0m, new List<SaleItemRequest> { item1, item2 });
 
@@ -117,7 +117,7 @@ public class SaleValidationsTests
     [Fact]
     public void Discount_GreaterThanSubtotal_ShouldHaveValidationError()
     {
-        var item = new SaleItemRequest(Guid.NewGuid(), 2f, 50m); // subtotal = 100
+        var item = new SaleItemRequest(Guid.NewGuid(), 2m, 50m); // subtotal = 100
         var model = new SaleRequest(Guid.NewGuid(), 150m, 0, new List<SaleItemRequest> { item });
 
         var result = _validator.TestValidate(model);
@@ -131,7 +131,7 @@ public class SaleValidationsTests
     [Fact]
     public void PaidAmount_GreaterThanNetTotal_ShouldHaveValidationError()
     {
-        var item = new SaleItemRequest(Guid.NewGuid(), 2f, 50m); // subtotal = 100
+        var item = new SaleItemRequest(Guid.NewGuid(), 2m, 50m); // subtotal = 100
         var model = new SaleRequest(Guid.NewGuid(), 20m, 90m, new List<SaleItemRequest> { item }); // net = 80
 
         var result = _validator.TestValidate(model);
@@ -144,6 +144,6 @@ public class SaleValidationsTests
     // ----------------------------
     private SaleItemRequest CreateValidSaleItem()
     {
-        return new SaleItemRequest(Guid.NewGuid(), 1f, 10m);
+        return new SaleItemRequest(Guid.NewGuid(), 1m, 10m);
     }
 }

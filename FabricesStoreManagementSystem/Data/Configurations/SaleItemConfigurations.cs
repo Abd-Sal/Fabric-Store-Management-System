@@ -8,6 +8,12 @@ public class SaleItemConfigurations : IEntityTypeConfiguration<SaleItem>
         builder.Property(x => x.Id)
             .ValueGeneratedNever();
 
+        builder.Property(x => x.Quantity)
+            .HasPrecision(18, 2);
+
+        builder.Property(x => x.UnitPrice)
+            .HasPrecision(18, 3);
+
         builder.HasIndex(x => x.SaleID);
         builder.HasIndex(x => x.ProductID);
 

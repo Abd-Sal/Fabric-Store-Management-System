@@ -1,10 +1,9 @@
-﻿namespace FabricesStoreManagementSystem.Validations;
+namespace FabricesStoreManagementSystem.Validations;
 
 public class ProductCatalogValidations : AbstractValidator<ProductCatalogRequest>
 {
-    private const float MIN_QUANTITY = 0.1f;    // Minimum 0.1 units
-    private const float MAX_QUANTITY = 20f;     // Maximum 20 units (from your rule)
-    private const float TOLERANCE = 0.00001f;   // For float comparisons
+    private const decimal MIN_QUANTITY = 0.1m;    // Minimum 0.1 units
+    private const decimal MAX_QUANTITY = 20m;     // Maximum 20 units (from your rule)
 
     public ProductCatalogValidations()
     {
@@ -20,7 +19,7 @@ public class ProductCatalogValidations : AbstractValidator<ProductCatalogRequest
             .NotEmpty()
             .WithMessage("معرف المنتج لا يمكن أن يكون فارغًا.");
 
-        // Quantity validation (float)
+        // Quantity validation (decimal)
         RuleFor(x => x.Quantity)
             .Cascade(CascadeMode.Stop)
             .NotNull()
@@ -31,42 +30,31 @@ public class ProductCatalogValidations : AbstractValidator<ProductCatalogRequest
             .WithMessage($"الكمية يجب أن تكون {MIN_QUANTITY} على الأقل.")
             .LessThanOrEqualTo(MAX_QUANTITY)
             .WithMessage($"الكمية لا يمكن أن تتجاوز {MAX_QUANTITY}.")
-            .Must(BeValidFloatNumber)
-            .WithMessage("الكمية يجب أن تكون رقمًا صالحًا.")
-            .Must(HasMaximumOneDecimalPlace)
-            .WithMessage("الكمية يمكن أن تحتوي على منزلة عشرية واحدة كحد أقصى.")
-            .Must(BeInTenthIncrements)
-            .WithMessage("الكمية يجب أن تكون مضاعفًا للـ 0.1 (مثل 0.2، 1.0، 2.5).");
+            .Must(HasMaximumTwoDecimalPlaces)
+            .WithMessage("الكمية يمكن أن تحتوي على منزلتين عشريتين كحد أقصى.")
+            .Must(BeInHundredthIncrements)
+            .WithMessage("الكمية يجب أن تكون مضاعفًا للـ 0.01 (مثل 0.01، 1.25، 2.50).");
     }
 
-    private bool BeValidFloatNumber(float quantity)
-    {
-        return !float.IsNaN(quantity) && !float.IsInfinity(quantity);
-    }
 
-    private bool HasMaximumOneDecimalPlace(float quantity)
+    private bool HasMaximumTwoDecimalPlaces(decimal quantity)
     {
-        if (float.IsNaN(quantity) || float.IsInfinity(quantity))
-            return false;
-
         try
         {
-            // Convert to decimal for precise decimal place checking
-            decimal decimalQuantity = (decimal)quantity;
-            var bits = decimal.GetBits(decimalQuantity);
+            var bits = decimal.GetBits(quantity);
             int scale = (bits[3] >> 16) & 0x7F; // Get decimal places
-            return scale <= 1;
+            return scale <= 2;
         }
         catch (OverflowException)
         {
-            // Fallback for very large/small floats
-            return ValidateFloatOneDecimalFallback(quantity);
+            // Fallback for very large/small decimals
+            return ValidatedecimalOneDecimalFallback(quantity);
         }
     }
 
-    private bool ValidateFloatOneDecimalFallback(float quantity)
+    private bool ValidatedecimalOneDecimalFallback(decimal quantity) // fallback still OK for 2 digits
     {
-        // String-based validation for floats
+        // String-based validation for decimals
         var str = Math.Abs(quantity).ToString("F10", CultureInfo.InvariantCulture);
         var parts = str.Split('.');
 
@@ -78,14 +66,10 @@ public class ProductCatalogValidations : AbstractValidator<ProductCatalogRequest
         return true; // No decimal point
     }
 
-    private bool BeInTenthIncrements(float quantity)
+    private bool BeInHundredthIncrements(decimal quantity)
     {
-        if (float.IsNaN(quantity) || float.IsInfinity(quantity))
-            return false;
-
-        // Scale by 10 and allow tiny floating-point tolerance
-        var scaled = quantity * 10f;
-
-        return Math.Abs(scaled - MathF.Round(scaled)) < TOLERANCE;
+        // Exact for `decimal`: multiples of 0.01 have (quantity * 100) as an integer.
+        var scaled = quantity * 100m;
+        return (scaled % 1m) == 0m;
     }
 }

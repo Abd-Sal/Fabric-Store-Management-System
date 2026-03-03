@@ -22,6 +22,9 @@ public class PaymentConfigurations : IEntityTypeConfiguration<Payment>
             )
             .HasMaxLength(35);
 
+        builder.Property(x => x.Amount)
+            .HasPrecision(18, 3);
+
         builder.HasIndex(x => x.ReferenceID);
 
         builder.ToTable("Payments");

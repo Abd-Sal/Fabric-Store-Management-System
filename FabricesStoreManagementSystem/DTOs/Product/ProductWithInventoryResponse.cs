@@ -2,7 +2,7 @@
 
 public record ProductWithInventoryResponse(
     ProductResponse Product,
-    float CurrentQuantity,
+    decimal CurrentQuantity,
     decimal LastUnitCost,
     DateTime? LastUpdateAt
 );

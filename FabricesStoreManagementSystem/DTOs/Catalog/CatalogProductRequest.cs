@@ -2,5 +2,5 @@
 
 public record CatalogProductRequest(
     Guid ProductID,
-    float Quantity
+    decimal Quantity
 );

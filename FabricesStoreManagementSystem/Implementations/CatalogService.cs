@@ -1,4 +1,4 @@
-﻿namespace FabricesStoreManagementSystem.Implementations;
+namespace FabricesStoreManagementSystem.Implementations;
 
 public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> logger) : ICatalogService
 {
@@ -101,7 +101,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         {
             ProductID = product.ProductID,
             Note = "قص من اجل الكاتالوغ",
-            QuantityChange = -1f * product.Quantity,
+            QuantityChange = -product.Quantity,
             TransactionType = StockTransactionType.Sample,
             ReferenceID = catalogID,
             ReferenceType = ReferenceTypes.Sample
@@ -317,7 +317,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
     }
 
     private async Task<Result> ReturnProductInventory
-        (Guid productID, float quantity, CancellationToken cancellationToken = default)
+        (Guid productID, decimal quantity, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("check product inventory");
         var productInventory = await _appDbContext.Inventory

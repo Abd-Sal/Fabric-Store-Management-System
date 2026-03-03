@@ -2,6 +2,6 @@
 
 public record SaleItemRequest(
     Guid ProductID,
-    float Quantity,
+    decimal Quantity,
     decimal UnitPrice
 );

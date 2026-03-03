@@ -10,6 +10,12 @@ public class CatalogConfigurations : IEntityTypeConfiguration<Catalog>
         builder.Property(x => x.Id)
             .ValueGeneratedNever();
 
+        builder.Property(x => x.Price)
+            .HasPrecision(18, 3);
+
+        builder.Property(x => x.PaidAmount)
+            .HasPrecision(18, 3);
+
         builder.Property(x => x.Status)
             .HasConversion(
                 v => v.ToString(),

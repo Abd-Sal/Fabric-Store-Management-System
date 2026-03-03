@@ -1,4 +1,4 @@
-﻿namespace FabricesStoreManagementSystem.Implementations;
+namespace FabricesStoreManagementSystem.Implementations;
 
 public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger) : ISaleService
 {
@@ -138,7 +138,7 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
         {
             Note = "تم تسجيل عملية بيع من قبل المدير و تم خصم الكمية من المخزن بنجاح",
             ProductID = saleItem.ProductID,
-            QuantityChange = -1f * saleItem.Quantity,
+            QuantityChange = -saleItem.Quantity,
             ReferenceID = saleItem.SaleID,
             ReferenceType = ReferenceTypes.Sale,
             TransactionType = StockTransactionType.Sale
@@ -245,7 +245,7 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
     }
 
     private async Task<Result> returnQuantity
-        (Guid saleID, Guid productID, float returnedQuantity, CancellationToken cancellationToken = default)
+        (Guid saleID, Guid productID, decimal returnedQuantity, CancellationToken cancellationToken = default)
     {
         _logger.LogInformation("start return product with id({id}) for sale id({saleID})", productID, saleID);
         _logger.LogInformation("check product inventory existance");

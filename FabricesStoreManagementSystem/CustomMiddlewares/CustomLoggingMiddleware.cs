@@ -17,6 +17,6 @@ public class CustomLoggingMiddleware(ILogger<CustomLoggingMiddleware> logger) : 
         await next(context);
 
         if(context.Response.StatusCode >= 200 &&  context.Response.StatusCode < 300)
-            _logger.LogInformation("request: \n\tmethod: {method}\n\tpath: {path}\n\theaders: {headers}\n\tbody: {body}", context.Request.Method, context.Request.Path, context.Request.Headers, body);
+            _logger.LogInformation("request: \n\tmethod: {method}\n\tpath: {path}\n\theaders: {headers}\n\tbody: {body}\n", context.Request.Method, context.Request.Path, context.Request.Headers, body);
     }
 }

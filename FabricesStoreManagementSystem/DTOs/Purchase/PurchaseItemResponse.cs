@@ -3,7 +3,7 @@
 public record PurchaseItemResponse(
     Guid Id,
     Guid ProductID,
-    float Quantity,
+    decimal Quantity,
     decimal UnitCost,
     decimal Total
 );

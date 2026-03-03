@@ -3,7 +3,7 @@
 public record StockTransactionResponse(
     Guid Id,
     Guid ProductID,
-    float QuantityChange,
+    decimal QuantityChange,
     StockTransactionType TransactionType,
     Guid? ReferenceID,
     ReferenceTypes? ReferenceType,

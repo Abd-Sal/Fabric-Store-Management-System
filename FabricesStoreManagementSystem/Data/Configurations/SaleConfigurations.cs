@@ -15,6 +15,18 @@ public class SaleConfigurations : IEntityTypeConfiguration<Sale>
             )
             .HasMaxLength(25);
 
+        builder.Property(x => x.TotalAmount)
+            .HasPrecision(18, 3);
+
+        builder.Property(x => x.PaidAmount)
+            .HasPrecision(18, 3);
+
+        builder.Property(x => x.NetAmount)
+            .HasPrecision(18, 3);
+
+        builder.Property(x => x.Discount)
+            .HasPrecision(18, 3);
+
         builder.ToTable("Sales");
     }
 }
