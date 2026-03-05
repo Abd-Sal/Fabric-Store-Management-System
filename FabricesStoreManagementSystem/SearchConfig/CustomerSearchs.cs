@@ -11,8 +11,8 @@ public static class CustomerSearchs
             "email" => query.Where(x => x.Email != null && EF.Functions.Like(x.Email, $"%{searchRequest.Search}%")),
             "phone" => query.Where(x => x.Phone != null && EF.Functions.Like(x.Phone, $"%{searchRequest.Search}%")),
             "id" => query.Where(x => EF.Functions.Like(x.Id.ToString(), $"%{searchRequest.Search}%")),
-            "name" => query.Where(x => EF.Functions.Like(string.Concat(x.FirstName, " ", x.LastName), $"%{searchRequest.Search}%")),
-            _ => query.Where(x => EF.Functions.Like(string.Concat(x.FirstName, " ", x.LastName), $"%{searchRequest.Search}%"))
+            "name" => query.Where(x => EF.Functions.Like(x.FirstName + " " + x.LastName, $"%{searchRequest.Search}%")),
+            _ => query.Where(x => EF.Functions.Like(x.FirstName + " " + x.LastName, $"%{searchRequest.Search}%"))
         };
 
     public static SearchColumnsResponse CustomerSortColumns()

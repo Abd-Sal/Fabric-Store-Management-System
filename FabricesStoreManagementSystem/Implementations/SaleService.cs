@@ -313,6 +313,7 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
         var sale = await _appDbContext.Sales.AsNoTracking()
             .Include(x => x.Customer)
             .Include(x => x.SaleItems)
+            .ThenInclude(x => x.Product)
             .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (sale is null)
@@ -327,6 +328,7 @@ public class SaleService(AppDbContext appDbContext, ILogger<SaleService> logger)
         var sale = await _appDbContext.Sales.AsNoTracking()
             .Include(x => x.Customer)
             .Include(x => x.SaleItems)
+            .ThenInclude(x => x.Product)
             .SingleOrDefaultAsync(x => x.InvoiceNumber == invoiceNumber, cancellationToken);
 
         if (sale is null)

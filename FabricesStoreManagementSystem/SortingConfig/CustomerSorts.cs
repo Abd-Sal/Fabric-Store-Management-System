@@ -5,7 +5,7 @@ public class CustomerSorts
     public static Expression<Func<Customer, object>> CustomerResponseSort(SortRequest sortRequest)
         => sortRequest.SortColumn?.ToLower() switch
         {
-            "name" => customer => $"{customer.FirstName} {customer.LastName}",
+            "name" => customer => customer.FirstName + " " + customer.LastName,
             "address" => customer => customer.Address ?? "",
             "email" => customer => customer.Email ?? "",
             "phone" => customer => customer.Phone ?? "",

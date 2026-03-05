@@ -54,7 +54,7 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
             query = query.OrderByDescending(PurchaseSorts.PurchaseResponseSort(sortRequest));
 
         var result = query
-            .Select(x => x.ToPurchaseResponse());
+            .Select(x => x.ToPurchaseResponseWithoutItems());
 
         var response = await PaginatedList<PurchaseResponse>.CreateAsync
             (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);

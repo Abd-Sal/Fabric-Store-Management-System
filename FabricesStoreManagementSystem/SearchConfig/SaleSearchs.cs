@@ -7,7 +7,7 @@ public static class SaleSearchs
         {
             "invoicenumber" => query.Where(x => EF.Functions.Like(x.InvoiceNumber, $"%{searchRequest.Search}%")),
             "customerid" => query.Where(x => EF.Functions.Like(x.CustomerID.ToString(), $"%{searchRequest.Search}%")),
-            "customername" => query.Where(x => EF.Functions.Like(string.Concat(x.Customer.FirstName, " ", x.Customer.LastName), $"%{searchRequest.Search}%")),
+            "customername" => query.Where(x => EF.Functions.Like(x.Customer.FirstName + " " + x.Customer.LastName, $"%{searchRequest.Search}%")),
             _ => query.Where(x => EF.Functions.Like(x.InvoiceNumber, $"%{searchRequest.Search}%")),
         };
 

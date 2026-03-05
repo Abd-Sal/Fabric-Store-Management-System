@@ -4,8 +4,8 @@ public static class SaleItemMapper{
     public static SaleItemResponse TotSaleItemResponse(this SaleItem saleItem)
         => new SaleItemResponse(
                 saleItem.Id, saleItem.ProductID,
-                saleItem.Quantity, saleItem.UnitPrice,
-                saleItem.Total
+                saleItem.Product.ProductCode, saleItem.Quantity,
+                saleItem.UnitPrice, saleItem.Total
             );
 
     public static IEnumerable<SaleItemResponse> TotSaleItemsResponse(this IEnumerable<SaleItem> saleItems)

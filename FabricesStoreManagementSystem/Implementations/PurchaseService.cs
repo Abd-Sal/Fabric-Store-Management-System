@@ -211,6 +211,7 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
         var purchase = await _appDbContext.Purchases.AsNoTracking()
             .Include(x => x.Supplier)
             .Include(x => x.PurchaseItems)
+            .ThenInclude(x => x.Product)
             .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (purchase is null)
@@ -225,6 +226,7 @@ public class PurchaseService(AppDbContext appDbContext, IProductService productS
         var purchase = await _appDbContext.Purchases.AsNoTracking()
             .Include (x => x.Supplier)
             .Include(x => x.PurchaseItems)
+            .ThenInclude(x => x.Product)
             .SingleOrDefaultAsync(x => x.InvoiceNumber == invoiceNumber, cancellationToken);
 
         if (purchase is null)

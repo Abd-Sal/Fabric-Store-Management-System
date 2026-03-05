@@ -8,7 +8,7 @@ public class ProductSorts
             "name" => product => product.Name ?? "",
             "code" => product => product.Code,
             "color" => product => product.Color,
-            "productcode" => product => product.ProductCode,
+            "productcode" => product => product.Code + " " + product.Color,
             "createdat" => product => product.CreatedAt,
             "id" => product => product.Id,
             _ => product => product.CreatedAt
