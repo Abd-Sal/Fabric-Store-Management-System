@@ -8,10 +8,6 @@ public class CatalogAssignConfigurations : IEntityTypeConfiguration<CatalogAssig
         builder.Property(x => x.Id)
             .ValueGeneratedNever();
 
-        builder.HasIndex(x => new {x.CatalogID, x.CustomerID});
-        builder.HasIndex(x => x.CatalogID);
-        builder.HasIndex(x => x.CustomerID);
-
         builder.ToTable("CatalogsAssigns");
     }
 }

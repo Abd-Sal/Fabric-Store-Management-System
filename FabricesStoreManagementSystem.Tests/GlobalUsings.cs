@@ -16,6 +16,7 @@ global using FabricesStoreManagementSystem.DTOs.Catalog;
 global using FabricesStoreManagementSystem.Validations;
 global using FabricesStoreManagementSystem.Data.Configurations;
 global using FabricesStoreManagementSystem.DTOs.Auth;
+global using FabricesStoreManagementSystem.DTOs.Expense;
 
 global using FluentValidation.TestHelper;
 global using FluentAssertions;

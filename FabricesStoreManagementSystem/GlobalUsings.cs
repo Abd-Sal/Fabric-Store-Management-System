@@ -17,6 +17,7 @@ global using System.Net;
 global using FabricesStoreManagementSystem.SearchConfig;
 global using FabricesStoreManagementSystem.DTOs.Catalog;
 global using FabricesStoreManagementSystem.DTOs.Common;
+global using FabricesStoreManagementSystem.DTOs.Expense;
 global using FabricesStoreManagementSystem.DTOs.Payment;
 global using FabricesStoreManagementSystem.SortingConfig;
 global using FabricesStoreManagementSystem.Enums;

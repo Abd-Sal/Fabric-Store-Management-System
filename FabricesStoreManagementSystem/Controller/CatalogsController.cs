@@ -105,7 +105,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
 
     [HttpPost("{id:guid}/return-catalog")]
     public async Task<IActionResult> ReturnCatalog
-    ([FromBody] Guid id,
+    ([FromRoute] Guid id,
     CancellationToken cancellationToken = default)
     {
         var result = await _unitOfWork.CatalogService.ReturnCatalog(id, cancellationToken);
@@ -121,7 +121,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> RemoveCatalog
-    ([FromBody] Guid id,
+    ([FromRoute] Guid id,
     CancellationToken cancellationToken = default)
     {
         var result = await _unitOfWork.CatalogService.RemoveCatalog(id, cancellationToken);
@@ -137,7 +137,7 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
 
     [HttpPost("{id:guid}/destroy")]
     public async Task<IActionResult> DestroyCatalog
-    ([FromBody] Guid id,
+    ([FromRoute] Guid id,
     CancellationToken cancellationToken = default)
     {
         var result = await _unitOfWork.CatalogService.DestructionCatalog(id, cancellationToken);
@@ -168,13 +168,44 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
         return NoContent();
     }
 
+    [HttpGet("assigned-catalogs")]
+    public async Task<IActionResult> GetAssignedCatalogs
+        ([FromQuery] PaginationRequest paginationRequest,
+        [FromQuery] SortRequest sortRequest,
+        [FromQuery] DateRangeRequest dateRangeRequest,
+        [FromQuery] SearchRequest searchRequest,
+        [FromQuery] bool includeReturned = false,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _unitOfWork.CatalogService.GetAssingedCatalogs
+            (paginationRequest, sortRequest, dateRangeRequest, searchRequest, includeReturned, cancellationToken: cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
+            return result.ToProblem();
+        }
+        return Ok(result.Value);
+    }
+
     [HttpOptions("")]
     public async Task<IActionResult> Details()
     {
         var result = new
         {
-            SearchDetails = CatalogSearchs.CatalogSortColumns(),
+            SearchDetails = CatalogSearchs.CatalogSearchColumns(),
             SortDetails = CatalogSorts.CatalogSortColumns(),
+        };
+
+        return Ok(result);
+    }
+
+    [HttpOptions("assigned-catalogs")]
+    public async Task<IActionResult> AssignedCatalogsDetails()
+    {
+        var result = new
+        {
+            SearchDetails = AssignCatalogSearchs.AssignCatalogSearchColumns(),
+            SortDetails = AssignCatalogSorts.AssignCatalogSortColumns(),
         };
 
         return Ok(result);

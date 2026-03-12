@@ -6,6 +6,8 @@ public record CatalogResponse(
     string? Description,
     CatalogStatus Status,
     bool IsPurchased,
+    Guid? SupplierID,
+    string? SupplierName,
     decimal? Price,
     decimal? PaidAmount,
     bool? IsPaid,

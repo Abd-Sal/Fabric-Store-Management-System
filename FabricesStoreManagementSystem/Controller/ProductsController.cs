@@ -160,7 +160,7 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
     {
         var result = new
         {
-            SearchDetails = ProductSearchs.ProductSortColumns(),
+            SearchDetails = ProductSearchs.ProductSearchColumns(),
             SortDetails = ProductSorts.ProductSortColumns(),
         };
 

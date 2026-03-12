@@ -77,15 +77,31 @@ public static class DependancyInjection
     {
         var hosts = configuration.GetSection("CORS:AllowedHosts").Get<string[]>();
         var methods = configuration.GetSection("CORS:AllowedMethods").Get<string[]>();
-        services.AddCors(options =>
+        if (hosts is null || hosts.Length == 0)
         {
-            options.AddDefaultPolicy(policy =>
+            services.AddCors(options => 
+                options.AddDefaultPolicy(opt =>
+                {
+                    opt
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowAnyOrigin();
+                })
+            );
+        }
+        else
+        {
+            services.AddCors(options =>
             {
-                policy
-                    .WithOrigins(hosts ?? new[] { "http://localhost:5173" })
-                    .WithMethods(methods ?? new[] { "GET", "POST" })
-                    .AllowAnyHeader();
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy
+                        .WithOrigins(hosts)
+                        .WithMethods(methods ?? new[] { "GET", "POST" })
+                        .AllowAnyHeader();
+                });
             });
-        }); return services;
+        }
+        return services;
     }
 }

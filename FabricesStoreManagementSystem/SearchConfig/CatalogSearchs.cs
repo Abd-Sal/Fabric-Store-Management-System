@@ -12,7 +12,7 @@ public static class CatalogSearchs
             _ => query.Where(x => EF.Functions.Like(x.CatalogCode, $"%{searchRequest.Search}%")),
         };
 
-    public static SearchColumnsResponse CatalogSortColumns()
+    public static SearchColumnsResponse CatalogSearchColumns()
         => new SearchColumnsResponse(
                 new List<LabelValue>{
                     new LabelValue("الوصف", "description"), new LabelValue("الكود", "code"),

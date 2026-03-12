@@ -572,11 +572,11 @@ public class CatalogServiceTestsHelpers
     {
         yield return new object[]
         {
-            CatalogAssignsRepo.CatalogAssings()[0].Id
+            CatalogsRepo.Catalogs()[2].Id
         };
         yield return new object[]
         {
-            CatalogAssignsRepo.CatalogAssings()[3].Id
+            CatalogsRepo.Catalogs()[6].Id
         };
     }
 
@@ -589,8 +589,8 @@ public class CatalogServiceTestsHelpers
         };
         yield return new object[]
         {
-            CatalogAssignsRepo.CatalogAssings()[1].Id,
-            CatalogErrors.NotAssignedCatalog
+            CatalogsRepo.Catalogs()[0].Id,
+            CatalogErrors.NotFoundAssignedCatalog
         };
     }
 
@@ -641,6 +641,50 @@ public class CatalogServiceTestsHelpers
         {
             new AssignCatalogRequest(CustomersRepo.Customers()[1].Id, CatalogsRepo.Catalogs()[5].Id),
             CatalogErrors.UnavailableCatalog
+        };
+    }
+
+    public static IEnumerable<object[]> GetAssignedCatalogsSccessTestsData()
+    {
+        yield return new object[]
+        {
+            new PaginationRequest(1, 10),
+            new SortRequest("code", "asc"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-02"), DateOnly.Parse("2026-01-04")),
+            new SearchRequest("Lost", "status"),
+            false
+        };
+        yield return new object[]
+        {
+            new PaginationRequest(1, 10),
+            new SortRequest("code", "asc"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-02"), DateOnly.Parse("2026-01-04")),
+            new SearchRequest("Lost", "status"),
+            true
+        };
+        yield return new object[]
+        {
+            new PaginationRequest(1, 10),
+            new SortRequest("id", "desc"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-02"), DateOnly.Parse("2026-01-04")),
+            new SearchRequest("Lost", "status"),
+            false
+        };
+        yield return new object[]
+        {
+            new PaginationRequest(1, 10),
+            new SortRequest("id", "desc"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-02"), DateOnly.Parse("2026-01-04")),
+            new SearchRequest("5021", "code"),
+            false
+        };
+        yield return new object[]
+        {
+            new PaginationRequest(1, 10),
+            new SortRequest("id", "desc"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-02"), DateOnly.Parse("2026-01-04")),
+            new SearchRequest("5021", "code"),
+            true
         };
     }
 }

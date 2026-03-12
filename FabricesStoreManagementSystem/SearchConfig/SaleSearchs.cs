@@ -7,11 +7,12 @@ public static class SaleSearchs
         {
             "invoicenumber" => query.Where(x => EF.Functions.Like(x.InvoiceNumber, $"%{searchRequest.Search}%")),
             "customerid" => query.Where(x => EF.Functions.Like(x.CustomerID.ToString(), $"%{searchRequest.Search}%")),
+            "status" => query.Where(x => EF.Functions.Like(x.Status.ToString(), $"%{searchRequest.Search}%")),
             "customername" => query.Where(x => EF.Functions.Like(x.Customer.FirstName + " " + x.Customer.LastName, $"%{searchRequest.Search}%")),
             _ => query.Where(x => EF.Functions.Like(x.InvoiceNumber, $"%{searchRequest.Search}%")),
         };
 
-    public static SearchColumnsResponse SaleSortColumns()
+    public static SearchColumnsResponse SaleSearchColumns()
     => new SearchColumnsResponse(
             new List<LabelValue>{
                 new LabelValue("رقم الفاتورة", "invoicenumber"),

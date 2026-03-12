@@ -245,7 +245,7 @@ public class SupplierServiceTests
     [Theory]
     [MemberData(nameof(SupplierServiceTestsHelpers.GetSupplierSalesSuccessTestData), MemberType = typeof(SupplierServiceTestsHelpers))]
     public async Task GetSalesBySupplier_ShouldSuccess
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest  searchRequest)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchInvoiceNumberRequest  searchRequest, DateRangeRequest dateRangeRequest)
     {
         //Arrange
         var db = DbContextFactory.Create();
@@ -256,7 +256,7 @@ public class SupplierServiceTests
         await db.SaveChangesAsync();
 
         //Act
-        var result = await service.GetPurchasesBySupplier(id, paginationRequest, sortRequest, searchRequest);
+        var result = await service.GetPurchasesBySupplier(id, paginationRequest, sortRequest, searchRequest, dateRangeRequest);
 
         //Assert
         result.IsSuccess.Should().BeTrue();

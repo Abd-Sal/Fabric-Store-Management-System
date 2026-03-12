@@ -5,6 +5,8 @@ public class DateRangeValidations : AbstractValidator<DateRangeRequest>
     
     public DateRangeValidations()
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
         // Either both From & To are provided, or neither
         RuleFor(x => x)
             .Must(x =>

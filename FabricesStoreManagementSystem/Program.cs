@@ -20,7 +20,6 @@ public class Program
 
         var app = builder.Build();
 
-        // Log application start with ERROR level to make it stand out
         Log.Information("=== APPLICATION STARTING ===");
         Log.Information($"Start Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
         Log.Information($"Current Directory: {Environment.CurrentDirectory}");
@@ -44,8 +43,6 @@ public class Program
         app.UseHttpsRedirection();
 
         app.UseCors();
-        
-        app.UseStaticFiles();
 
         app.UseCustomLoginMiddleware();
 

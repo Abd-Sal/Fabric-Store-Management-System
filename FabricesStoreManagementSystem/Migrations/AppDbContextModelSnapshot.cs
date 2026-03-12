@@ -96,8 +96,6 @@ namespace FabricesStoreManagementSystem.Migrations
 
                     b.HasIndex("CustomerID");
 
-                    b.HasIndex("CatalogID", "CustomerID");
-
                     b.ToTable("CatalogsAssigns", (string)null);
                 });
 
@@ -172,6 +170,32 @@ namespace FabricesStoreManagementSystem.Migrations
                         .HasFilter("[Phone] IS NOT NULL");
 
                     b.ToTable("Customers", (string)null);
+                });
+
+            modelBuilder.Entity("FabricesStoreManagementSystem.Entities.Expense", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("DollarPriceInSyr")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("SyrianAmount")
+                        .HasPrecision(18, 3)
+                        .HasColumnType("decimal(18,3)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Expenses", (string)null);
                 });
 
             modelBuilder.Entity("FabricesStoreManagementSystem.Entities.Inventory", b =>

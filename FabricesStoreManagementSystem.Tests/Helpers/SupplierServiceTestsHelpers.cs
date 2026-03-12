@@ -223,7 +223,8 @@ public static class SupplierServiceTestsHelpers
             SuppliersRepo.Suppliers().First().Id,
             new PaginationRequest(1, 10),
             new SortRequest("invoicenumber", "asc"),
-            null
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
         };
 
         yield return new object[]
@@ -231,7 +232,8 @@ public static class SupplierServiceTestsHelpers
             SuppliersRepo.Suppliers().First().Id,
             new PaginationRequest(1, 20),
             new SortRequest("createdat", "desc"),
-            new SearchRequest("abd", "status")
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
         };
 
         yield return new object[]
@@ -239,7 +241,8 @@ public static class SupplierServiceTestsHelpers
             SuppliersRepo.Suppliers().First().Id,
             new PaginationRequest { Page = 2, PageSize = 15 },
             new SortRequest("status", "ascending"),
-            null
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
         };
 
         yield return new object[]
@@ -247,7 +250,8 @@ public static class SupplierServiceTestsHelpers
             SuppliersRepo.Suppliers().First().Id,
             new PaginationRequest { Page = 1, PageSize = 5 },
             new SortRequest ("id", "DESC"),
-            null
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
         };
 
         yield return new object[]
@@ -255,7 +259,8 @@ public static class SupplierServiceTestsHelpers
             SuppliersRepo.Suppliers().First().Id,
             new PaginationRequest { Page = 1, PageSize = 5 },
             new SortRequest ("Unknown", "_DESC"),
-            null
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
         };
     }
 }

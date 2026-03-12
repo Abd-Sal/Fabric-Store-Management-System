@@ -9,6 +9,7 @@ public interface IUnitOfWork
     public IPurchaseService PurchaseService { get; }
     public ISaleService SaleService { get; }
     public IPaymentService PaymentService { get; }
+    public IExpenseService ExpenseService { get; }
 
 
     public int SaveChanges();

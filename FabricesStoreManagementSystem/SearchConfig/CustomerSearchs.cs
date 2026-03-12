@@ -15,7 +15,7 @@ public static class CustomerSearchs
             _ => query.Where(x => EF.Functions.Like(x.FirstName + " " + x.LastName, $"%{searchRequest.Search}%"))
         };
 
-    public static SearchColumnsResponse CustomerSortColumns()
+    public static SearchColumnsResponse CustomerSearchColumns()
     => new SearchColumnsResponse(
             new List<LabelValue>{
                 new LabelValue("العنوان", "address"),

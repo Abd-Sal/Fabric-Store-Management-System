@@ -13,7 +13,7 @@ public static class SupplierSearchs
             _ => query.Where(x => EF.Functions.Like(x.Name, $"%{searchRequest.Search}%"))
         };
 
-    public static SearchColumnsResponse SupplierSortColumns()
+    public static SearchColumnsResponse SupplierSearchColumns()
     => new SearchColumnsResponse(
             new List<LabelValue>{
                 new LabelValue("الاسم", "name"), new LabelValue("العنوان", "address"),

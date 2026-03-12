@@ -117,11 +117,12 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
             ([FromRoute]Guid id,
             [FromQuery] PaginationRequest paginatinoRequest,
             [FromQuery] SortRequest sortRequest,
-            [FromQuery] SearchRequest searchRequest,
+            [FromQuery] SearchInvoiceNumberRequest searchInvoiceNumberRequest,
+            [FromQuery] DateRangeRequest dateRangeRequest,
             CancellationToken cancellationToken = default)
     {
         var result = await _unitOfWork.SupplierService.GetPurchasesBySupplier
-            (id, paginatinoRequest, sortRequest, searchRequest, cancellationToken: cancellationToken);
+            (id, paginatinoRequest, sortRequest, searchInvoiceNumberRequest, dateRangeRequest, cancellationToken: cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
@@ -151,11 +152,10 @@ public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService
     {
         var result = new
         {
-            SearchDetails = SupplierSearchs.SupplierSortColumns(),
+            SearchDetails = SupplierSearchs.SupplierSearchColumns(),
             SortDetails = SupplierSorts.SupplierSortColumns(),
         };
 
         return Ok(result);
     }
-
 }

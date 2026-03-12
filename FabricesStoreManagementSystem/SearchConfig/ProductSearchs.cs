@@ -15,7 +15,7 @@ public static class ProductSearchs
             _ => query.Where(x => EF.Functions.Like(x.Code + "-" + x.Color, $"%{searchRequest.Search}%"))
         };
 
-    public static SearchColumnsResponse ProductSortColumns()
+    public static SearchColumnsResponse ProductSearchColumns()
     => new SearchColumnsResponse(
             new List<LabelValue>{
                 new LabelValue("الوحدة", "unit"), new LabelValue("الكود", "code"),

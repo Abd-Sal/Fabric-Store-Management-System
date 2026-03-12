@@ -287,15 +287,15 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             .ToListAsync(cancellationToken);
 
         _logger.LogInformation("start returning quantity to stock");
-        var returnProductStockProcess = catalogProducts.Select(x => ReturnProductInventory(x.ProductID, x.Quantity, cancellationToken));
-        var resultProductStockProcess = await Task.WhenAll(returnProductStockProcess);
+        List<Result> results = new List<Result>();
+        foreach (var item in catalogProducts)
+        {
+            var result = await ReturnProductInventory(item.ProductID, item.Quantity, cancellationToken);
+            if (result.IsFailure)
+                return Result.Failure(result.Error);
+            results.Add(result);
+        }
         _logger.LogInformation("end returning quantity to stock");
-        foreach (var productProcess in resultProductStockProcess)
-            if (productProcess.IsFailure)
-            {
-                _logger.LogError("start returning quantity to stock");
-                return Result.Failure(productProcess.Error);
-            }
 
         _logger.LogInformation("remove stock transaction");
         _appDbContext.StockTransactions.RemoveRange(
@@ -365,36 +365,36 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         var catalogAssign = new CatalogAssign
         {
             CatalogID = request.CatalogID,
-            CustomerID = request.CatalogID,
+            CustomerID = request.CustomerID,
         };
 
         catalog.LastUpdateAt = DateTime.UtcNow;
         catalog.Status = CatalogStatus.Assigned;
 
         await _appDbContext.CatalogsAssigns.AddAsync(catalogAssign, cancellationToken);
-        _appDbContext.Catalogs.Update(catalog);
         _logger.LogInformation("update catalog({id}) status, add assign({id}) catalog", request.CatalogID, catalogAssign.Id);
         return Result.Success(catalogAssign.ToAssignCatalogResponse());
     }
 
     public async Task<Result<AssignCatalogResponse>> ReturnCatalog
-        (Guid assignID, CancellationToken cancellationToken = default)
+        (Guid catalogID, CancellationToken cancellationToken = default)
     {
-        _logger.LogInformation("check assign({id}) catalog", assignID);
+        _logger.LogInformation("check catalog({id}) if assign", catalogID);
         var catalogAssign = await _appDbContext.CatalogsAssigns
             .Include(x => x.Catalog)
-            .SingleOrDefaultAsync(x => x.Id == assignID, cancellationToken);
+            .Include(x => x.Customer)
+            .SingleOrDefaultAsync(x => x.CatalogID == catalogID && !x.ReturnedAt.HasValue, cancellationToken);
 
         if (catalogAssign is null)
         {
-            _logger.LogError("catalog assign({id}) not found", assignID);
+            _logger.LogError("catalog({id}) not found assigned", catalogID);
             return Result.Failure<AssignCatalogResponse>(CatalogErrors.NotFoundAssignedCatalog);
         }
 
-        _logger.LogInformation("check assign({id}) catalog status if assigned", assignID);
+        _logger.LogInformation("check assign({id}) catalog status if assigned", catalogAssign.Id);
         if (catalogAssign.Catalog.Status != CatalogStatus.Assigned || catalogAssign.ReturnedAt is not null)
         {
-            _logger.LogError("assign({id}) catalog not found", assignID);
+            _logger.LogError("assign({id}) catalog not found", catalogAssign.Id);
             return Result.Failure<AssignCatalogResponse>(CatalogErrors.NotAssignedCatalog);
         }
 
@@ -403,7 +403,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
 
         _appDbContext.Catalogs.Update(catalogAssign.Catalog);
         _appDbContext.CatalogsAssigns.Update(catalogAssign);
-        _logger.LogInformation("update assign({id}) catalog return date, catalog({id}) status", assignID, catalogAssign.CatalogID);
+        _logger.LogInformation("update assign({assignid}) catalog return date, catalog({catalogid}) status", catalogAssign.Id, catalogAssign.CatalogID);
         return Result.Success(catalogAssign.ToAssignCatalogResponse());
     }
 
@@ -436,7 +436,9 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
     public async Task<Result<PaginatedList<CatalogResponse>>> GetCatalogs
         (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
     {
-        var query = _appDbContext.Catalogs.AsNoTracking();
+        var query = _appDbContext.Catalogs.AsNoTracking()
+            .Include(x => x.Supplier)
+            .AsQueryable();
 
         if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
         {
@@ -471,13 +473,15 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         (Guid id, CancellationToken cancellationToken = default)
     {
         var catalog = await _appDbContext.Catalogs.AsNoTracking()
+            .Include(x => x.Supplier)
             .Include(x => x.CatalogsProducts)
+            .ThenInclude(x => x.Product)
             .SingleOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (catalog is null)
             return Result.Failure<CatalogResponse>(CatalogErrors.NotFound);
 
-        return Result.Success(catalog.ToCatalogResponse());
+        return Result.Success(catalog.ToCatalogResponseWithItems());
     }
 
     public async Task<Result<CatalogResponse>> PurchaseCatalog
@@ -524,6 +528,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             Status = CatalogStatus.Available,
             ProductsCount = request.Items.Count,
             IsPurchased = true,
+            SupplierID = request.SupplierID,
             Price = request.Amount,
             PaidAmount = request.PaidAmount
         };
@@ -554,7 +559,7 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
             {
                 Amount = request.PaidAmount,
                 ReferenceID = catalog.Id,
-                ReferenceType = ReferenceTypes.Purchase,
+                ReferenceType = ReferenceTypes.Sample,
                 PayMethod = PaymentMethod.Cash,
             };
             _logger.LogInformation("add purchase catalog payment");
@@ -607,5 +612,45 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
         _appDbContext.Catalogs.Update(catalogPurchase);
         _logger.LogInformation("execute update purchased catalog({id}) done", id);
         return Result.Success();
+    }
+
+    public async Task<Result<PaginatedList<AssignCatalogResponse>>> GetAssingedCatalogs
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, bool includeReturned = false, CancellationToken cancellationToken = default)
+    {
+        var query = _appDbContext.CatalogsAssigns.AsNoTracking()
+            .Include(x => x.Customer)
+            .Include(x => x.Catalog)
+            .AsQueryable();
+
+        if (!includeReturned)
+            query = query.Where(x => !x.ReturnedAt.HasValue);
+
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var timezone = !string.IsNullOrEmpty(dateRangeRequest.Timezone)
+                ? dateRangeRequest.Timezone
+                : "Arab Standard Time";
+            var (utcFrom, utcTo) = DateRangeHelper.ConvertToUtcRange(
+                dateRangeRequest.From.Value,
+                dateRangeRequest.To.Value,
+                timezone);
+            query = query.Where(x => x.AssignedAt >= utcFrom && x.AssignedAt <= utcTo);
+        }
+
+        if (searchRequest is not null && searchRequest.Search is not null)
+            query = query.AssignCatalogResponseSearch(searchRequest);
+
+        if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
+            query = query.OrderBy(AssignCatalogSorts.AssignCatalogResponseSort(sortRequest));
+        else
+            query = query.OrderByDescending(AssignCatalogSorts.AssignCatalogResponseSort(sortRequest));
+
+        var result = query
+            .Select(x => x.ToAssignCatalogResponse());
+
+        var response = await PaginatedList<AssignCatalogResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 }

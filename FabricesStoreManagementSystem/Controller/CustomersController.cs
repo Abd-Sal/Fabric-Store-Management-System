@@ -107,15 +107,34 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
     }
 
     [HttpGet("{id:guid}/sales")]
-    public async Task<IActionResult> PurchasesByCustomer
+    public async Task<IActionResult> SalesByCustomer
             ([FromRoute] Guid id,
-            [FromQuery] PaginationRequest paginatinoRequest,
-            [FromQuery] SortRequest sortRequest,
-            [FromQuery] SearchRequest searchRequest,
+            [FromQuery] PaginationRequest paginationRequest,
+            [FromQuery] SearchInvoiceNumberRequest searchInvoiceNumberRequest,
+            [FromQuery] DateRangeRequest dateRangeRequest,
             CancellationToken cancellationToken = default)
     {
         var result = await _unitOfWork.CustomerService.GetSalesByCustomer
-            (id, paginatinoRequest, sortRequest, searchRequest, cancellationToken: cancellationToken);
+            (id, paginationRequest, searchInvoiceNumberRequest, dateRangeRequest, cancellationToken: cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
+            return result.ToProblem();
+        }
+        return Ok(result.Value);
+    }
+
+    [HttpGet("{id:guid}/catalogs")]
+    public async Task<IActionResult> CatalogsByCustomer
+            ([FromRoute] Guid id,
+            [FromQuery] PaginationRequest paginationRequest,
+            [FromQuery] SearchCatalogByCodeRequest searchCatalogByCodeRequest,
+            [FromQuery] DateRangeRequest dateRangeRequest,
+            [FromQuery] bool includeReturned = false,
+            CancellationToken cancellationToken = default)
+    {
+        var result = await _unitOfWork.CustomerService.GetCustomerCatalogs
+            (id, paginationRequest, searchCatalogByCodeRequest, dateRangeRequest, includeReturned, cancellationToken: cancellationToken);
         if (result.IsFailure)
         {
             _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
@@ -143,7 +162,7 @@ public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService
     {
         var result = new
         {
-            SearchDetails = CustomerSearchs.CustomerSortColumns(),
+            SearchDetails = CustomerSearchs.CustomerSearchColumns(),
             SortDetails = CustomerSorts.CustomerSortColumns(),
         };
         return Ok(result);

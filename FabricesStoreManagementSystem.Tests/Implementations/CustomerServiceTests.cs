@@ -246,7 +246,7 @@ public class CustomerServiceTests
     [Theory]
     [MemberData(nameof(CustomerServiceTestsHelpers.GetCustomerSalesSuccessTestData), MemberType = typeof(CustomerServiceTestsHelpers))]
     public async Task GetSalesByCustomer_ShouldSuccess
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest  searchRequest)
+        (Guid id, PaginationRequest paginationRequest, SearchInvoiceNumberRequest searchRequest, DateRangeRequest dateRangeRequest)
     {
         //Arrange
         var db = DbContextFactory.Create();
@@ -257,12 +257,10 @@ public class CustomerServiceTests
         await db.SaveChangesAsync();
 
         //Act
-        var result = await service.GetSalesByCustomer(id, paginationRequest, sortRequest, searchRequest);
+        var result = await service.GetSalesByCustomer(id, paginationRequest, searchRequest, dateRangeRequest);
 
         //Assert
         result.IsSuccess.Should().BeTrue();
-        var updatedCustomer = await db.Customers.FindAsync(id);
-        updatedCustomer.Should().NotBeNull();
     }
 
     [Theory]
@@ -287,5 +285,55 @@ public class CustomerServiceTests
 
     }
 
+    [Theory]
+    [MemberData(nameof(CustomerServiceTestsHelpers.GetCustomerCatalogsSuccessTestData), MemberType = typeof(CustomerServiceTestsHelpers))]
+    public async Task GetCustomerCatalogs_ShouldSuccess
+        (Guid id, PaginationRequest paginationRequest, SearchCatalogByCodeRequest searchCatalogByCodeRequest, DateRangeRequest dateRangeRequest, bool includeReturned = false)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<CustomerService>.Instance;
+        var service = new CustomerService(db, logger);
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Customers.AddRangeAsync(CustomersRepo.Customers());
+        await db.Catalogs.AddRangeAsync(CatalogsRepo.Catalogs());
+        await db.CatalogsProducts.AddRangeAsync(CatalogProductsRepo.CatalogProducts());
+        await db.CatalogsAssigns.AddRangeAsync(CatalogAssignsRepo.CatalogAssings());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.GetCustomerCatalogs(id, paginationRequest, searchCatalogByCodeRequest, dateRangeRequest, includeReturned);
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+    }
+    
+    [Theory]
+    [MemberData(nameof(CustomerServiceTestsHelpers.GetCustomerCatalogsFailTestData), MemberType = typeof(CustomerServiceTestsHelpers))]
+    public async Task GetCustomerCatalogs_ShouldFail
+        (Guid id, PaginationRequest paginationRequest, SearchCatalogByCodeRequest searchCatalogByCodeRequest, DateRangeRequest dateRangeRequest, bool includeReturned, Error error)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<CustomerService>.Instance;
+        var service = new CustomerService(db, logger);
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Customers.AddRangeAsync(CustomersRepo.Customers());
+        await db.Catalogs.AddRangeAsync(CatalogsRepo.Catalogs());
+        await db.CatalogsProducts.AddRangeAsync(CatalogProductsRepo.CatalogProducts());
+        await db.CatalogsAssigns.AddRangeAsync(CatalogAssignsRepo.CatalogAssings());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.GetCustomerCatalogs(id, paginationRequest, searchCatalogByCodeRequest, dateRangeRequest, includeReturned);
+
+        //Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().Be(error);
+    }
 }
 

@@ -37,7 +37,7 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
     }
 
     public async Task<Result<PaginatedList<PurchaseResponse>>> GetPurchasesBySupplier
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
+        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchInvoiceNumberRequest invoiceNumberRequest, DateRangeRequest dateRangeRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Suppliers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
             return Result.Failure<PaginatedList<PurchaseResponse>>(SupplierErrors.NotFound);
@@ -45,8 +45,20 @@ public class SupplierService(AppDbContext appDbContext, ILogger<SupplierService>
         var query = _appDbContext.Purchases.AsNoTracking()
             .Where(x => x.SupplierID == id);
 
-        if (searchRequest is not null && searchRequest.Search is not null)
-            query = query.PurchaseResponseSearch(searchRequest);
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var timezone = !string.IsNullOrEmpty(dateRangeRequest.Timezone)
+                ? dateRangeRequest.Timezone
+                : "Arab Standard Time";
+            var (utcFrom, utcTo) = DateRangeHelper.ConvertToUtcRange(
+                dateRangeRequest.From.Value,
+                dateRangeRequest.To.Value,
+                timezone);
+            query = query.Where(x => x.CreatedAt >= utcFrom && x.CreatedAt <= utcTo);
+        }
+
+        if (!string.IsNullOrWhiteSpace(invoiceNumberRequest.InvoiceNumber))
+            query = query.Where(x => x.InvoiceNumber.StartsWith(invoiceNumberRequest.InvoiceNumber));
 
         if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
             query = query.OrderBy(PurchaseSorts.PurchaseResponseSort(sortRequest));

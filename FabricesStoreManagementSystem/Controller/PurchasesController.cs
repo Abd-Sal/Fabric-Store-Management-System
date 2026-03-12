@@ -108,11 +108,10 @@ public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService
     {
         var result = new
         {
-            SearchDetails = PurchaseSearchs.PurchaseSortColumns(),
+            SearchDetails = PurchaseSearchs.PurchaseSearchColumns(),
             SortDetails = PurchaseSorts.PurchaseSortColumns(),
         };
 
         return Ok(result);
     }
-
 }

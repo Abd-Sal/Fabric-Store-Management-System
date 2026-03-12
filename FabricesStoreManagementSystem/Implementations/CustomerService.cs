@@ -115,7 +115,7 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
     }
 
     public async Task<Result<PaginatedList<SaleResponse>>> GetSalesByCustomer
-        (Guid id, PaginationRequest paginationRequest, SortRequest sortRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default)
+        (Guid id, PaginationRequest paginationRequest, SearchInvoiceNumberRequest invoiceNumberRequest, DateRangeRequest dateRangeRequest, CancellationToken cancellationToken = default)
     {
         if (!(await _appDbContext.Customers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
             return Result.Failure<PaginatedList<SaleResponse>>(CustomerErrors.NotFound);
@@ -123,13 +123,22 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
         var query = _appDbContext.Sales.AsNoTracking()
             .Where(x => x.CustomerID == id);
 
-        if (searchRequest is not null && searchRequest.Search is not null)
-            query = query.SaleResponseSearch(searchRequest);
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var timezone = !string.IsNullOrEmpty(dateRangeRequest.Timezone)
+                ? dateRangeRequest.Timezone
+                : "Arab Standard Time";
+            var (utcFrom, utcTo) = DateRangeHelper.ConvertToUtcRange(
+                dateRangeRequest.From.Value,
+                dateRangeRequest.To.Value,
+                timezone);
+            query = query.Where(x => x.CreatedAt >= utcFrom && x.CreatedAt <= utcTo);
+        }
 
-        if (sortRequest.SortDir?.ToLower() == "asc" || sortRequest.SortDir?.ToLower() == "ascending")
-            query = query.OrderBy(SaleSorts.SaleResponseSort(sortRequest));
-        else
-            query = query.OrderByDescending(SaleSorts.SaleResponseSort(sortRequest));
+        if (!string.IsNullOrWhiteSpace(invoiceNumberRequest.InvoiceNumber))
+            query = query.Where(x => x.InvoiceNumber.StartsWith(invoiceNumberRequest.InvoiceNumber));
+
+        query = query.OrderByDescending(x => x.CreatedAt);
 
         var result = query
             .Select(x => x.ToSaleResponseWithNoItems());
@@ -174,6 +183,46 @@ public class CustomerService(AppDbContext appDbContext, ILogger<CustomerService>
 
         return Result.Success(await result);
 
+    }
+
+    public async Task<Result<PaginatedList<AssignCatalogResponse>>> GetCustomerCatalogs
+        (Guid id, PaginationRequest paginationRequest, SearchCatalogByCodeRequest searchCatalogByCodeRequest, DateRangeRequest dateRangeRequest, bool includeReturned = false, CancellationToken cancellationToken = default)
+    {
+        if (!(await _appDbContext.Customers.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken)))
+            return Result.Failure<PaginatedList<AssignCatalogResponse>>(CustomerErrors.NotFound);
+
+        var query = _appDbContext.CatalogsAssigns.AsNoTracking()
+            .Include(x => x.Customer)
+            .Include(x => x.Catalog)
+            .Where(x => x.CustomerID == id);
+
+        if (!includeReturned)
+            query = query.Where(x => !x.ReturnedAt.HasValue);
+
+        if (dateRangeRequest is not null && dateRangeRequest.From is not null && dateRangeRequest.To is not null)
+        {
+            var timezone = !string.IsNullOrEmpty(dateRangeRequest.Timezone)
+                ? dateRangeRequest.Timezone
+                : "Arab Standard Time";
+            var (utcFrom, utcTo) = DateRangeHelper.ConvertToUtcRange(
+                dateRangeRequest.From.Value,
+                dateRangeRequest.To.Value,
+                timezone);
+            query = query.Where(x => x.AssignedAt >= utcFrom && x.AssignedAt <= utcTo);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchCatalogByCodeRequest.Code))
+            query = query.Where(x => x.Catalog.CatalogCode.StartsWith(searchCatalogByCodeRequest.Code));
+
+        query = query.OrderByDescending(x => x.AssignedAt);
+
+        var result = query
+            .Select(x => x.ToAssignCatalogResponse());
+
+        var response = await PaginatedList<AssignCatalogResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
     }
 }
 

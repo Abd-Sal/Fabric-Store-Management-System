@@ -109,11 +109,10 @@ public class SalesController(IUnitOfWork unitOfWork, ILogger<SaleService> logger
     {
         var result = new
         {
-            SearchDetails = SaleSearchs.SaleSortColumns(),
+            SearchDetails = SaleSearchs.SaleSearchColumns(),
             SortDetails = SaleSorts.SaleSortColumns(),
         };
 
         return Ok(result);
     }
-
 }

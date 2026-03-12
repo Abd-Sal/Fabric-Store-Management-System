@@ -413,7 +413,7 @@ public class CatalogServiceTests
     [Theory]
     [MemberData(nameof(CatalogServiceTestsHelpers.GetCatalogReturnSuccessTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
     public async Task ReturnCatalog_ShouldSuccess
-        (Guid assignID)
+        (Guid catalogID)
     {
         //Arrange
         var db = DbContextFactory.Create();
@@ -429,7 +429,7 @@ public class CatalogServiceTests
         await db.SaveChangesAsync();
 
         //Act
-        var result = await service.ReturnCatalog(assignID);
+        var result = await service.ReturnCatalog(catalogID);
         if (result.IsSuccess)
             await db.SaveChangesAsync();
 
@@ -444,7 +444,7 @@ public class CatalogServiceTests
     [Theory]
     [MemberData(nameof(CatalogServiceTestsHelpers.GetCatalogReturnFailTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
     public async Task ReturnCatalog_ShouldFail
-        (Guid assignID, Error error)
+        (Guid catalogID, Error error)
     {
         //Arrange
         var db = DbContextFactory.Create();
@@ -460,7 +460,7 @@ public class CatalogServiceTests
         await db.SaveChangesAsync();
 
         //Act
-        var result = await service.ReturnCatalog(assignID);
+        var result = await service.ReturnCatalog(catalogID);
         if (result.IsSuccess)
             await db.SaveChangesAsync();
 
@@ -526,4 +526,30 @@ public class CatalogServiceTests
         result.IsFailure.Should().BeTrue();
         result.Error.Should().Be(error);
     }
+
+    [Theory]
+    [MemberData(nameof(CatalogServiceTestsHelpers.GetAssignedCatalogsSccessTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
+    public async Task GetAssingedCatalogs_ShouldSuccess
+        (PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, bool includeReturned = false)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<CatalogService>.Instance;
+        var service = new CatalogService(db, logger);
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Customers.AddRangeAsync(CustomersRepo.Customers());
+        await db.Catalogs.AddRangeAsync(CatalogsRepo.Catalogs());
+        await db.CatalogsProducts.AddRangeAsync(CatalogProductsRepo.CatalogProducts());
+        await db.CatalogsAssigns.AddRangeAsync(CatalogAssignsRepo.CatalogAssings());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.GetAssingedCatalogs(paginationRequest, sortRequest, dateRangeRequest, searchRequest, includeReturned);
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+    }
+
 }

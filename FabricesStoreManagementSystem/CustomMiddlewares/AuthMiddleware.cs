@@ -15,6 +15,7 @@ public class AuthMiddleware(
         if (!checkAuth)
         {
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            await context.Response.CompleteAsync();
             return;
         }
         await _next(context);

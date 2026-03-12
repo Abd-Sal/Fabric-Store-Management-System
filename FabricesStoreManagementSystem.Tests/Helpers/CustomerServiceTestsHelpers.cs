@@ -222,40 +222,81 @@ public static class CustomerServiceTestsHelpers
         {
             CustomersRepo.Customers().First().Id,
             new PaginationRequest(1, 10),
-            new SortRequest("invoicenumber", "asc"),
-            null
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
         };
 
         yield return new object[]
         {
             CustomersRepo.Customers().First().Id,
             new PaginationRequest(1, 20),
-            new SortRequest("createdat", "desc"),
-            new SearchRequest("abd", "status")
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
         };
 
         yield return new object[]
         {
             CustomersRepo.Customers().First().Id,
             new PaginationRequest { Page = 2, PageSize = 15 },
-            new SortRequest("status", "ascending"),
-            null
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
         };
 
         yield return new object[]
         {
             CustomersRepo.Customers().First().Id,
             new PaginationRequest { Page = 1, PageSize = 5 },
-            new SortRequest ("id", "DESC"),
-            null
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
         };
 
         yield return new object[]
         {
             CustomersRepo.Customers().First().Id,
             new PaginationRequest { Page = 1, PageSize = 5 },
-            new SortRequest ("Unknown", "_DESC"),
-            null
+            new SearchInvoiceNumberRequest("202603035502"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
+        };
+    }
+
+    public static IEnumerable<object[]> GetCustomerCatalogsSuccessTestData()
+    {
+        yield return new object[]
+        {
+            CustomersRepo.Customers()[0].Id,
+            new PaginationRequest(1, 10),
+            new SearchCatalogByCodeRequest("5021"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
+            false
+        };
+        yield return new object[]
+        {
+            CustomersRepo.Customers()[3].Id,
+            new PaginationRequest(1, 10),
+            new SearchCatalogByCodeRequest("AM"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
+            false
+        };
+        yield return new object[]
+        {
+            CustomersRepo.Customers()[1].Id,
+            new PaginationRequest(1, 10),
+            new SearchCatalogByCodeRequest("P-001"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
+            true
+        };
+    }
+
+    public static IEnumerable<object[]> GetCustomerCatalogsFailTestData()
+    {
+        yield return new object[]
+        {
+            Guid.Parse("3fb0f743-6b4f-48ce-bcaf-be631f39348e"),
+            new PaginationRequest(1, 10),
+            new SearchCatalogByCodeRequest("5021"),
+            new DateRangeRequest(DateOnly.Parse("2026-01-01"), DateOnly.Parse("2026-01-02")),
+            false,
+            CustomerErrors.NotFound,
         };
     }
 }

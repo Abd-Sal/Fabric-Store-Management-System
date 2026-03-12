@@ -4,5 +4,6 @@ public enum ReferenceTypes
 {
     Sale,
     Purchase,
+    Expense,
     Sample
 }
