@@ -220,4 +220,30 @@ public class ProductService(AppDbContext appDbContext, ILogger<ProductService> l
             .ToListAsync(cancellationToken);
         return Result.Success(response);
     }
+
+    public async Task<Result<PaginatedList<ProductWithInventoryResponse>>> GetProductsWhichWillRanout
+        (decimal minQuantity, PaginationRequest paginationRequest, CancellationToken cancellationToken = default)
+    {
+        var query = _appDbContext.Products.AsNoTracking()
+            .Include(x => x.Inventory)
+            .Include(x => x.PurchaseItems)
+            .AsQueryable();
+
+        query = query.Where(x => x.Inventory != null);
+
+        query = query
+                .Where(x => x.Inventory!.CurrentQuantity <= Math.Round(minQuantity, 2, MidpointRounding.AwayFromZero));
+
+        var result = query
+                .Select(x => x.ToProductWithInventoryResponse(
+                     x.PurchaseItems.Any()
+                        ? x.PurchaseItems.Max(p => p.UnitCost)
+                        : 0
+                ));
+
+        var response = await PaginatedList<ProductWithInventoryResponse>
+            .CreateAsync(result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
+    }
 }

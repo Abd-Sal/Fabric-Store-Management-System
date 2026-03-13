@@ -14,6 +14,7 @@ global using System.Text.RegularExpressions;
 global using System.Text.Json;
 global using System.Net;
 
+global using FabricesStoreManagementSystem.HelpTools.Interfaces;
 global using FabricesStoreManagementSystem.SearchConfig;
 global using FabricesStoreManagementSystem.DTOs.Catalog;
 global using FabricesStoreManagementSystem.DTOs.Common;

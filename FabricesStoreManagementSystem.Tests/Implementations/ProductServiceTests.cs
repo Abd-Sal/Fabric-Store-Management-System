@@ -285,4 +285,28 @@ public class ProductServiceTests
         //Assert
         result.IsSuccess.Should().BeTrue();
     }
+
+    [Theory]
+    [MemberData(nameof(ProductServiceTestsHelpers.GetProductsWhichWillRanOutSuccessTestsData), MemberType = typeof(ProductServiceTestsHelpers))]
+    public async Task GetProductsWhichWillRanout_ShouldSuccess
+        (decimal minQuantity, PaginationRequest paginationRequest)
+    {
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<ProductService>.Instance;
+        var service = new ProductService(db, logger);
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.Purchases.AddRangeAsync(PurchasesRepo.Purchases());
+        await db.PurchaseItems.AddRangeAsync(PurchaseItemsRepo.PurchaseItems());
+        await db.Customers.AddRangeAsync(CustomersRepo.Customers());
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.GetProductsWhichWillRanout(minQuantity, paginationRequest);
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+    }
+
 }

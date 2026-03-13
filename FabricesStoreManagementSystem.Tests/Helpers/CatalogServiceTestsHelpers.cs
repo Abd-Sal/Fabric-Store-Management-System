@@ -412,7 +412,7 @@ public class CatalogServiceTestsHelpers
                 new List<Guid>()
                 {
                     ProductsRepo.Products()[0].Id,
-                    ProductsRepo.Products()[1].Id, 
+                    ProductsRepo.Products()[1].Id,
                     ProductsRepo.Products()[12].Id,
                 }
             ),
@@ -427,7 +427,7 @@ public class CatalogServiceTestsHelpers
                 new List<Guid>()
                 {
                     ProductsRepo.Products()[0].Id,
-                    ProductsRepo.Products()[1].Id, 
+                    ProductsRepo.Products()[1].Id,
                     ProductsRepo.Products()[1].Id,
                 }
             ),
@@ -685,6 +685,20 @@ public class CatalogServiceTestsHelpers
             new DateRangeRequest(DateOnly.Parse("2026-01-02"), DateOnly.Parse("2026-01-04")),
             new SearchRequest("5021", "code"),
             true
+        };
+    }
+
+    public static IEnumerable<object[]> GetCustomersWhoHasCatalogAndNotBoySccessTestsData()
+    {
+        yield return new object[]
+        {
+            1,
+            new PaginationRequest(1, 10),
+        };
+        yield return new object[]
+        {
+            2,
+            new PaginationRequest(2, 20),
         };
     }
 }

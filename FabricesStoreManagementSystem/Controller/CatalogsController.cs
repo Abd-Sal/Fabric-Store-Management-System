@@ -187,6 +187,21 @@ public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> 
         return Ok(result.Value);
     }
 
+    [HttpGet("{month:int}/customers-has-catalogs-and-not-buy")]
+    public async Task<IActionResult> GetCustomersWhoHasCatalogsAndNotBuyByMonthNumber
+        ([FromRoute] int month,
+        [FromQuery] PaginationRequest paginationRequest,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _unitOfWork.CatalogService.GetCustomersWhoHasCatalogsAndNotBuyByMonthNumber(month, paginationRequest, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("{error}: {desc}", result.Error.Code, result.Error.Description);
+            return result.ToProblem();
+        }
+        return Ok(result.Value);
+    }
+
     [HttpOptions("")]
     public async Task<IActionResult> Details()
     {

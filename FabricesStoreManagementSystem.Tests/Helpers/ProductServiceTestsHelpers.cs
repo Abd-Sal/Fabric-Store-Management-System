@@ -222,4 +222,18 @@ public class ProductServiceTestsHelpers
             ProductErrors.NotFound
         };
     }
+
+    public static IEnumerable<object[]> GetProductsWhichWillRanOutSuccessTestsData()
+    {
+        yield return new object[]
+        {
+            5,
+            new PaginationRequest(1, 10)
+        };
+        yield return new object[]
+        {
+            10,
+            new PaginationRequest(2, 20)
+        };
+    }
 }

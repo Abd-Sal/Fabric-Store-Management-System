@@ -47,4 +47,8 @@ public class CatalogErrors
             "the catalog is already paid",
             StatusCodes.Status400BadRequest);
 
+    public static Error MonthPeriodInvalid =
+        new("Catalog.MonthPeriodInvalid",
+            "month should be between 1 and 12!",
+            StatusCodes.Status400BadRequest);
 }

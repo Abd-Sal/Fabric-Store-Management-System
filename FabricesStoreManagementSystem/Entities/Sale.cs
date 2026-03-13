@@ -1,6 +1,6 @@
 ﻿namespace FabricesStoreManagementSystem.Entities;
 
-public class Sale
+public class Sale : IHasStatus
 {
     public Guid Id { get; set; } = Guid.CreateVersion7();
     public string InvoiceNumber { get; set; } = Guid.CreateVersion7().ToString();

@@ -552,4 +552,29 @@ public class CatalogServiceTests
         result.IsSuccess.Should().BeTrue();
     }
 
+    [Theory]
+    [MemberData(nameof(CatalogServiceTestsHelpers.GetCustomersWhoHasCatalogAndNotBoySccessTestsData), MemberType = typeof(CatalogServiceTestsHelpers))]
+    public async Task GetCustomersWhoHasCatalogsAndNotBuyByMonthNumber_ShouldSuccess
+        (int month, PaginationRequest paginationRequest)
+    {
+        //Arrange
+        var db = DbContextFactory.Create();
+        var logger = NullLogger<CatalogService>.Instance;
+        var service = new CatalogService(db, logger);
+        await db.Products.AddRangeAsync(ProductsRepo.Products());
+        await db.Inventory.AddRangeAsync(ProductInventoriesRepo.Inventories());
+        await db.Suppliers.AddRangeAsync(SuppliersRepo.Suppliers());
+        await db.Customers.AddRangeAsync(CustomersRepo.Customers());
+        await db.Catalogs.AddRangeAsync(CatalogsRepo.Catalogs());
+        await db.CatalogsProducts.AddRangeAsync(CatalogProductsRepo.CatalogProducts());
+        await db.CatalogsAssigns.AddRangeAsync(CatalogAssignsRepo.CatalogAssings());
+        await db.SaveChangesAsync();
+
+        //Act
+        var result = await service.GetCustomersWhoHasCatalogsAndNotBuyByMonthNumber(month, paginationRequest);
+
+        //Assert
+        result.IsSuccess.Should().BeTrue();
+    }
+
 }

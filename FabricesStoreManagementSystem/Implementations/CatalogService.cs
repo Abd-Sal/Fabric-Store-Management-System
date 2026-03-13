@@ -653,4 +653,34 @@ public class CatalogService(AppDbContext appDbContext, ILogger<CatalogService> l
 
         return Result.Success(response);
     }
+
+    public async Task<Result<PaginatedList<CustomerResponse>>> GetCustomersWhoHasCatalogsAndNotBuyByMonthNumber
+        (int month, PaginationRequest paginationRequest, CancellationToken cancellationToken = default)
+    {
+        if (month <= 0 || month > 12)
+            return Result.Failure<PaginatedList<CustomerResponse>>(CatalogErrors.MonthPeriodInvalid);
+
+        var query = _appDbContext.Customers.AsNoTracking()
+            .Include(x => x.Sales)
+            .Include(x => x.CatalogsAssigns)
+            .AsQueryable();
+
+        //Get  Customers Who Has Assigned Catalogs And Not Returned Yet
+        query = query
+            .Where(x => x.CatalogsAssigns.Where(c => !c.ReturnedAt.HasValue).Count() > 0);
+
+        var cutoffDate = DateTime.UtcNow.Date.AddMonths(-month);
+
+        //Get Customers Who Is Not Buy Sience {month} Month
+        query = query
+            .Where(x => !x.Sales.Any() ||
+                        x.Sales.Max(s => s.CreatedAt.Date) < cutoffDate);
+        var result = query
+            .Select(x => x.ToCustomerResponse());
+
+        var response = await PaginatedList<CustomerResponse>.CreateAsync
+            (result, paginationRequest.Page, paginationRequest.PageSize, cancellationToken);
+
+        return Result.Success(response);
+    }
 }

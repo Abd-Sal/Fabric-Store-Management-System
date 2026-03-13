@@ -13,4 +13,5 @@ public interface ICatalogService
     Task<Result<PaginatedList<CatalogResponse>>> GetCatalogs(PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, CancellationToken cancellationToken = default);
     Task<Result<CatalogResponse>> GetCatalog(Guid id, CancellationToken cancellationToken = default);
     Task<Result<PaginatedList<AssignCatalogResponse>>> GetAssingedCatalogs(PaginationRequest paginationRequest, SortRequest sortRequest, DateRangeRequest dateRangeRequest, SearchRequest searchRequest, bool includeReturned = false, CancellationToken cancellationToken = default);
+    Task<Result<PaginatedList<CustomerResponse>>> GetCustomersWhoHasCatalogsAndNotBuyByMonthNumber(int month, PaginationRequest paginationRequest, CancellationToken cancellationToken = default);
 }

@@ -7,7 +7,7 @@ public static class PurchaseSearchs
         {
             "invoicenumber" => query.Where(x => EF.Functions.Like(x.InvoiceNumber, $"%{searchRequest.Search}%")),
             "supplierid" => query.Where(x => EF.Functions.Like(x.SupplierID.ToString(), $"%{searchRequest.Search}%")),
-            "status" => query.Where(x => EF.Functions.Like(x.Status.ToString(), $"%{searchRequest.Search}%")),
+            "status" => HelperTools.HandleStatus(query, searchRequest),
             "suppliername" => query.Where(x => EF.Functions.Like(x.Supplier.Name, $"%{searchRequest.Search}%")),
             _ => query.Where(x => EF.Functions.Like(x.InvoiceNumber, $"%{searchRequest.Search}%")),
         };

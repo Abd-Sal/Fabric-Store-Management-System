@@ -154,6 +154,21 @@ public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> 
         return Ok(result.Value);
     }
 
+    [HttpGet("will-ran-out")]
+    public async Task<IActionResult> GetProductsWhichWillRanout
+        ([FromQuery] decimal minQuantity,
+        [FromQuery] PaginationRequest paginationRequest,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _unitOfWork.ProductService.GetProductsWhichWillRanout(minQuantity, paginationRequest, cancellationToken);
+        if (result.IsFailure)
+        {
+            _logger.LogError("Error happen: {err}", result.Error);
+            return result.ToProblem();
+        }
+        return Ok(result.Value);
+    }
+
 
     [HttpOptions("")]
     public async Task<IActionResult> Details()
