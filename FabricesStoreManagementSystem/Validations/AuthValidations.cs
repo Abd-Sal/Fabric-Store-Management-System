@@ -39,23 +39,7 @@ public class AuthValidations : AbstractValidator<LoginRequest>
         RuleFor(x => x.Password)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .WithMessage("كلمة المرور مطلوبة.")
-            .MinimumLength(MIN_PASSWORD_LENGTH)
-            .WithMessage($"كلمة المرور يجب أن تحتوي على {MIN_PASSWORD_LENGTH} أحرف على الأقل.")
-            .MaximumLength(MAX_PASSWORD_LENGTH)
-            .WithMessage($"كلمة المرور لا يمكن أن تتجاوز {MAX_PASSWORD_LENGTH} حرفًا.")
-            .Must(ContainUpperCase)
-            .WithMessage("كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل.")
-            .Must(ContainLowerCase)
-            .WithMessage("كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل.")
-            .Must(ContainDigit)
-            .WithMessage("كلمة المرور يجب أن تحتوي على رقم واحد على الأقل.")
-            .Must(ContainSpecialCharacter)
-            .WithMessage("كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل (!@#$%^&*).")
-            .Must(NotBeCommonPassword)
-            .WithMessage("كلمة المرور ضعيفة جدًا. يرجى اختيار كلمة مرور أقوى.")
-            .Must(NotContainUsername)
-            .WithMessage("كلمة المرور لا يمكن أن تحتوي على اسم المستخدم.");
+            .WithMessage("كلمة المرور مطلوبة.");
 
         // Additional security: Check for suspicious patterns
         RuleFor(x => x)
@@ -73,70 +57,6 @@ public class AuthValidations : AbstractValidator<LoginRequest>
                     context.AddFailure("Password", "كلمة المرور تحتوي على أنماط غير مسموح بها.");
                 }
             });
-    }
-
-    // Password complexity validation methods
-    private bool ContainUpperCase(string password)
-    {
-        return !string.IsNullOrEmpty(password) && password.Any(char.IsUpper);
-    }
-
-    private bool ContainLowerCase(string password)
-    {
-        return !string.IsNullOrEmpty(password) && password.Any(char.IsLower);
-    }
-
-    private bool ContainDigit(string password)
-    {
-        return !string.IsNullOrEmpty(password) && password.Any(char.IsDigit);
-    }
-
-    private bool ContainSpecialCharacter(string password)
-    {
-        if (string.IsNullOrEmpty(password)) return false;
-
-        var specialCharacters = "!@#$%^&*()_+-=[]{}|;:,.<>?";
-        return password.Any(c => specialCharacters.Contains(c));
-    }
-
-    private bool NotBeCommonPassword(string password)
-    {
-        if (string.IsNullOrEmpty(password)) return false;
-
-        // Check against banned passwords
-        if (BannedPasswords.Contains(password))
-            return false;
-
-        // Check for simple patterns
-        if (IsSimplePattern(password))
-            return false;
-
-        return true;
-    }
-
-    private bool NotContainUsername(LoginRequest request, string password)
-    {
-        if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(request.Username))
-            return true;
-
-        return !password.Contains(request.Username, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private bool IsSimplePattern(string password)
-    {
-        // Check for repeating characters
-        if (password.Distinct().Count() <= 2)
-            return true;
-
-        // Check for keyboard patterns
-        var keyboardPatterns = new[] { "qwerty", "asdfgh", "zxcvbn", "йцукен", "фывапр" };
-        foreach (var pattern in keyboardPatterns)
-        {
-            if (password.Contains(pattern, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        return false;
     }
 
     private bool ContainsSqlInjectionPattern(string input)

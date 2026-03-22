@@ -2,6 +2,7 @@
 
 [Route("api/catalogs")]
 [ApiController]
+[Authorize]
 public class CatalogsController(IUnitOfWork unitOfWork, ILogger<CatalogService> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;

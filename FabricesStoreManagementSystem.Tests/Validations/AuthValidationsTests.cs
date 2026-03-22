@@ -111,109 +111,6 @@ public class AuthValidationsTests
     }
 
     [Theory]
-    [InlineData("short")]
-    [InlineData("1234567")]
-    public void Password_WhenTooShort_ShouldHaveValidationError(string password)
-    {
-        var request = CreateValidLoginRequest() with { Password = password };
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("كلمة المرور يجب أن تحتوي على 8 أحرف على الأقل.");
-    }
-
-    [Fact]
-    public void Password_WhenTooLong_ShouldHaveValidationError()
-    {
-        var longPassword = new string('a', 101);
-        var request = CreateValidLoginRequest() with { Password = longPassword };
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("كلمة المرور لا يمكن أن تتجاوز 100 حرفًا.");
-    }
-
-    [Theory]
-    [InlineData("alllowercase123!")]
-    [InlineData("12345678!")]
-    public void Password_WhenNoUppercase_ShouldHaveValidationError(string password)
-    {
-        var request = CreateValidLoginRequest() with { Password = password };
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("كلمة المرور يجب أن تحتوي على حرف كبير واحد على الأقل.");
-    }
-
-    [Theory]
-    [InlineData("ALLUPPERCASE123!")]
-    [InlineData("PASSWORD123!")]
-    public void Password_WhenNoLowercase_ShouldHaveValidationError(string password)
-    {
-        var request = CreateValidLoginRequest() with { Password = password };
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("كلمة المرور يجب أن تحتوي على حرف صغير واحد على الأقل.");
-    }
-
-    [Theory]
-    [InlineData("NoDigitsHere!")]
-    [InlineData("Password!")]
-    public void Password_WhenNoDigits_ShouldHaveValidationError(string password)
-    {
-        var request = CreateValidLoginRequest() with { Password = password };
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("كلمة المرور يجب أن تحتوي على رقم واحد على الأقل.");
-    }
-
-    [Theory]
-    [InlineData("NoSpecial123")]
-    [InlineData("Password123")]
-    public void Password_WhenNoSpecialCharacters_ShouldHaveValidationError(string password)
-    {
-        var request = CreateValidLoginRequest() with { Password = password };
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("كلمة المرور يجب أن تحتوي على رمز خاص واحد على الأقل (!@#$%^&*).");
-    }
-
-    [Theory]
-    [InlineData("password")]
-    [InlineData("123456")]
-    [InlineData("admin")]
-    [InlineData("كلمة السر")]
-    public void Password_WhenExactBannedPassword_ShouldHaveValidationError(string password)
-    {
-        var request = CreateValidLoginRequest() with { Password = password };
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password);
-    }
-
-    [Theory]
-    [InlineData("aaaaaaaa")]
-    [InlineData("11111111")]
-    [InlineData("11223344")]
-    [InlineData("qwertyui")]
-    [InlineData("asdfghjk")]
-    public void Password_WhenSimplePattern_ShouldHaveValidationError(string password)
-    {
-        var request = CreateValidLoginRequest() with { Password = password };
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password);
-    }
-
-    [Fact]
-    public void Password_WhenContainsUsername_ShouldHaveValidationError()
-    {
-        var request = new LoginRequest(
-            Username: "john",
-            Password: "MyPasswordjohn123!"
-        );
-
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("كلمة المرور لا يمكن أن تحتوي على اسم المستخدم.");
-    }
-
-    [Theory]
     [InlineData("SecurePass123!")]
     [InlineData("MyP@ssw0rd")]
     [InlineData("Test@2024")]
@@ -241,17 +138,6 @@ public class AuthValidationsTests
             .WithErrorMessage("كلمة المرور تحتوي على أنماط غير مسموح بها.");
     }
 
-    // Or test the basic failing case separately
-    [Theory]
-    [InlineData("pass'; DROP TABLE users;--", "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل.")]
-    [InlineData("test'; SELECT * FROM users;", "كلمة المرور يجب أن تحتوي على رقم واحد على الأقل.")]
-    public void Password_WhenInvalidAndContainsSqlInjection_ShouldHaveFirstError(string password, string expectedError)
-    {
-        var request = CreateValidLoginRequest() with { Password = password };
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage(expectedError);
-    }
 
     #endregion
 
@@ -324,19 +210,4 @@ public class AuthValidationsTests
 
     #endregion
 
-    #region Password Complexity Edge Cases
-    [Fact]
-    public void Password_WhenUsernameInPassword_ShouldFailCustomValidation()
-    {
-        var request = new LoginRequest(
-            Username: "admin",
-            Password: "AdminPassword123!"
-        );
-
-        _validator.TestValidate(request)
-            .ShouldHaveValidationErrorFor(x => x.Password)
-            .WithErrorMessage("كلمة المرور لا يمكن أن تحتوي على اسم المستخدم.");
-    }
-
-    #endregion
 }

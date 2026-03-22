@@ -2,6 +2,7 @@
 
 [Route("api/suppliers")]
 [ApiController]
+[Authorize]
 public class SuppliersController(IUnitOfWork unitOfWork, ILogger<SupplierService> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;

@@ -1,5 +1,6 @@
 ﻿namespace FabricesStoreManagementSystem.DTOs.Auth;
 
 public record AuthResponse(
-    Guid Token
+    string Token,
+    string Username
 );

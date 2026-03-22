@@ -2,6 +2,7 @@
 
 [Route("api/products")]
 [ApiController]
+[Authorize]
 public class ProductsController(IUnitOfWork unitOfWork, ILogger<ProductService> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;

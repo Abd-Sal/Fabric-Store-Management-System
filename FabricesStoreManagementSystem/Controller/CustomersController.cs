@@ -2,6 +2,7 @@
 
 [Route("api/customers")]
 [ApiController]
+[Authorize]
 public class CustomersController(IUnitOfWork unitOfWork, ILogger<CustomerService> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;

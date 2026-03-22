@@ -44,13 +44,11 @@ public class Program
 
         app.UseCors();
 
-        app.UseCustomLoginMiddleware();
-
-        app.useCustomLoggingMiddlerware();
-
-        app.UseCustomAuthMiddleware();
+        app.UseAuthentication();
 
         app.UseAuthorization();
+
+        app.useCustomLoggingMiddlerware();
 
         app.MapControllers();
 

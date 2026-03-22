@@ -1,4 +1,7 @@
-﻿global using Microsoft.EntityFrameworkCore;
+﻿global using Microsoft.AspNetCore.Authentication.Cookies;
+global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.Authentication;
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Metadata.Builders;
 global using Microsoft.Extensions.Options;
 global using Microsoft.AspNetCore.Mvc;
@@ -13,6 +16,7 @@ global using System.Globalization;
 global using System.Text.RegularExpressions;
 global using System.Text.Json;
 global using System.Net;
+global using System.Security.Claims;
 
 global using FabricesStoreManagementSystem.HelpTools.Interfaces;
 global using FabricesStoreManagementSystem.SearchConfig;

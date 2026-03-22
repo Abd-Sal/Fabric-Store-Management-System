@@ -2,6 +2,7 @@
 
 [Route("api/expenses")]
 [ApiController]
+[Authorize]
 public class ExpensesController(IUnitOfWork unitOfWork, ILogger<ExpensesController> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;

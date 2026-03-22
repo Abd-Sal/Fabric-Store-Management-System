@@ -12,4 +12,8 @@ public class AuthOptions
 
     [Required]
     public string Password { get; set; } = null!;
+
+    [Required]
+    [Range(1, 43200)]   //30 Days
+    public int ExpiresInMinuts { get; set; }
 }

@@ -10,7 +10,7 @@ public interface IUnitOfWork
     public ISaleService SaleService { get; }
     public IPaymentService PaymentService { get; }
     public IExpenseService ExpenseService { get; }
-
+    public IAuthService AuthService { get; }
 
     public int SaveChanges();
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

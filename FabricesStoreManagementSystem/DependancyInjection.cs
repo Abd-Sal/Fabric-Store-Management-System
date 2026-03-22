@@ -17,6 +17,7 @@ public static class DependancyInjection
         services.AddOpenApi();
 
         services
+            .AddAuthConfig(configuration)
             .AddEfCoreConfig(configuration)
             .AddSwaggerConfig()
             .AddOptionsServices()
@@ -27,6 +28,28 @@ public static class DependancyInjection
         return services;
     }
     
+    private static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
+    {
+        var authOptions = configuration.GetSection(AuthOptions.sectionName).Get<AuthOptions>();
+        int expireMinuts = 3600;
+        if (authOptions is not null)
+            expireMinuts = authOptions.ExpiresInMinuts;
+        services
+            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
+            {
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.Name = "auth";
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(expireMinuts);
+                options.SlidingExpiration = true;
+                options.LoginPath = "/auth/login";
+                options.LogoutPath = "/auth/logout";
+            });
+        return services;
+    }
+
     private static IServiceCollection AddEfCoreConfig(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
@@ -85,7 +108,8 @@ public static class DependancyInjection
                     opt
                         .AllowAnyHeader()
                         .AllowAnyMethod()
-                        .AllowAnyOrigin();
+                        .AllowAnyOrigin()
+                        .AllowCredentials();
                 })
             );
         }
@@ -98,7 +122,8 @@ public static class DependancyInjection
                     policy
                         .WithOrigins(hosts)
                         .WithMethods(methods ?? new[] { "GET", "POST" })
-                        .AllowAnyHeader();
+                        .AllowAnyHeader()
+                        .AllowCredentials();
                 });
             });
         }

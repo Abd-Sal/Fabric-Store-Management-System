@@ -2,6 +2,7 @@
 
 [Route("api/purchases")]
 [ApiController]
+[Authorize]
 public class PurchasesController(IUnitOfWork unitOfWork, ILogger<PurchaseService> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;

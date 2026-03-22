@@ -25,6 +25,7 @@ public class UnitOfWork : IUnitOfWork
         CatalogService = new CatalogService(appDbContext, catalogServiceLogger);
         PaymentService = new PaymentService(appDbContext, paymentServiceLogger);
         ExpenseService = new ExpenseService(appDbContext, expenseServiceLogger);
+        AuthService = new AuthService(authOptions);
     }
 
     public ICatalogService CatalogService{ get; }
@@ -42,6 +43,8 @@ public class UnitOfWork : IUnitOfWork
     public IPaymentService PaymentService { get; }
 
     public IExpenseService ExpenseService { get; }
+
+    public IAuthService AuthService { get; }
 
 
     public int SaveChanges()

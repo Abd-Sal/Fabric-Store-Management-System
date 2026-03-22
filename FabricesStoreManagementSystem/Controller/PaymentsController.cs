@@ -2,6 +2,7 @@
 
 [Route("api/payments")]
 [ApiController]
+[Authorize]
 public class PaymentsController(IUnitOfWork unitOfWork, ILogger<PaymentsController> logger) : ControllerBase
 {
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
